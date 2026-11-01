@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Hydrator;
 
-use App\Domain\UuidValue;
+use App\Domain\Shared\Value\UuidValue;
 use Attribute;
 use Yiisoft\Hydrator\Attribute\Parameter\ParameterAttributeInterface;
 use Yiisoft\Hydrator\Attribute\Parameter\ParameterAttributeResolverInterface;

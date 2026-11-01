@@ -6,8 +6,8 @@ namespace App\Presentation\Api\Page\Create;
 
 use App\Application\Page\CreatePage\Command;
 use App\Application\Page\CreatePage\Handler;
-use App\Domain\Page\PageSlug;
-use App\Domain\Page\PageTitle;
+use App\Domain\Page\Value\PageSlug;
+use App\Domain\Page\Value\PageTitle;
 use App\Presentation\Api\Shared\ResponseFactory\ResponseFactory;
 use Psr\Http\Message\ResponseInterface;
 use Webmozart\Assert\Assert;

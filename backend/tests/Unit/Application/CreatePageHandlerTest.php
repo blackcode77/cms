@@ -6,12 +6,12 @@ namespace App\Tests\Unit\Application;
 
 use App\Application\Page\CreatePage\Command;
 use App\Application\Page\CreatePage\Handler;
-use App\Application\Page\PageSlugAlreadyExistsException;
-use App\Domain\Page\Page;
-use App\Domain\Page\PageId;
-use App\Domain\Page\PageRepositoryInterface;
-use App\Domain\Page\PageSlug;
-use App\Domain\Page\PageTitle;
+use App\Application\Page\Exception\PageSlugAlreadyExistsException;
+use App\Domain\Page\Entity\Page;
+use App\Domain\Page\Value\PageId;
+use App\Domain\Page\Repository\PageRepositoryInterface;
+use App\Domain\Page\Value\PageSlug;
+use App\Domain\Page\Value\PageTitle;
 use Codeception\Test\Unit;
 use DateTimeImmutable;
 use Psr\Clock\ClockInterface;

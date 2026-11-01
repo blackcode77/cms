@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Tests\Unit\Domain;
+namespace App\Tests\Unit\Domain\Page\Value;
 
-use App\Domain\Page\PageId;
-use App\Domain\Page\PageSlug;
-use App\Domain\Page\PageTitle;
+use App\Domain\Page\Value\PageId;
+use App\Domain\Page\Value\PageSlug;
+use App\Domain\Page\Value\PageTitle;
 use Codeception\Test\Unit;
 use InvalidArgumentException;
 

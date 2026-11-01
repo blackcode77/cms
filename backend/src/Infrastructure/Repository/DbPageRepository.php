@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Repository;
 
-use App\Domain\Page\Page;
-use App\Domain\Page\PageId;
-use App\Domain\Page\PageRepositoryInterface;
-use App\Domain\Page\PageSlug;
-use App\Domain\Page\PageTitle;
+use App\Domain\Page\Entity\Page;
+use App\Domain\Page\Value\PageId;
+use App\Domain\Page\Repository\PageRepositoryInterface;
+use App\Domain\Page\Value\PageSlug;
+use App\Domain\Page\Value\PageTitle;
 use App\Infrastructure\DataMapper\EntityHydratorInterface;
 use App\Infrastructure\Table;
 use DateTimeImmutable;

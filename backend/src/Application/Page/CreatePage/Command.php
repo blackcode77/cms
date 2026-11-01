@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Application\Page\CreatePage;
 
-use App\Domain\Page\PageSlug;
-use App\Domain\Page\PageTitle;
+use App\Domain\Page\Value\PageSlug;
+use App\Domain\Page\Value\PageTitle;
 
 final readonly class Command
 {

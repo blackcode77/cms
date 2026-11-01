@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Hydrator;
 
-use App\Domain\UuidValue;
+use App\Domain\Shared\Value\UuidValue;
 use ReflectionNamedType;
 use ReflectionUnionType;
 use Yiisoft\Hydrator\Result;

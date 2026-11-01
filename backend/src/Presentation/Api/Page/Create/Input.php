@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Presentation\Api\Page\Create;
 
-use App\Domain\Page\PageSlug;
-use App\Domain\Page\PageTitle;
+use App\Domain\Page\Value\PageSlug;
+use App\Domain\Page\Value\PageTitle;
 use Yiisoft\Input\Http\AbstractInput;
 use Yiisoft\Input\Http\Attribute\Data\FromBody;
 use Yiisoft\Validator\Rule\Length;

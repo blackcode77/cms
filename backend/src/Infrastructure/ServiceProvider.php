@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure;
 
-use App\Domain\Page\PageRepositoryInterface;
+use App\Domain\Page\Repository\PageRepositoryInterface;
 use App\Environment;
 use App\Infrastructure\DataMapper\EntityHydratorInterface;
 use App\Infrastructure\DataMapper\PropertyReaderInterface;

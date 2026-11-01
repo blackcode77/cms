@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Application\Page;
+namespace App\Application\Page\Exception;
 
-use App\Domain\Page\PageSlug;
+use App\Domain\Page\Value\PageSlug;
 use Exception;
 use Yiisoft\ErrorHandler\Exception\UserException;
 

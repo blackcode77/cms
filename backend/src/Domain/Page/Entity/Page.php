@@ -2,8 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Domain\Page;
+namespace App\Domain\Page\Entity;
 
+use App\Domain\Page\Value\PageId;
+use App\Domain\Page\Value\PageSlug;
+use App\Domain\Page\Value\PageTitle;
 use DateTimeImmutable;
 
 final class Page

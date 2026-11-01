@@ -24,8 +24,8 @@ Entry point is `http://cms.localhost` (nginx, port `HTTP_PORT`): `/api/*` → ph
 
 Layered DDD modelled on `yiisoft/demo-blog`. Dependencies point inward: Presentation → Application → Domain; Infrastructure implements Domain interfaces.
 
-- `src/Domain/<Aggregate>/` — entity, value objects (`PageId` extends `UuidValue`, `PageTitle`, `PageSlug`), `*RepositoryInterface`. No framework code.
-- `src/Application/<Aggregate>/<UseCase>/{Command,Handler,Result}` — one folder per use case. Handlers generate IDs (`Uuid::uuid7()`) and take time from `Psr\Clock\ClockInterface`. Business errors are exceptions marked `#[UserException]` — the API turns them into a 400 JSON response.
+- `src/Domain/<Aggregate>/{Entity,Value,Repository}/` — entity, value objects (`PageId` extends `Domain/Shared/Value/UuidValue`, `PageTitle`, `PageSlug`), `*RepositoryInterface`. No framework code. Create every new aggregate with this layout (add `Exception/`, `Event/`, … only when needed).
+- `src/Application/<Aggregate>/<UseCase>/{Command,Handler,Result}` — one folder per use case. Handlers generate IDs (`Uuid::uuid7()`) and take time from `Psr\Clock\ClockInterface`. Business errors are exceptions in `src/Application/<Aggregate>/Exception/` marked `#[UserException]` — the API turns them into a 400 JSON response.
 - `src/Infrastructure/` — `Repository/Db*Repository` use yiisoft/db **QueryBuilder (no ActiveRecord)**; rows → entities via `DataMapper/EntityHydratorInterface` (builds entities without calling constructors). `ServiceProvider` is the DI wiring for repositories, DB connection, clock. `Table` holds table-name constants. Migrations in `Migration/` (PostgreSQL `uuid` PKs, hand-written SQL).
 - `src/Presentation/{Api,Console,Site}` — `Api/<Context>/<Op>/{Action,Input,Presenter}`; actions are invokable, thin, and respond only through `Api/Shared/ResponseFactory` (envelope `{status: success|failed, data | error_message, error_data}`). `Site` is an intentionally empty placeholder.
 - `src/Shared/Read/` — read models/queries that bypass repositories (list endpoints). Reading goes here, writing goes through Application handlers.
