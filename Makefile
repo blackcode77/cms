@@ -1,0 +1,81 @@
+.DEFAULT_GOAL := help
+
+export UID := $(shell id -u)
+export GID := $(shell id -g)
+
+DC  := docker compose
+PHP := $(DC) run --rm -u $(UID):$(GID) php
+PHP_TEST := $(DC) run --rm -u $(UID):$(GID) -e APP_ENV=test php
+NODE := $(DC) run --rm --no-deps node
+
+help: ## Show this help
+	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-16s\033[0m %s\n", $$1, $$2}'
+
+.env:
+	cp .env.example .env
+
+init: .env build composer-install npm-install up migrate ## First-time setup: build, install deps, start, migrate
+
+build: ## Build docker images
+	$(DC) build
+
+up: ## Start the stack
+	$(DC) up -d
+
+down: ## Stop the stack
+	$(DC) down --remove-orphans
+
+restart: down up ## Restart the stack
+
+logs: ## Tail logs (service=name to filter)
+	$(DC) logs -f $(service)
+
+clean: ## Stop and remove containers AND volumes (drops the database)
+	$(DC) down --volumes --remove-orphans
+
+sh-php: ## Shell in php container
+	$(DC) exec -u $(UID):$(GID) php bash
+
+sh-node: ## Shell in node container
+	$(DC) exec node sh
+
+psql: ## psql into the dev database
+	$(DC) exec postgres sh -c 'psql -U $$POSTGRES_USER -d $$POSTGRES_DB'
+
+composer-install: ## composer install
+	$(PHP) composer install
+
+composer: ## Run composer, e.g. make composer c="require foo/bar"
+	$(PHP) composer $(c)
+
+npm-install: ## npm install in frontend
+	$(NODE) npm install
+
+npm: ## Run npm, e.g. make npm c="run build"
+	$(NODE) npm $(c)
+
+migrate: ## Apply DB migrations (dev + test DBs)
+	$(PHP) ./yii migrate:up --no-interaction
+	$(PHP_TEST) ./yii migrate:up --no-interaction
+
+migrate-create: ## Create migration: make migrate-create name=CreateFooTable
+	$(PHP) ./yii migrate:create $(name)
+
+test: test-back test-front ## Run all tests
+
+test-back: ## Run backend tests (Codeception)
+	$(PHP_TEST) composer test
+
+test-one: ## Run one test: make test-one f=tests/Api/HealthCest.php[:method]
+	$(PHP_TEST) php -d register_argc_argv=On vendor/bin/codecept run $(f)
+
+test-front: ## Run frontend tests (Vitest)
+	$(NODE) npm run test
+
+lint: ## psalm + php-cs-fixer (check) + eslint + steiger
+	$(PHP) composer psalm
+	$(PHP) composer cs-check
+	$(NODE) npm run lint
+
+cs-fix: ## Fix PHP code style
+	$(PHP) composer cs-fix

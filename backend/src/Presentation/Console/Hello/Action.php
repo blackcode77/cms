@@ -1,0 +1,22 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Presentation\Console\Hello;
+
+use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
+use Yiisoft\Yii\Console\ExitCode;
+
+#[AsCommand(name: 'app:hello', description: 'Example console command')]
+final class Action extends Command
+{
+    protected function execute(InputInterface $input, OutputInterface $output): int
+    {
+        $output->writeln('Hello from CMS console');
+
+        return ExitCode::OK;
+    }
+}

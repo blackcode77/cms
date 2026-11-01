@@ -1,0 +1,90 @@
+{
+    "name": "cms/backend",
+    "type": "project",
+    "description": "CMS backend (Yii3 API)",
+    "license": "proprietary",
+    "scripts": {
+        "test": "php -d register_argc_argv=On vendor/bin/codecept run",
+        "codecept-build": "php -d register_argc_argv=On vendor/bin/codecept build",
+        "psalm": "psalm",
+        "cs-check": "php-cs-fixer fix --config=.php-cs-fixer.php --diff --dry-run",
+        "cs-fix": "php-cs-fixer fix --config=.php-cs-fixer.php --diff"
+    },
+    "require": {
+        "php": "^8.5",
+        "ext-intl": "*",
+        "ext-mbstring": "*",
+        "ext-pdo": "*",
+        "httpsoft/http-message": "^1.1.6",
+        "psr/clock": "^1.0",
+        "psr/container": "^2.0.2",
+        "psr/http-factory": "^1.1",
+        "psr/http-message": "^2.0",
+        "psr/http-server-handler": "^1.0.2",
+        "psr/http-server-middleware": "^1.0.2",
+        "psr/log": "^3.0.2",
+        "ramsey/uuid": "^4.9.4",
+        "symfony/console": "^8.1",
+        "vlucas/phpdotenv": "^5.7.0",
+        "webmozart/assert": "^2.5.0",
+        "yiisoft/aliases": "^3.1.1",
+        "yiisoft/cache": "^3.2",
+        "yiisoft/cache-file": "^3.2",
+        "yiisoft/config": "^1.6.2",
+        "yiisoft/data-response": "^2.2",
+        "yiisoft/db": "^2.0.1",
+        "yiisoft/db-migration": "^2.2.0",
+        "yiisoft/db-pgsql": "^2",
+        "yiisoft/definitions": "^3.4.1",
+        "yiisoft/di": "^1.4.1",
+        "yiisoft/error-handler": "^4.3.2",
+        "yiisoft/http": "^1.3",
+        "yiisoft/hydrator": "^1.6.3",
+        "yiisoft/hydrator-validator": "^2.0.2",
+        "yiisoft/injector": "^1.2.1",
+        "yiisoft/input-http": "^1.0.1",
+        "yiisoft/log": "^2.2.1",
+        "yiisoft/log-target-file": "^3.1",
+        "yiisoft/middleware-dispatcher": "^5.4",
+        "yiisoft/request-body-parser": "^1.2.1",
+        "yiisoft/router": "^4.0.2",
+        "yiisoft/router-fastroute": "^4.0.3",
+        "yiisoft/validator": "^2.6.1",
+        "yiisoft/yii-console": "^2.4.2",
+        "yiisoft/yii-http": "^1.1.1",
+        "yiisoft/yii-runner-console": "^2.2.1",
+        "yiisoft/yii-runner-http": "^3.2.1"
+    },
+    "require-dev": {
+        "codeception/codeception": "^5.3.7",
+        "codeception/module-asserts": "^3.3.0",
+        "codeception/module-cli": "^2.0.1",
+        "codeception/module-db": "^3.2",
+        "friendsofphp/php-cs-fixer": "^3.95",
+        "phpunit/phpunit": "^13.4",
+        "roave/security-advisories": "dev-latest",
+        "vimeo/psalm": "^6.20"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "App\\Tests\\": "tests"
+        }
+    },
+    "extra": {
+        "config-plugin-file": "config/configuration.php"
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "yiisoft/config": true,
+            "composer/installers": true
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
