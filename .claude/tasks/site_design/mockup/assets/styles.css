@@ -204,7 +204,6 @@ input:focus,select:focus,textarea:focus{outline:3px solid #8cc084;border-color:v
 .footer-grid li{margin-bottom:8px}
 .footer-logo img{height:64px;width:auto;margin-bottom:14px}
 .footer-bottom{border-top:1px solid #3a3637;margin-top:40px;padding:18px 0;font-size:.85rem;display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;color:#8d8a8a}
-.footer-bar{height:6px;background:var(--green)}
 
 /* Article */
 .prose{max-width:780px}
