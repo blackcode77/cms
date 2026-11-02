@@ -3,6 +3,8 @@ import { useCurrentUser } from '@entities/session'
 import { fetchAssignableRoles, fetchUsers } from '@entities/user'
 import type { CreateUserResult } from '@entities/user'
 import { CreateUserForm } from '@features/create-user'
+import { DeleteUserButton } from '@features/delete-user'
+import { EditUserButton } from '@features/edit-user'
 
 const { can } = useCurrentUser()
 
@@ -25,6 +27,7 @@ const columns = [
   { accessorKey: 'name', header: 'Name' },
   { accessorKey: 'email', header: 'Email' },
   { accessorKey: 'role.name', header: 'Role' },
+  { id: 'actions', header: '' },
 ]
 </script>
 
@@ -41,7 +44,14 @@ const columns = [
         :description="notice.text"
         data-testid="create-user-notice"
       />
-      <UTable :data="users" :columns="columns" data-testid="users-table" />
+      <UTable :data="users" :columns="columns" data-testid="users-table">
+        <template #actions-cell="{ row }">
+          <div v-if="can('manage_users')" class="flex gap-2">
+            <EditUserButton :user="row.original" :roles="roles" @updated="refresh" />
+            <DeleteUserButton :user="row.original" @deleted="refresh" />
+          </div>
+        </template>
+      </UTable>
       <UCard v-if="can('manage_users')" data-testid="create-user-card">
         <template #header>
           <h2 class="font-semibold">New user</h2>

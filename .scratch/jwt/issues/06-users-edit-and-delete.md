@@ -4,11 +4,11 @@
 
 **Blocked by:** 05
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] Update endpoint and edit form; email stays unique
-- [ ] Delete endpoint and confirm action
-- [ ] Deleted User's refresh token stops working
-- [ ] Deleting yourself is rejected with a business error
-- [ ] Deleting or demoting the last Admin is rejected
-- [ ] Api Cests cover each rule and 403 without `manage_users`
+- [x] Update endpoint and edit form; email stays unique
+- [x] Delete endpoint and confirm action
+- [x] Deleted User's refresh token stops working
+- [x] Deleting yourself is rejected with a business error
+- [x] Deleting or demoting the last Admin is rejected
+- [x] Api Cests cover each rule and 403 without `manage_users`

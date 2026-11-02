@@ -60,4 +60,22 @@ describe('AdminUsersPage', () => {
 
     expect(wrapper.find('[data-testid="create-user-form"]').exists()).toBe(true)
   })
+
+  it('hides edit and delete actions without manage_users', async () => {
+    signInWith(['view_users'])
+
+    const wrapper = await mountSuspended(AdminUsersPage)
+
+    expect(wrapper.find('[data-testid="user-edit"]').exists()).toBe(false)
+    expect(wrapper.find('[data-testid="user-delete"]').exists()).toBe(false)
+  })
+
+  it('shows edit and delete actions per row with manage_users', async () => {
+    signInWith(['view_users', 'manage_users'])
+
+    const wrapper = await mountSuspended(AdminUsersPage)
+
+    expect(wrapper.findAll('[data-testid="user-edit"]')).toHaveLength(1)
+    expect(wrapper.findAll('[data-testid="user-delete"]')).toHaveLength(1)
+  })
 })

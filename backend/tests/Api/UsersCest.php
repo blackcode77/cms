@@ -374,13 +374,13 @@ final class UsersCest
         $I->haveUser('t@example.com', 'secret-pass', 'manager');
         $victim = $I->loginAs('t@example.com', 'secret-pass');
         $victimId = $I->userId('t@example.com');
-        assertSame(1, $I->countRows('refresh_tokens', "user_id = '" . $victimId . "'"));
+        assertSame(1, $I->countRows("refresh_tokens WHERE user_id = '" . $victimId . "'"));
 
         $response = $I->sendApiRequest('DELETE', self::USERS . '/' . $victimId, null, $session);
 
         assertSame(200, $response->getStatusCode());
         assertSame(1, $I->countRows('users'));
-        assertSame(0, $I->countRows('refresh_tokens', "user_id = '" . $victimId . "'"));
+        assertSame(0, $I->countRows("refresh_tokens WHERE user_id = '" . $victimId . "'"));
         assertSame(
             401,
             $I->sendApiRequest('POST', '/api/v1/auth/refresh', cookies: ['refresh_token' => $victim['refresh_token']])

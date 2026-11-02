@@ -133,4 +133,13 @@ final class InMemoryUserRepository implements UserRepositoryInterface
     {
         $this->users[] = $user;
     }
+
+    public function update(User $user): void {}
+
+    public function remove(UserId $id): void {}
+
+    public function countByRole(RoleId $roleId): int
+    {
+        return 0;
+    }
 }

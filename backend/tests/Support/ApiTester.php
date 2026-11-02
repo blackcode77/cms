@@ -262,9 +262,9 @@ class ApiTester extends \Codeception\Actor
         }
     }
 
-    public function countRows(string $table, string $where = 'true'): int
+    public function countRows(string $table): int
     {
-        return (int) $this->pdo()->query('SELECT COUNT(*) FROM ' . $table . ' WHERE ' . $where)->fetchColumn();
+        return (int) $this->pdo()->query('SELECT COUNT(*) FROM ' . $table)->fetchColumn();
     }
 
     public function userId(string $email): string

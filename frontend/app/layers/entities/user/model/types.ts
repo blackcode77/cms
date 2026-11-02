@@ -25,3 +25,6 @@ export interface CreateUserResult {
   id: string
   mail_sent: boolean
 }
+
+/** Body of `PUT /users/{id}`. */
+export type UpdateUserInput = CreateUserInput
