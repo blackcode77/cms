@@ -27,4 +27,10 @@ return [
     Route::post('/users')
         ->middleware(Authenticate::class, RequirePermission::for(Permission::ManageUsers))
         ->action(Api\User\Create\Action::class),
+    Route::put('/users/{id}')
+        ->middleware(Authenticate::class, RequirePermission::for(Permission::ManageUsers))
+        ->action(Api\User\Update\Action::class),
+    Route::delete('/users/{id}')
+        ->middleware(Authenticate::class, RequirePermission::for(Permission::ManageUsers))
+        ->action(Api\User\Delete\Action::class),
 ];

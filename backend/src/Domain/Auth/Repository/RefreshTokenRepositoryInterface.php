@@ -17,5 +17,7 @@ interface RefreshTokenRepositoryInterface
      *
      * @return UserId|null the token's owner, or null when the token was not active (used, revoked, expired, unknown)
      */
+    public function revokeAllForUser(UserId $userId): void;
+
     public function revokeActive(string $tokenHash, DateTimeImmutable $now): ?UserId;
 }

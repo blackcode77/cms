@@ -215,4 +215,228 @@ final class UsersCest
         $errors = $I->decode($response)['error_data'];
         assertSame(true, isset($errors['email'], $errors['name'], $errors['role_id']));
     }
+
+    public function updateAndDeleteRequireSessionAndManageUsers(ApiTester $I): void
+    {
+        $I->haveUser('t@example.com', 'secret-pass', 'manager');
+        $id = $I->userId('t@example.com');
+        $payload = ['email' => 't2@example.com', 'name' => 'T', 'role_id' => $I->haveRole('manager')];
+
+        assertSame(401, $I->sendApiRequest('PUT', self::USERS . '/' . $id, $payload)->getStatusCode());
+        assertSame(401, $I->sendApiRequest('DELETE', self::USERS . '/' . $id)->getStatusCode());
+        $manager = $I->loginAs('t@example.com', 'secret-pass');
+        assertSame(403, $I->sendApiRequest('PUT', self::USERS . '/' . $id, $payload, $manager)->getStatusCode());
+        assertSame(403, $I->sendApiRequest('DELETE', self::USERS . '/' . $id, null, $manager)->getStatusCode());
+        assertSame(1, $I->countRows('users'));
+    }
+
+    public function updateChangesNameEmailAndRole(ApiTester $I): void
+    {
+        $session = $I->haveSessionFor('admin');
+        $I->haveUser('t@example.com', 'secret-pass', 'manager');
+        $id = $I->userId('t@example.com');
+
+        $response = $I->sendApiRequest(
+            'PUT',
+            self::USERS . '/' . $id,
+            ['email' => 'New@Example.com', 'name' => 'Renamed', 'role_id' => $I->haveRole('editor')],
+            $session,
+        );
+
+        assertSame(200, $response->getStatusCode());
+        $byId = array_column($I->decode($I->sendApiRequest('GET', self::USERS, null, $session))['data'], null, 'id');
+        assertSame('new@example.com', $byId[$id]['email']);
+        assertSame('Renamed', $byId[$id]['name']);
+        assertSame('editor', $byId[$id]['role']['name']);
+        // The password is untouched.
+        assertSame(true, password_verify('secret-pass', $I->grabPasswordHash('new@example.com')));
+    }
+
+    public function updateKeepingOwnEmailIsAllowed(ApiTester $I): void
+    {
+        $session = $I->haveSessionFor('admin');
+        $I->haveUser('t@example.com', 'secret-pass', 'manager');
+
+        $response = $I->sendApiRequest(
+            'PUT',
+            self::USERS . '/' . $I->userId('t@example.com'),
+            ['email' => 'T@example.com', 'name' => 'Same email', 'role_id' => $I->haveRole('manager')],
+            $session,
+        );
+
+        assertSame(200, $response->getStatusCode());
+    }
+
+    public function updateRejectsDuplicateEmailCaseInsensitively(ApiTester $I): void
+    {
+        $session = $I->haveSessionFor('admin');
+        $I->haveUser('t@example.com', 'secret-pass', 'manager');
+
+        $response = $I->sendApiRequest(
+            'PUT',
+            self::USERS . '/' . $I->userId('t@example.com'),
+            ['email' => 'ADMIN@example.com', 'name' => 'T', 'role_id' => $I->haveRole('manager')],
+            $session,
+        );
+
+        assertSame(400, $response->getStatusCode());
+        assertSame('failed', $I->decode($response)['status']);
+    }
+
+    public function updateRejectsVisiterAndUnknownRole(ApiTester $I): void
+    {
+        $session = $I->haveSessionFor('admin');
+        $I->haveUser('t@example.com', 'secret-pass', 'manager');
+        $url = self::USERS . '/' . $I->userId('t@example.com');
+
+        $visiter = ['email' => 't@example.com', 'name' => 'T', 'role_id' => $I->haveRole('visiter')];
+        assertSame(400, $I->sendApiRequest('PUT', $url, $visiter, $session)->getStatusCode());
+        $unknown = ['email' => 't@example.com', 'name' => 'T', 'role_id' => '0199aaaa-0000-7000-8000-000000000000'];
+        assertSame(400, $I->sendApiRequest('PUT', $url, $unknown, $session)->getStatusCode());
+    }
+
+    public function updateOfUnknownUserIsBusinessError(ApiTester $I): void
+    {
+        $session = $I->haveSessionFor('admin');
+
+        $response = $I->sendApiRequest(
+            'PUT',
+            self::USERS . '/0199aaaa-0000-7000-8000-000000000000',
+            ['email' => 't@example.com', 'name' => 'T', 'role_id' => $I->haveRole('manager')],
+            $session,
+        );
+
+        assertSame(400, $response->getStatusCode());
+    }
+
+    public function updateRejectsInvalidInput(ApiTester $I): void
+    {
+        $session = $I->haveSessionFor('admin');
+
+        $response = $I->sendApiRequest(
+            'PUT',
+            self::USERS . '/' . $I->userId('admin@example.com'),
+            ['email' => 'nope', 'name' => '', 'role_id' => 'nope'],
+            $session,
+        );
+
+        assertSame(422, $response->getStatusCode());
+    }
+
+    public function lastAdminCannotBeDemoted(ApiTester $I): void
+    {
+        $session = $I->haveSessionFor('admin');
+
+        $response = $I->sendApiRequest(
+            'PUT',
+            self::USERS . '/' . $I->userId('admin@example.com'),
+            ['email' => 'admin@example.com', 'name' => 'X', 'role_id' => $I->haveRole('manager')],
+            $session,
+        );
+
+        assertSame(400, $response->getStatusCode());
+        assertSame('admin', $I->grabRoleName('admin@example.com'));
+    }
+
+    public function adminCanBeDemotedWhenAnotherAdminExists(ApiTester $I): void
+    {
+        $session = $I->haveSessionFor('admin');
+        $I->haveUser('second@example.com', 'secret-pass', 'admin');
+
+        $response = $I->sendApiRequest(
+            'PUT',
+            self::USERS . '/' . $I->userId('second@example.com'),
+            ['email' => 'second@example.com', 'name' => 'X', 'role_id' => $I->haveRole('manager')],
+            $session,
+        );
+
+        assertSame(200, $response->getStatusCode());
+        assertSame('manager', $I->grabRoleName('second@example.com'));
+    }
+
+    public function lastAdminCanStillBeRenamedKeepingTheRole(ApiTester $I): void
+    {
+        $session = $I->haveSessionFor('admin');
+
+        $response = $I->sendApiRequest(
+            'PUT',
+            self::USERS . '/' . $I->userId('admin@example.com'),
+            ['email' => 'admin@example.com', 'name' => 'Boss', 'role_id' => $I->haveRole('admin')],
+            $session,
+        );
+
+        assertSame(200, $response->getStatusCode());
+    }
+
+    public function deleteRemovesUserAndTheirRefreshTokenStopsWorking(ApiTester $I): void
+    {
+        $session = $I->haveSessionFor('admin');
+        $I->haveUser('t@example.com', 'secret-pass', 'manager');
+        $victim = $I->loginAs('t@example.com', 'secret-pass');
+        $victimId = $I->userId('t@example.com');
+        assertSame(1, $I->countRows('refresh_tokens', "user_id = '" . $victimId . "'"));
+
+        $response = $I->sendApiRequest('DELETE', self::USERS . '/' . $victimId, null, $session);
+
+        assertSame(200, $response->getStatusCode());
+        assertSame(1, $I->countRows('users'));
+        assertSame(0, $I->countRows('refresh_tokens', "user_id = '" . $victimId . "'"));
+        assertSame(
+            401,
+            $I->sendApiRequest('POST', '/api/v1/auth/refresh', cookies: ['refresh_token' => $victim['refresh_token']])
+                ->getStatusCode(),
+        );
+        assertSame(401, $I->sendApiRequest('GET', '/api/v1/auth/me', null, $victim)->getStatusCode());
+    }
+
+    public function cannotDeleteYourself(ApiTester $I): void
+    {
+        $session = $I->haveSessionFor('admin');
+        $I->haveUser('second@example.com', 'secret-pass', 'admin');
+
+        $response = $I->sendApiRequest('DELETE', self::USERS . '/' . $I->userId('admin@example.com'), null, $session);
+
+        assertSame(400, $response->getStatusCode());
+        assertSame('failed', $I->decode($response)['status']);
+        assertSame(2, $I->countRows('users'));
+    }
+
+    public function lastAdminCannotBeDeleted(ApiTester $I): void
+    {
+        $I->haveUser('boss@example.com', 'secret-pass', 'admin');
+        $I->haveUser('mgr@example.com', 'secret-pass', 'manager');
+        // A manager holding manage_users tries to delete the only Admin.
+        $I->havePermission('manager', 'manage_users');
+        $session = $I->loginAs('mgr@example.com', 'secret-pass');
+
+        $response = $I->sendApiRequest('DELETE', self::USERS . '/' . $I->userId('boss@example.com'), null, $session);
+
+        assertSame(400, $response->getStatusCode());
+        assertSame(2, $I->countRows('users'));
+    }
+
+    public function anotherAdminCanBeDeletedWhenNotTheLast(ApiTester $I): void
+    {
+        $session = $I->haveSessionFor('admin');
+        $I->haveUser('second@example.com', 'secret-pass', 'admin');
+
+        $response = $I->sendApiRequest('DELETE', self::USERS . '/' . $I->userId('second@example.com'), null, $session);
+
+        assertSame(200, $response->getStatusCode());
+        assertSame(1, $I->countRows('users'));
+    }
+
+    public function deleteOfUnknownUserIsBusinessError(ApiTester $I): void
+    {
+        $session = $I->haveSessionFor('admin');
+
+        $response = $I->sendApiRequest(
+            'DELETE',
+            self::USERS . '/0199aaaa-0000-7000-8000-000000000000',
+            null,
+            $session,
+        );
+
+        assertSame(400, $response->getStatusCode());
+    }
 }

@@ -36,4 +36,11 @@ final class User
         $this->mustChangePassword = $mustChangePassword;
         $this->createdAt = $createdAt;
     }
+
+    public function edit(UserEmail $email, string $name, RoleId $roleId): void
+    {
+        $this->email = $email;
+        $this->name = $name;
+        $this->roleId = $roleId;
+    }
 }

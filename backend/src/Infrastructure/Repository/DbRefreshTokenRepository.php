@@ -31,6 +31,16 @@ final readonly class DbRefreshTokenRepository implements RefreshTokenRepositoryI
             ->execute();
     }
 
+    /**
+     * Removes every token of the User (they are also removed by the users FK cascade).
+     */
+    public function revokeAllForUser(UserId $userId): void
+    {
+        $this->db->createCommand()
+            ->delete(Table::REFRESH_TOKENS, ['user_id' => $userId->toString()])
+            ->execute();
+    }
+
     public function revokeActive(string $tokenHash, DateTimeImmutable $now): ?UserId
     {
         /** @var list<array{user_id: string}> $rows */

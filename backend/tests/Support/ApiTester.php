@@ -240,9 +240,32 @@ class ApiTester extends \Codeception\Actor
         return (string) $stmt->fetchColumn();
     }
 
-    public function countRows(string $table): int
+    public function countRows(string $table, string $where = 'true'): int
     {
-        return (int) $this->pdo()->query('SELECT COUNT(*) FROM ' . $table)->fetchColumn();
+        return (int) $this->pdo()->query('SELECT COUNT(*) FROM ' . $table . ' WHERE ' . $where)->fetchColumn();
+    }
+
+    public function userId(string $email): string
+    {
+        $stmt = $this->pdo()->prepare('SELECT id FROM users WHERE email = ?');
+        $stmt->execute([$email]);
+
+        return (string) $stmt->fetchColumn();
+    }
+
+    public function grabRoleName(string $email): string
+    {
+        $stmt = $this->pdo()->prepare('SELECT r.name FROM users u JOIN roles r ON r.id = u.role_id WHERE u.email = ?');
+        $stmt->execute([$email]);
+
+        return (string) $stmt->fetchColumn();
+    }
+
+    public function havePermission(string $role, string $permission): void
+    {
+        $this->pdo()->prepare(
+            'INSERT INTO role_permissions (role_id, permission) VALUES (?, ?) ON CONFLICT DO NOTHING',
+        )->execute([$this->haveRole($role), $permission]);
     }
 
     private function pdo(): PDO

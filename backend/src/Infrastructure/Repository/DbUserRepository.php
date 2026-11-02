@@ -54,6 +54,36 @@ final readonly class DbUserRepository implements UserRepositoryInterface
             ->execute();
     }
 
+    public function update(User $user): void
+    {
+        $this->db->createCommand()
+            ->update(
+                Table::USERS,
+                [
+                    'email' => $user->email->toString(),
+                    'name' => $user->name,
+                    'role_id' => $user->roleId->toString(),
+                ],
+                ['id' => $user->id->toString()],
+            )
+            ->execute();
+    }
+
+    public function remove(UserId $id): void
+    {
+        $this->db->createCommand()
+            ->delete(Table::USERS, ['id' => $id->toString()])
+            ->execute();
+    }
+
+    public function countByRole(RoleId $roleId): int
+    {
+        return (int) $this->db->createQuery()
+            ->from(Table::USERS)
+            ->where(['role_id' => $roleId->toString()])
+            ->count();
+    }
+
     /**
      * @param array<string, string> $condition
      */
