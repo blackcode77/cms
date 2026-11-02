@@ -61,7 +61,7 @@ describe('AdminUsersPage', () => {
     expect(wrapper.find('[data-testid="create-user-form"]').exists()).toBe(true)
   })
 
-  it('resets a password with manage_users and reports the email result', async () => {
+  it('asks for confirmation before resetting a password, then reports the email result', async () => {
     signInWith(['view_users', 'manage_users'])
     let calls = 0
     registerEndpoint('/api/v1/users/u9/reset-password', {
@@ -74,8 +74,32 @@ describe('AdminUsersPage', () => {
 
     const wrapper = await mountSuspended(AdminUsersPage)
     await wrapper.find('[data-testid="reset-password-u9"]').trigger('click')
+    await nextTick()
+
+    expect(calls).toBe(0)
+    const confirm = await vi.waitFor(() => {
+      const el = document.body.querySelector<HTMLElement>('[data-testid="reset-password-confirm"]')
+      expect(el).not.toBeNull()
+      return el!
+    })
+    expect(document.body.textContent).toContain('stops working')
+    expect(document.body.textContent).toContain('sessions are signed out')
+    confirm.click()
     await vi.waitFor(() => expect(calls).toBe(1))
     await vi.waitFor(() => expect(wrapper.find('[data-testid="create-user-notice"]').text()).toContain('could not be sent'))
+  })
+
+  it('offers no password reset for the current user own row', async () => {
+    useCurrentUser().session.value = {
+      user: { id: 'u9', email: 'bob@example.com', name: 'Bob' },
+      role: { id: 'r1', name: 'x' },
+      permissions: ['view_users', 'manage_users'],
+      must_change_password: false,
+    }
+
+    const wrapper = await mountSuspended(AdminUsersPage)
+
+    expect(wrapper.find('[data-testid="reset-password-u9"]').exists()).toBe(false)
   })
 
   it('hides the reset action without manage_users', async () => {

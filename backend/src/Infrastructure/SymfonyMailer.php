@@ -28,7 +28,7 @@ final readonly class SymfonyMailer implements MailerInterface
                 ->subject($mail->subject)
                 ->text($mail->body);
             $this->mailer->send($email);
-        } catch (MailerException | MimeException $e) {
+        } catch (MailerException|MimeException $e) {
             // transport failures and malformed addresses alike: the caller only needs to know the mail was not sent
             throw new MailDeliveryException('Could not send mail: ' . $e->getMessage(), previous: $e);
         }

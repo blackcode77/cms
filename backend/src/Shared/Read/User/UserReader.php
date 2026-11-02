@@ -61,7 +61,6 @@ final readonly class UserReader
      */
     public function assignableRoles(bool $includeAdmin): array
     {
-        /** @var list<array{id: string, name: string}> $rows */
         $query = $this->db->createQuery()
             ->select(['id', 'name'])
             ->from(Table::ROLES)
@@ -70,6 +69,7 @@ final readonly class UserReader
         if (!$includeAdmin) {
             $query->andWhere(['<>', 'name', RoleName::ADMIN]);
         }
+        /** @var list<array{id: string, name: string}> $rows */
         $rows = $query->all();
 
         return array_map(

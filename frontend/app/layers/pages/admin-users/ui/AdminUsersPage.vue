@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { useCurrentUser } from '@entities/session'
-import { fetchAssignableRoles, fetchUsers, resetUserPassword } from '@entities/user'
-import type { CreateUserResult, UserListItem } from '@entities/user'
+import { fetchAssignableRoles, fetchUsers } from '@entities/user'
+import type { CreateUserResult, ResetPasswordResult, UserListItem } from '@entities/user'
 import { CreateUserForm } from '@features/create-user'
 import { DeleteUserButton } from '@features/delete-user'
 import { EditUserButton } from '@features/edit-user'
+import { ResetPasswordButton } from '@features/reset-password'
 
-const { can } = useCurrentUser()
+const { can, user: currentUser } = useCurrentUser()
 
 const { data: users, refresh } = await useAsyncData('admin-users', fetchUsers, { default: () => [] })
 const { data: roles } = await useAsyncData('admin-users-roles', fetchAssignableRoles, { default: () => [] })
@@ -23,20 +24,13 @@ async function onCreated(result: CreateUserResult, email: string) {
   await refresh()
 }
 
-async function onResetPassword(user: UserListItem) {
-  try {
-    const result = await resetUserPassword(user.id)
-    notice.value = result.mail_sent
-      ? { color: 'success', text: `A new password was emailed to ${user.email}.` }
-      : {
-          color: 'warning',
-          text: `A new password was set for ${user.email}, but the email could not be sent. Send it again.`,
-        }
-  }
-  catch (e) {
-    const err = e as { data?: { error_message?: string } }
-    notice.value = { color: 'warning', text: err.data?.error_message ?? 'Could not reset the password.' }
-  }
+function onPasswordReset(user: UserListItem, result: ResetPasswordResult) {
+  notice.value = result.mail_sent
+    ? { color: 'success', text: `A new password was emailed to ${user.email}.` }
+    : {
+        color: 'warning',
+        text: `A new password was set for ${user.email}, but the email could not be sent. Send it again.`,
+      }
 }
 
 const columns = [
@@ -69,13 +63,12 @@ const columns = [
           </div>
         </template>
         <template #password-cell="{ row }">
-          <UButton
-            v-if="can('manage_users')"
-            size="xs"
-            variant="outline"
-            label="Send password again"
-            :data-testid="`reset-password-${row.original.id}`"
-            @click="onResetPassword(row.original)"
+          <!-- own password: use change-password instead of a reset -->
+          <ResetPasswordButton
+            v-if="can('manage_users') && row.original.id !== currentUser?.id"
+            :user="row.original"
+            @done="onPasswordReset(row.original, $event)"
+            @failed="notice = { color: 'warning', text: $event }"
           />
         </template>
       </UTable>
