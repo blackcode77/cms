@@ -159,6 +159,31 @@ class ApiTester extends \Codeception\Actor
         return array_map(static fn(array $a): string => (string) $a['value'], $this->setCookies($response));
     }
 
+    /**
+     * Logs in and returns the Session cookies.
+     *
+     * @return array<string, string>
+     */
+    public function loginAs(string $email, string $password): array
+    {
+        return $this->cookieValues(
+            $this->sendApiRequest('POST', '/api/v1/auth/login', ['email' => $email, 'password' => $password]),
+        );
+    }
+
+    /**
+     * Creates a User with the given Role and returns their Session cookies.
+     *
+     * @return array<string, string>
+     */
+    public function haveSessionFor(string $role = 'manager'): array
+    {
+        $email = $role . '@example.com';
+        $this->haveUser($email, 'secret-pass', $role);
+
+        return $this->loginAs($email, 'secret-pass');
+    }
+
     public function countRows(string $table): int
     {
         return (int) $this->pdo()->query('SELECT COUNT(*) FROM ' . $table)->fetchColumn();

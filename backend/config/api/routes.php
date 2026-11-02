@@ -2,7 +2,10 @@
 
 declare(strict_types=1);
 
+use App\Domain\Role\Value\Permission;
 use App\Presentation\Api;
+use App\Presentation\Api\Auth\Shared\Authenticate;
+use App\Presentation\Api\Auth\Shared\RequirePermission;
 use Yiisoft\Router\Route;
 
 return [
@@ -12,5 +15,7 @@ return [
     Route::post('/auth/refresh')->action(Api\Auth\Refresh\Action::class),
     Route::post('/auth/logout')->action(Api\Auth\Logout\Action::class),
     Route::get('/auth/me')->action(Api\Auth\Me\Action::class),
-    Route::post('/pages')->action(Api\Page\Create\Action::class),
+    Route::post('/pages')
+        ->middleware(Authenticate::class, RequirePermission::for(Permission::EditPage))
+        ->action(Api\Page\Create\Action::class),
 ];
