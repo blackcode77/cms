@@ -15,5 +15,6 @@ final readonly class Command
         public UserEmail $email,
         public string $name,
         public RoleId $roleId,
+        public UserId $actorId,
     ) {}
 }

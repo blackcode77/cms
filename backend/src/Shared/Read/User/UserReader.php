@@ -59,15 +59,18 @@ final readonly class UserReader
     /**
      * @return list<RoleOption>
      */
-    public function assignableRoles(): array
+    public function assignableRoles(bool $includeAdmin): array
     {
         /** @var list<array{id: string, name: string}> $rows */
-        $rows = $this->db->createQuery()
+        $query = $this->db->createQuery()
             ->select(['id', 'name'])
             ->from(Table::ROLES)
             ->where(['<>', 'name', RoleName::VISITER])
-            ->orderBy(['name' => SORT_ASC])
-            ->all();
+            ->orderBy(['name' => SORT_ASC]);
+        if (!$includeAdmin) {
+            $query->andWhere(['<>', 'name', RoleName::ADMIN]);
+        }
+        $rows = $query->all();
 
         return array_map(
             static fn(array $row) => new RoleOption(RoleId::fromString($row['id']), $row['name']),

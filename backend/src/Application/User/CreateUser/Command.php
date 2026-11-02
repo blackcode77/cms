@@ -6,6 +6,7 @@ namespace App\Application\User\CreateUser;
 
 use App\Domain\Role\Value\RoleId;
 use App\Domain\User\Value\UserEmail;
+use App\Domain\User\Value\UserId;
 
 final readonly class Command
 {
@@ -13,5 +14,6 @@ final readonly class Command
         public UserEmail $email,
         public string $name,
         public RoleId $roleId,
+        public UserId $actorId,
     ) {}
 }

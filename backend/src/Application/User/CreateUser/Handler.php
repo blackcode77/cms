@@ -9,6 +9,8 @@ use App\Application\Shared\MailDeliveryException;
 use App\Application\Shared\MailerInterface;
 use App\Application\Shared\PasswordGenerator;
 use App\Application\Shared\PasswordHasherInterface;
+use App\Application\User\AdminGuard;
+use App\Application\User\Exception\AdminRequiredException;
 use App\Application\User\Exception\RoleNotAssignableException;
 use App\Application\User\Exception\UserEmailAlreadyExistsException;
 use App\Domain\Role\Repository\RoleRepositoryInterface;
@@ -28,6 +30,7 @@ final readonly class Handler
         private PasswordGenerator $passwordGenerator,
         private MailerInterface $mailer,
         private ClockInterface $clock,
+        private AdminGuard $adminGuard,
     ) {}
 
     /**
@@ -35,6 +38,7 @@ final readonly class Handler
      *
      * @throws UserEmailAlreadyExistsException
      * @throws RoleNotAssignableException
+     * @throws AdminRequiredException
      */
     public function handle(Command $command): Result
     {
@@ -42,6 +46,7 @@ final readonly class Handler
         if ($role === null || $role->isVisiter()) {
             throw RoleNotAssignableException::create();
         }
+        $this->adminGuard->assertMayAssign($command->actorId, $role);
         if ($this->userRepository->hasByEmail($command->email)) {
             throw UserEmailAlreadyExistsException::fromEmail($command->email);
         }

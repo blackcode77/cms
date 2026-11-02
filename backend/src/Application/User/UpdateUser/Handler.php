@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Application\User\UpdateUser;
 
+use App\Application\User\AdminGuard;
+use App\Application\User\Exception\AdminRequiredException;
 use App\Application\User\Exception\LastAdminException;
 use App\Application\User\Exception\RoleNotAssignableException;
 use App\Application\User\Exception\UserEmailAlreadyExistsException;
@@ -16,6 +18,7 @@ final readonly class Handler
     public function __construct(
         private UserRepositoryInterface $userRepository,
         private RoleRepositoryInterface $roleRepository,
+        private AdminGuard $adminGuard,
     ) {}
 
     /**
@@ -23,6 +26,7 @@ final readonly class Handler
      * @throws RoleNotAssignableException
      * @throws UserEmailAlreadyExistsException
      * @throws LastAdminException
+     * @throws AdminRequiredException
      */
     public function handle(Command $command): void
     {
@@ -32,6 +36,9 @@ final readonly class Handler
         if ($role === null || $role->isVisiter()) {
             throw RoleNotAssignableException::create();
         }
+
+        $this->adminGuard->assertMayManage($command->actorId, $user);
+        $this->adminGuard->assertMayAssign($command->actorId, $role);
 
         $other = $this->userRepository->findByEmail($command->email);
         if ($other !== null && !$other->id->isEqualTo($user->id)) {

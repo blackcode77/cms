@@ -10,8 +10,10 @@ use App\Application\User\UpdateUser\Handler;
 use App\Domain\Role\Value\RoleId;
 use App\Domain\User\Value\UserEmail;
 use App\Domain\User\Value\UserId;
+use App\Presentation\Api\Auth\Shared\Authenticate;
 use App\Presentation\Api\Shared\ResponseFactory\ResponseFactory;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 use Yiisoft\Router\CurrentRoute;
 
 final readonly class Action
@@ -22,7 +24,7 @@ final readonly class Action
         private CurrentRoute $currentRoute,
     ) {}
 
-    public function __invoke(Input $input): ResponseInterface
+    public function __invoke(Input $input, ServerRequestInterface $request): ResponseInterface
     {
         $id = UserId::tryFromString((string) $this->currentRoute->getArgument('id'));
         if ($id === null) {
@@ -36,6 +38,7 @@ final readonly class Action
                     new UserEmail($input->email),
                     trim($input->name),
                     RoleId::fromString($input->role_id),
+                    Authenticate::currentUser($request)->user->id,
                 ),
             );
         } catch (UserNotFoundException $e) {

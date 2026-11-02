@@ -439,4 +439,75 @@ final class UsersCest
 
         assertSame(404, $response->getStatusCode());
     }
+
+    private function userManagerSession(ApiTester $I): array
+    {
+        $I->haveRoleWithPermissions('usermanager', ['view_users', 'manage_users']);
+        $I->haveUser('um@example.com', 'secret-pass', 'usermanager');
+
+        return $I->loginAs('um@example.com', 'secret-pass');
+    }
+
+    public function nonAdminCannotAssignAdminRoleOnCreate(ApiTester $I): void
+    {
+        $session = $this->userManagerSession($I);
+        $adminRole = $I->haveRole('admin');
+
+        $response = $I->sendApiRequest('POST', self::USERS, [
+            'email' => 'x@example.com', 'name' => 'X', 'role_id' => $adminRole,
+        ], $session);
+
+        assertSame(400, $response->getStatusCode());
+        assertSame(0, $I->countRowsWhere('users', "email = 'x@example.com'"));
+    }
+
+    public function nonAdminCannotPromoteToAdmin(ApiTester $I): void
+    {
+        $session = $this->userManagerSession($I);
+        $I->haveUser('boss@example.com', 'secret-pass', 'manager');
+
+        $response = $I->sendApiRequest('PUT', self::USERS . '/' . $I->userId('boss@example.com'), [
+            'email' => 'boss@example.com', 'name' => 'X', 'role_id' => $I->haveRole('admin'),
+        ], $session);
+
+        assertSame(400, $response->getStatusCode());
+        assertSame('manager', $I->grabRoleName('boss@example.com'));
+    }
+
+    public function nonAdminCannotEditResetOrDeleteAnAdmin(ApiTester $I): void
+    {
+        $session = $this->userManagerSession($I);
+        $I->haveUser('root@example.com', 'secret-pass', 'admin');
+        $I->haveUser('root2@example.com', 'secret-pass', 'admin');
+        $id = $I->userId('root@example.com');
+        $hash = $I->grabPasswordHash('root@example.com');
+
+        $update = $I->sendApiRequest('PUT', self::USERS . '/' . $id, [
+            'email' => 'evil@example.com', 'name' => 'X', 'role_id' => $I->haveRole('manager'),
+        ], $session);
+        $reset = $I->sendApiRequest('POST', self::USERS . '/' . $id . '/reset-password', null, $session);
+        $delete = $I->sendApiRequest('DELETE', self::USERS . '/' . $id, null, $session);
+
+        assertSame(400, $update->getStatusCode());
+        assertSame(400, $reset->getStatusCode());
+        assertSame(400, $delete->getStatusCode());
+        assertSame($hash, $I->grabPasswordHash('root@example.com'));
+        assertSame(0, count($I->sentMails()));
+        assertSame('admin', $I->grabRoleName('root@example.com'));
+    }
+
+    public function assignableRolesOmitAdminForNonAdmin(ApiTester $I): void
+    {
+        $session = $this->userManagerSession($I);
+        $I->haveRole('admin');
+        $I->haveRole('manager');
+
+        $names = array_column(
+            $I->decode($I->sendApiRequest('GET', self::USERS . '/assignable-roles', null, $session))['data'],
+            'name',
+        );
+        sort($names);
+
+        assertSame(['manager', 'usermanager'], $names);
+    }
 }

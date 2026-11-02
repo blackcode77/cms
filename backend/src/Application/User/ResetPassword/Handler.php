@@ -9,6 +9,8 @@ use App\Application\Shared\MailDeliveryException;
 use App\Application\Shared\MailerInterface;
 use App\Application\Shared\PasswordGenerator;
 use App\Application\Shared\PasswordHasherInterface;
+use App\Application\User\AdminGuard;
+use App\Application\User\Exception\AdminRequiredException;
 use App\Application\User\Exception\UserNotFoundException;
 use App\Domain\Auth\Repository\RefreshTokenRepositoryInterface;
 use App\Domain\User\Repository\UserRepositoryInterface;
@@ -25,6 +27,7 @@ final readonly class Handler
         private PasswordGenerator $passwordGenerator,
         private MailerInterface $mailer,
         private ClockInterface $clock,
+        private AdminGuard $adminGuard,
     ) {}
 
     /**
@@ -34,10 +37,12 @@ final readonly class Handler
      * @return bool whether the mail was sent
      *
      * @throws UserNotFoundException
+     * @throws AdminRequiredException
      */
-    public function handle(UserId $id): bool
+    public function handle(UserId $id, UserId $actorId): bool
     {
         $user = $this->userRepository->findById($id) ?? throw UserNotFoundException::create();
+        $this->adminGuard->assertMayManage($actorId, $user);
 
         $password = $this->passwordGenerator->generate();
         $this->userRepository->changePassword($id, $this->passwordHasher->hash($password), true);
