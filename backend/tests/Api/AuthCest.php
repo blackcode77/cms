@@ -80,25 +80,75 @@ final class AuthCest
 
     public function fiveFailuresLockEmailAndIpForFifteenMinutes(ApiTester $I): void
     {
-        $ip = ['REMOTE_ADDR' => '10.0.0.1'];
+        $ip = ['X-Real-IP' => '10.0.0.1'];
         for ($i = 0; $i < 5; $i++) {
             $r = $this->login($I, 'manager@example.com', 'bad', $ip);
             assertSame(self::GENERIC_ERROR, $I->decode($r)['error_message']);
         }
 
-        $locked = $this->login($I, serverParams: $ip);
+        $locked = $this->login($I, headers: $ip);
         assertSame(400, $locked->getStatusCode());
         assertNotSame(self::GENERIC_ERROR, $I->decode($locked)['error_message']);
         assertSame([], $locked->getHeader('Set-Cookie'));
 
         // another IP is not affected
-        assertSame(200, $this->login($I, serverParams: ['REMOTE_ADDR' => '10.0.0.2'])->getStatusCode());
+        assertSame(200, $this->login($I, headers: ['X-Real-IP' => '10.0.0.2'])->getStatusCode());
 
         $I->travelTo('+14 minutes');
-        assertSame(400, $this->login($I, serverParams: $ip)->getStatusCode());
+        assertSame(400, $this->login($I, headers: $ip)->getStatusCode());
 
         $I->travelTo('+16 minutes');
-        assertSame(200, $this->login($I, serverParams: $ip)->getStatusCode());
+        assertSame(200, $this->login($I, headers: $ip)->getStatusCode());
+    }
+
+    public function lockoutKeysOnTheIpFromTheProxyNotTheSocketAddress(ApiTester $I): void
+    {
+        // behind nginx REMOTE_ADDR is always the proxy: an attacker must not lock out everybody
+        $proxy = ['REMOTE_ADDR' => '172.18.0.2'];
+        $attacker = ['X-Real-IP' => '203.0.113.7'];
+        $credentials = ['email' => 'manager@example.com', 'password' => 'bad'];
+        for ($i = 0; $i < 5; $i++) {
+            $I->sendApiRequest('POST', self::LOGIN, $credentials, serverParams: $proxy, headers: $attacker);
+        }
+        $credentials['password'] = 'secret-pass';
+
+        $legit = $I->sendApiRequest('POST', self::LOGIN, $credentials, serverParams: $proxy, headers: ['X-Real-IP' => '198.51.100.9']);
+        $blocked = $I->sendApiRequest('POST', self::LOGIN, $credentials, serverParams: $proxy, headers: $attacker);
+
+        assertSame(200, $legit->getStatusCode());
+        assertSame(400, $blocked->getStatusCode());
+    }
+
+    public function attemptsAreCountedBeforeThePasswordIsChecked(ApiTester $I): void
+    {
+        // at most five password checks per window: afterwards even the correct password is refused
+        $ip = ['X-Real-IP' => '10.0.0.5'];
+        for ($i = 0; $i < 5; $i++) {
+            $this->login($I, 'manager@example.com', 'bad', $ip);
+        }
+
+        assertNotSame(self::GENERIC_ERROR, $I->decode($this->login($I, headers: $ip))['error_message']);
+    }
+
+    public function expiredFailureRowsArePurged(ApiTester $I): void
+    {
+        for ($i = 0; $i < 3; $i++) {
+            $this->login($I, 'ghost' . $i . '@example.com', 'bad');
+        }
+        assertSame(3, $I->countRows('login_attempts'));
+
+        $I->travelTo('+16 minutes');
+        $this->login($I, 'ghost9@example.com', 'bad');
+
+        assertSame(1, $I->countRows('login_attempts'));
+    }
+
+    public function successfulLoginRemovesTheCounterRow(ApiTester $I): void
+    {
+        $this->login($I, 'manager@example.com', 'bad');
+        $this->login($I);
+
+        assertSame(0, $I->countRows('login_attempts'));
     }
 
     public function successfulLoginResetsFailureCounter(ApiTester $I): void
@@ -197,19 +247,19 @@ final class AuthCest
     }
 
     /**
-     * @param array<string, string> $serverParams
+     * @param array<string, string> $headers
      */
     private function login(
         ApiTester $I,
         string $email = 'manager@example.com',
         string $password = 'secret-pass',
-        array $serverParams = [],
+        array $headers = [],
     ): ResponseInterface {
         return $I->sendApiRequest(
             'POST',
             self::LOGIN,
             ['email' => $email, 'password' => $password],
-            serverParams: $serverParams,
+            headers: $headers,
         );
     }
 

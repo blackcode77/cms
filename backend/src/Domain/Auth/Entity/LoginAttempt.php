@@ -8,42 +8,29 @@ use DateInterval;
 use DateTimeImmutable;
 
 /**
- * Consecutive failed sign-ins of one email + IP pair; too many lock the pair for a while.
+ * Sign-in attempts of one key + IP pair inside a fixed window. Attempts are counted before the password is
+ * checked (and cleared on success), so more than {@see self::MAX_ATTEMPTS} in a window lock the pair until
+ * the window ends.
  */
-final class LoginAttempt
+final readonly class LoginAttempt
 {
-    public const int MAX_FAILURES = 5;
-    public const string LOCK_DURATION = 'PT15M';
+    public const int MAX_ATTEMPTS = 5;
+    public const string WINDOW = 'PT15M';
 
-    public readonly string $email;
-    public readonly string $ip;
-    public private(set) int $failures;
-    public private(set) ?DateTimeImmutable $lockedUntil;
+    public function __construct(
+        public string $key,
+        public string $ip,
+        public int $attempts,
+        public DateTimeImmutable $windowUntil,
+    ) {}
 
-    public function __construct(string $email, string $ip, int $failures = 0, ?DateTimeImmutable $lockedUntil = null)
+    public static function windowEnd(DateTimeImmutable $now): DateTimeImmutable
     {
-        $this->email = $email;
-        $this->ip = $ip;
-        $this->failures = $failures;
-        $this->lockedUntil = $lockedUntil;
+        return $now->add(new DateInterval(self::WINDOW));
     }
 
-    public function isLocked(DateTimeImmutable $now): bool
+    public function isLocked(): bool
     {
-        return $this->lockedUntil !== null && $this->lockedUntil > $now;
-    }
-
-    public function registerFailure(DateTimeImmutable $now): void
-    {
-        if ($this->lockedUntil !== null && $this->lockedUntil <= $now) {
-            // the previous lock has run out: start counting afresh
-            $this->failures = 0;
-            $this->lockedUntil = null;
-        }
-
-        $this->failures++;
-        if ($this->failures >= self::MAX_FAILURES) {
-            $this->lockedUntil = $now->add(new DateInterval(self::LOCK_DURATION));
-        }
+        return $this->attempts > self::MAX_ATTEMPTS;
     }
 }

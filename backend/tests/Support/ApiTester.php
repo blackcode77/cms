@@ -29,6 +29,7 @@ class ApiTester extends \Codeception\Actor
     /**
      * @param array<string, string> $cookies
      * @param array<string, string> $serverParams e.g. ['REMOTE_ADDR' => '10.0.0.1']
+     * @param array<string, string> $headers e.g. ['X-Real-IP' => '10.0.0.1']
      */
     public function sendApiRequest(
         string $method,
@@ -36,9 +37,13 @@ class ApiTester extends \Codeception\Actor
         ?array $json = null,
         array $cookies = [],
         array $serverParams = [],
+        array $headers = [],
     ): ResponseInterface {
         $request = new ServerRequest(method: $method, uri: $uri, serverParams: $serverParams)
             ->withCookieParams($cookies);
+        foreach ($headers as $name => $value) {
+            $request = $request->withHeader($name, $value);
+        }
         if ($json !== null) {
             $request = $request
                 ->withHeader('Content-Type', 'application/json')

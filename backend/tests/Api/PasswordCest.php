@@ -146,4 +146,77 @@ final class PasswordCest
             assertSame(422, $response->getStatusCode(), $bad);
         }
     }
+
+    public function pendingPasswordChangeBlocksEveryOtherProtectedEndpoint(ApiTester $I): void
+    {
+        $I->haveUser('boss@example.com', 'secret-pass', 'admin', true);
+        $session = $I->loginAs('boss@example.com', 'secret-pass');
+
+        $users = $I->sendApiRequest('GET', '/api/v1/users', null, $session);
+        $page = $I->sendApiRequest('POST', '/api/v1/pages', ['title' => 'A', 'slug' => 'a', 'content' => ''], $session);
+
+        assertSame(403, $users->getStatusCode());
+        assertStringContainsString('change your password', strtolower($I->decode($users)['error_message']));
+        assertSame(403, $page->getStatusCode());
+        assertSame(0, $I->countRows('page'));
+        assertSame(200, $I->sendApiRequest('GET', self::ME, null, $session)->getStatusCode());
+        assertSame(200, $I->sendApiRequest('POST', '/api/v1/auth/refresh', null, $session)->getStatusCode());
+        assertSame(200, $I->sendApiRequest('POST', '/api/v1/auth/logout', null, $session)->getStatusCode());
+    }
+
+    public function changingThePasswordUnblocksTheSession(ApiTester $I): void
+    {
+        $I->haveUser('boss@example.com', 'secret-pass', 'admin', true);
+        $session = $I->loginAs('boss@example.com', 'secret-pass');
+
+        $change = $I->sendApiRequest('POST', self::CHANGE, ['current_password' => 'secret-pass', 'new_password' => 'brand-new-pass'], $session);
+
+        assertSame(200, $change->getStatusCode());
+        assertSame(200, $I->sendApiRequest('GET', '/api/v1/users', null, $I->cookieValues($change))->getStatusCode());
+    }
+
+    public function changePasswordRevokesOtherSessionsAndKeepsTheCallerSignedIn(ApiTester $I): void
+    {
+        $I->haveUser('boss@example.com', 'secret-pass');
+        $stolen = $I->loginAs('boss@example.com', 'secret-pass');
+        $mine = $I->loginAs('boss@example.com', 'secret-pass');
+
+        $change = $I->sendApiRequest('POST', self::CHANGE, ['current_password' => 'secret-pass', 'new_password' => 'brand-new-pass'], $mine);
+
+        assertSame(200, $change->getStatusCode());
+        assertSame(401, $I->sendApiRequest('POST', '/api/v1/auth/refresh', null, ['refresh_token' => $stolen['refresh_token']])->getStatusCode());
+        assertSame(401, $I->sendApiRequest('POST', '/api/v1/auth/refresh', null, ['refresh_token' => $mine['refresh_token']])->getStatusCode());
+        $fresh = $I->cookieValues($change);
+        assertSame(200, $I->sendApiRequest('GET', self::ME, null, $fresh)->getStatusCode());
+        assertSame(200, $I->sendApiRequest('POST', '/api/v1/auth/refresh', null, $fresh)->getStatusCode());
+    }
+
+    public function changePasswordRejectsNewPasswordEqualToCurrent(ApiTester $I): void
+    {
+        $I->haveUser('boss@example.com', 'secret-pass');
+        $session = $I->loginAs('boss@example.com', 'secret-pass');
+        $hash = $I->grabPasswordHash('boss@example.com');
+
+        $response = $I->sendApiRequest('POST', self::CHANGE, ['current_password' => 'secret-pass', 'new_password' => 'secret-pass'], $session);
+
+        assertSame(400, $response->getStatusCode());
+        assertSame($hash, $I->grabPasswordHash('boss@example.com'));
+    }
+
+    public function wrongCurrentPasswordIsThrottled(ApiTester $I): void
+    {
+        $I->haveUser('boss@example.com', 'secret-pass');
+        $session = $I->loginAs('boss@example.com', 'secret-pass');
+        $body = ['current_password' => 'wrong', 'new_password' => 'brand-new-pass'];
+        for ($i = 0; $i < 5; $i++) {
+            $I->sendApiRequest('POST', self::CHANGE, $body, $session);
+        }
+
+        $body['current_password'] = 'secret-pass';
+        $response = $I->sendApiRequest('POST', self::CHANGE, $body, $session);
+
+        assertSame(400, $response->getStatusCode());
+        assertStringContainsString('too many', strtolower($I->decode($response)['error_message']));
+        assertSame(200, $I->sendApiRequest('POST', self::LOGIN, ['email' => 'boss@example.com', 'password' => 'secret-pass'])->getStatusCode());
+    }
 }

@@ -8,6 +8,7 @@ use App\Application\Auth\Exception\InvalidCredentialsException;
 use App\Application\Auth\Login\Command;
 use App\Application\Auth\Login\Handler;
 use App\Domain\User\Value\UserEmail;
+use App\Presentation\Api\Auth\Shared\ClientIp;
 use App\Presentation\Api\Auth\Shared\SessionCookies;
 use App\Presentation\Api\Shared\ResponseFactory\ResponseFactory;
 use InvalidArgumentException;
@@ -31,9 +32,8 @@ final readonly class Action
             return $this->responseFactory->fail(InvalidCredentialsException::create()->getMessage());
         }
 
-        $ip = $request->getServerParams()['REMOTE_ADDR'] ?? null;
         $session = $this->handler->handle(
-            new Command($email, $input->password, is_string($ip) && $ip !== '' ? $ip : 'unknown'),
+            new Command($email, $input->password, ClientIp::fromRequest($request)),
         );
 
         return $this->cookies->attach($this->responseFactory->success(), $session);

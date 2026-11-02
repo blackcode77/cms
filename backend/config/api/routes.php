@@ -15,7 +15,7 @@ return [
     Route::post('/auth/refresh')->action(Api\Auth\Refresh\Action::class),
     Route::post('/auth/logout')->action(Api\Auth\Logout\Action::class),
     Route::post('/auth/change-password')
-        ->middleware(Authenticate::class)
+        ->middleware(Authenticate::allowingPendingPasswordChange())
         ->action(Api\Auth\ChangePassword\Action::class),
     Route::get('/auth/me')->action(Api\Auth\Me\Action::class),
     Route::post('/pages')
