@@ -6,7 +6,7 @@ namespace App\Infrastructure;
 
 final readonly class Table
 {
-    public const string PAGE = 'page';
+    public const string PAGE_CONTENT = 'page_content';
     public const string ROLES = 'roles';
     public const string ROLE_PERMISSIONS = 'role_permissions';
     public const string USERS = 'users';

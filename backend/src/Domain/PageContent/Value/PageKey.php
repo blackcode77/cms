@@ -2,14 +2,18 @@
 
 declare(strict_types=1);
 
-namespace App\Domain\Page\Value;
+namespace App\Domain\PageContent\Value;
 
 use Stringable;
 use Webmozart\Assert\Assert;
 
-final readonly class PageTitle implements Stringable
+/**
+ * Stable identifier of a Page, e.g. `home`, `site`.
+ */
+final readonly class PageKey implements Stringable
 {
-    public const int LENGTH_LIMIT = 200;
+    public const int LENGTH_LIMIT = 50;
+    public const string PATTERN = '/^[a-z0-9]+(?:[-_][a-z0-9]+)*$/';
 
     /**
      * @param non-empty-string $value
@@ -17,8 +21,8 @@ final readonly class PageTitle implements Stringable
     public function __construct(
         private string $value,
     ) {
-        Assert::notEmpty($value);
         Assert::maxLength($value, self::LENGTH_LIMIT);
+        Assert::regex($value, self::PATTERN);
     }
 
     /**

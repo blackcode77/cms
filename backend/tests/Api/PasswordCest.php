@@ -153,12 +153,12 @@ final class PasswordCest
         $session = $I->loginAs('boss@example.com', 'secret-pass');
 
         $users = $I->sendApiRequest('GET', '/api/v1/users', null, $session);
-        $page = $I->sendApiRequest('POST', '/api/v1/pages', ['title' => 'A', 'slug' => 'a', 'content' => ''], $session);
+        $page = $I->sendApiRequest('PATCH', '/api/v1/page-content/home', ['path' => 'a', 'type' => 'string', 'value' => 'A'], $session);
 
         assertSame(403, $users->getStatusCode());
         assertStringContainsString('change your password', strtolower($I->decode($users)['error_message']));
         assertSame(403, $page->getStatusCode());
-        assertSame(0, $I->countRows('page'));
+        assertSame(0, $I->countRows('page_content'));
         assertSame(200, $I->sendApiRequest('GET', self::ME, null, $session)->getStatusCode());
         assertSame(200, $I->sendApiRequest('POST', '/api/v1/auth/refresh', null, $session)->getStatusCode());
         assertSame(200, $I->sendApiRequest('POST', '/api/v1/auth/logout', null, $session)->getStatusCode());

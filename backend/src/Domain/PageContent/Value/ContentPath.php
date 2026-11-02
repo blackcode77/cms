@@ -2,18 +2,21 @@
 
 declare(strict_types=1);
 
-namespace App\Domain\Page\Value;
+namespace App\Domain\PageContent\Value;
 
 use Stringable;
 use Webmozart\Assert\Assert;
 
-final readonly class PageSlug implements Stringable
+/**
+ * Dotted address of a Content element within a Page, e.g. `header.phone_number_one`.
+ */
+final readonly class ContentPath implements Stringable
 {
     public const int LENGTH_LIMIT = 100;
-    public const string PATTERN = '/^[a-z0-9]+(?:-[a-z0-9]+)*$/';
+    public const string PATTERN = '/^[a-z0-9_]+(?:\.[a-z0-9_]+)*$/';
 
     /**
-     * @param non-empty-string $value Lowercase latin words separated by single dashes.
+     * @param non-empty-string $value
      */
     public function __construct(
         private string $value,

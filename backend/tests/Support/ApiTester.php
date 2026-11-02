@@ -86,7 +86,7 @@ class ApiTester extends \Codeception\Actor
         ShiftableClock::reset();
         InMemoryMailer::reset();
         $this->pdo()->exec(
-            'TRUNCATE TABLE page, refresh_tokens, login_attempts, users, role_permissions, roles CASCADE',
+            'TRUNCATE TABLE page_content, refresh_tokens, login_attempts, users, role_permissions, roles CASCADE',
         );
     }
 

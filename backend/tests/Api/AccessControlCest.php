@@ -11,9 +11,9 @@ use function PHPUnit\Framework\assertSame;
 
 final class AccessControlCest
 {
-    private const string PAGES = '/api/v1/pages';
-    private const array PAYLOAD = ['title' => 'About', 'slug' => 'about', 'content' => ''];
-    private const array SECOND = ['title' => 'Two', 'slug' => 'two', 'content' => ''];
+    private const string CONTENT = '/api/v1/page-content/home';
+    private const array PAYLOAD = ['path' => 'hero.title', 'type' => 'string', 'value' => 'One'];
+    private const array SECOND = ['path' => 'hero.title', 'type' => 'string', 'value' => 'Two'];
 
     public function _before(ApiTester $I): void
     {
@@ -23,21 +23,21 @@ final class AccessControlCest
     public function publicEndpointsNeedNoSession(ApiTester $I): void
     {
         assertSame(200, $I->sendApiRequest('GET', '/api/v1/health')->getStatusCode());
-        assertSame(200, $I->sendApiRequest('GET', self::PAGES)->getStatusCode());
+        assertSame(200, $I->sendApiRequest('GET', '/api/v1/page-content?keys=home')->getStatusCode());
     }
 
-    public function creatingPageWithoutSessionReturns401(ApiTester $I): void
+    public function editingContentWithoutSessionReturns401(ApiTester $I): void
     {
-        $response = $I->sendApiRequest('POST', self::PAGES, self::PAYLOAD);
+        $response = $I->sendApiRequest('PATCH', self::CONTENT, self::PAYLOAD);
 
         assertSame(401, $response->getStatusCode());
         assertSame('failed', $I->decode($response)['status']);
-        assertSame(0, $I->countRows('page'));
+        assertSame(0, $I->countRows('page_content'));
     }
 
-    public function creatingPageWithGarbageTokenReturns401(ApiTester $I): void
+    public function editingContentWithGarbageTokenReturns401(ApiTester $I): void
     {
-        $response = $I->sendApiRequest('POST', self::PAGES, self::PAYLOAD, ['access_token' => 'garbage']);
+        $response = $I->sendApiRequest('PATCH', self::CONTENT, self::PAYLOAD, ['access_token' => 'garbage']);
 
         assertSame(401, $response->getStatusCode());
     }
@@ -46,34 +46,34 @@ final class AccessControlCest
     {
         $session = $I->haveSessionFor('viewer');
 
-        $response = $I->sendApiRequest('POST', self::PAGES, self::PAYLOAD, $session);
+        $response = $I->sendApiRequest('PATCH', self::CONTENT, self::PAYLOAD, $session);
 
         assertSame(403, $response->getStatusCode());
         assertSame('failed', $I->decode($response)['status']);
-        assertSame(0, $I->countRows('page'));
+        assertSame(0, $I->countRows('page_content'));
     }
 
-    public function adminAndManagerCanCreatePage(ApiTester $I): void
+    public function adminAndManagerCanEditContent(ApiTester $I): void
     {
         $admin = $I->haveSessionFor('admin');
         $manager = $I->haveSessionFor('manager');
 
-        assertSame(201, $I->sendApiRequest('POST', self::PAGES, self::PAYLOAD, $admin)->getStatusCode());
-        assertSame(201, $I->sendApiRequest('POST', self::PAGES, self::SECOND, $manager)->getStatusCode());
+        assertSame(200, $I->sendApiRequest('PATCH', self::CONTENT, self::PAYLOAD, $admin)->getStatusCode());
+        assertSame(200, $I->sendApiRequest('PATCH', self::CONTENT, self::SECOND, $manager)->getStatusCode());
     }
 
     public function rolePermissionChangeAppliesOnNextRequest(ApiTester $I): void
     {
         $session = $I->haveSessionFor('manager');
-        assertSame(201, $I->sendApiRequest('POST', self::PAGES, self::PAYLOAD, $session)->getStatusCode());
+        assertSame(200, $I->sendApiRequest('PATCH', self::CONTENT, self::PAYLOAD, $session)->getStatusCode());
 
         $this->pdo()->exec("DELETE FROM role_permissions WHERE permission = 'edit_page'");
-        assertSame(403, $I->sendApiRequest('POST', self::PAGES, self::SECOND, $session)->getStatusCode());
+        assertSame(403, $I->sendApiRequest('PATCH', self::CONTENT, self::SECOND, $session)->getStatusCode());
 
         $this->pdo()->exec(
             "INSERT INTO role_permissions (role_id, permission) SELECT id, 'edit_page' FROM roles WHERE name = 'manager'",
         );
-        assertSame(201, $I->sendApiRequest('POST', self::PAGES, self::SECOND, $session)->getStatusCode());
+        assertSame(200, $I->sendApiRequest('PATCH', self::CONTENT, self::SECOND, $session)->getStatusCode());
     }
 
     private function pdo(): PDO
