@@ -28,7 +28,7 @@ return [
     ],
     'config-plugin-environments' => [
         Environment::DEV => ['params' => ['environments/dev/params.php']],
-        Environment::TEST => ['params' => ['environments/test/params.php']],
+        Environment::TEST => ['params' => ['environments/test/params.php'], 'di' => ['environments/test/di.php']],
         Environment::PROD => ['params' => ['environments/prod/params.php']],
     ],
     'config-plugin-options' => [

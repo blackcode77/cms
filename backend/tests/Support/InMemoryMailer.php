@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Infrastructure;
+namespace App\Tests\Support;
 
 use App\Application\Shared\Mail;
 use App\Application\Shared\MailDeliveryException;

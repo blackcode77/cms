@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace App\Tests\Support;
 
 use App\Environment;
-use App\Infrastructure\InMemoryMailer;
-use App\Infrastructure\ShiftableClock;
 use DateTimeImmutable;
 use Ramsey\Uuid\Uuid;
 use HttpSoft\Message\ServerRequest;

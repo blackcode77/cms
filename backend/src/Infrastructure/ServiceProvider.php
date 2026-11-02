@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Infrastructure;
 
-use App\Application\Shared\MailerInterface;
 use App\Application\Shared\PasswordHasherInterface;
 use App\Application\Auth\TokenIssuerInterface;
 use App\Domain\Auth\Repository\LoginAttemptRepositoryInterface;
@@ -22,9 +21,6 @@ use App\Infrastructure\Repository\DbPageRepository;
 use App\Infrastructure\Repository\DbRefreshTokenRepository;
 use App\Infrastructure\Repository\DbRoleRepository;
 use App\Infrastructure\Repository\DbUserRepository;
-use Psr\Clock\ClockInterface;
-use Symfony\Component\Mailer\Mailer;
-use Symfony\Component\Mailer\Transport;
 use Yiisoft\Aliases\Aliases;
 use Yiisoft\Cache\File\FileCache;
 use Yiisoft\Db\Cache\SchemaCache;
@@ -49,13 +45,6 @@ final readonly class ServiceProvider implements ServiceProviderInterface
             PasswordHasherInterface::class => Argon2idPasswordHasher::class,
             TokenIssuerInterface::class => static fn() => new JwtTokenIssuer(self::env('JWT_SECRET', '')),
 
-            MailerInterface::class => Environment::isTest()
-                ? InMemoryMailer::class
-                : static fn() => new SymfonyMailer(
-                    new Mailer(Transport::fromDsn(self::env('MAILER_DSN', 'null://null'))),
-                    self::env('MAIL_FROM', 'cms@localhost'),
-                ),
-
             // DB (credentials come from the environment, see compose.yaml)
             ConnectionInterface::class => static fn(Aliases $aliases) => new Connection(
                 new Driver(
@@ -79,7 +68,6 @@ final readonly class ServiceProvider implements ServiceProviderInterface
             ],
 
             // Other
-            ClockInterface::class => Environment::isTest() ? ShiftableClock::class : SystemClock::class,
             EntityHydratorInterface::class => YiiHydratorEntityHydrator::class,
             PropertyReaderInterface::class => ReflectionPropertyReader::class,
         ];
