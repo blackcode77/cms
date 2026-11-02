@@ -8,6 +8,8 @@ export default defineConfig([
     files: ['./app/layers/**'],
     rules: {
       'fsd/insignificant-slice': 'off',
+      // `health` is uncountable and `session` is the agreed entity name, so a plural rule only adds noise.
+      'fsd/inconsistent-naming': 'off',
     },
   },
 ])

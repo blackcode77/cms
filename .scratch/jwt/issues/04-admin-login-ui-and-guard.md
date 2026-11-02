@@ -4,12 +4,12 @@
 
 **Blocked by:** 02
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] Guest visiting `/admin` is redirected to `/admin/login`
-- [ ] Valid credentials lead to the dashboard; invalid show the generic error
-- [ ] `can()` reflects the Permissions from `/auth/me`
-- [ ] Sign-out ends the Session and returns to login
-- [ ] Menu items are hidden without the matching Permission
-- [ ] Vitest covers `can()` and the route middleware (`registerEndpoint` for `/auth/me`)
-- [ ] `make lint` (including steiger) passes
+- [x] Guest visiting `/admin` is redirected to `/admin/login`
+- [x] Valid credentials lead to the dashboard; invalid show the generic error
+- [x] `can()` reflects the Permissions from `/auth/me`
+- [x] Sign-out ends the Session and returns to login
+- [x] Menu items are hidden without the matching Permission
+- [x] Vitest covers `can()` and the route middleware (`registerEndpoint` for `/auth/me`)
+- [x] `make lint` (including steiger) passes
