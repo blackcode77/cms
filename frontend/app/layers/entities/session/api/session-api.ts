@@ -42,6 +42,14 @@ export async function login(email: string, password: string): Promise<void> {
   await api('/v1/auth/login', { method: 'POST', body: { email, password } })
 }
 
+export async function changePassword(currentPassword: string, newPassword: string): Promise<void> {
+  const api = useApi()
+  await api('/v1/auth/change-password', {
+    method: 'POST',
+    body: { current_password: currentPassword, new_password: newPassword },
+  })
+}
+
 export async function logout(): Promise<void> {
   const api = useApi()
   await api('/v1/auth/logout', { method: 'POST' })

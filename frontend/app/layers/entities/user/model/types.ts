@@ -25,3 +25,8 @@ export interface CreateUserResult {
   id: string
   mail_sent: boolean
 }
+
+/** Payload of `POST /users/{id}/reset-password`; `mail_sent` is false when the email could not be delivered. */
+export interface ResetPasswordResult {
+  mail_sent: boolean
+}

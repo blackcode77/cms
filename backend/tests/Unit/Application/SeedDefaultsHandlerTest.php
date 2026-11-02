@@ -133,4 +133,6 @@ final class InMemoryUserRepository implements UserRepositoryInterface
     {
         $this->users[] = $user;
     }
+
+    public function changePassword(UserId $id, string $passwordHash, bool $mustChangePassword): void {}
 }

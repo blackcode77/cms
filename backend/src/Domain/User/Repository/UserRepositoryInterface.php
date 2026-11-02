@@ -17,4 +17,6 @@ interface UserRepositoryInterface
     public function hasByEmail(UserEmail $email): bool;
 
     public function add(User $user): void;
+
+    public function changePassword(UserId $id, string $passwordHash, bool $mustChangePassword): void;
 }

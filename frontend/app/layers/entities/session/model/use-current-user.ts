@@ -1,4 +1,4 @@
-import { fetchSession, login, logout } from '../api/session-api'
+import { changePassword, fetchSession, login, logout } from '../api/session-api'
 import type { Permission, Session } from './types'
 
 /** The signed-in admin User, shared across the app (SSR-safe `useState`). */
@@ -24,6 +24,12 @@ export function useCurrentUser() {
     await load()
   }
 
+  /** Changes the own password; reloads the session so the must-change flag clears. */
+  async function updatePassword(currentPassword: string, newPassword: string): Promise<void> {
+    await changePassword(currentPassword, newPassword)
+    await load()
+  }
+
   async function signOut(): Promise<void> {
     try {
       await logout()
@@ -33,5 +39,5 @@ export function useCurrentUser() {
     }
   }
 
-  return { session, user, role, isAuthenticated, mustChangePassword, can, load, signIn, signOut }
+  return { session, user, role, isAuthenticated, mustChangePassword, can, load, signIn, updatePassword, signOut }
 }

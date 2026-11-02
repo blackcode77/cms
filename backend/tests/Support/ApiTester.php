@@ -241,6 +241,14 @@ class ApiTester extends \Codeception\Actor
         return (string) $stmt->fetchColumn();
     }
 
+    public function grabUserId(string $email): string
+    {
+        $stmt = $this->pdo()->prepare('SELECT id FROM users WHERE email = ?');
+        $stmt->execute([$email]);
+
+        return (string) $stmt->fetchColumn();
+    }
+
     public function roleId(string $name): string
     {
         return $this->haveRole($name);

@@ -1,2 +1,2 @@
-export { fetchUsers, fetchAssignableRoles, createUser } from './api/user-api'
-export type { UserListItem, RoleOption, CreateUserInput, CreateUserResult } from './model/types'
+export { fetchUsers, fetchAssignableRoles, createUser, resetUserPassword } from './api/user-api'
+export type { UserListItem, RoleOption, CreateUserInput, CreateUserResult, ResetPasswordResult } from './model/types'

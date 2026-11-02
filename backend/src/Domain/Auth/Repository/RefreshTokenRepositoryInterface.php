@@ -13,6 +13,11 @@ interface RefreshTokenRepositoryInterface
     public function add(RefreshToken $token): void;
 
     /**
+     * Revokes every active refresh token of the User (ends all their Sessions).
+     */
+    public function revokeAllForUser(UserId $userId, DateTimeImmutable $now): void;
+
+    /**
      * Atomically revokes an active (not revoked, not expired) token.
      *
      * @return UserId|null the token's owner, or null when the token was not active (used, revoked, expired, unknown)

@@ -31,6 +31,14 @@ final readonly class DbRefreshTokenRepository implements RefreshTokenRepositoryI
             ->execute();
     }
 
+    public function revokeAllForUser(UserId $userId, DateTimeImmutable $now): void
+    {
+        $this->db->createCommand(
+            'UPDATE ' . Table::REFRESH_TOKENS . ' SET revoked_at = :now WHERE user_id = :user AND revoked_at IS NULL',
+            ['now' => $now->format(self::FORMAT), 'user' => $userId->toString()],
+        )->execute();
+    }
+
     public function revokeActive(string $tokenHash, DateTimeImmutable $now): ?UserId
     {
         /** @var list<array{user_id: string}> $rows */
