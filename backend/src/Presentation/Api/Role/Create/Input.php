@@ -8,8 +8,8 @@ use App\Domain\Role\Value\Permission;
 use App\Domain\Role\Value\RoleName;
 use Yiisoft\Input\Http\AbstractInput;
 use Yiisoft\Input\Http\Attribute\Data\FromBody;
-use Yiisoft\Validator\Rule\Each;
-use Yiisoft\Validator\Rule\In;
+use Yiisoft\Validator\Result;
+use Yiisoft\Validator\Rule\Callback;
 use Yiisoft\Validator\Rule\Length;
 use Yiisoft\Validator\Rule\Required;
 
@@ -21,17 +21,27 @@ class Input extends AbstractInput
     public string $name = '';
 
     /** @var list<string> */
-    #[Each(new In(self::PERMISSIONS))]
+    #[Callback(method: 'validatePermissions')]
     public array $permissions = [];
 
-    private const array PERMISSIONS = [
-        'view_dashboard',
-        'edit_page',
-        'view_users',
-        'manage_users',
-        'view_roles',
-        'manage_roles',
-    ];
+    /**
+     * Strict whitelist built from the Permission catalog (non-strings such as `true` must not reach Permission::from).
+     */
+    public function validatePermissions(mixed $value): Result
+    {
+        $result = new Result();
+        if (!is_array($value)) {
+            return $result->addError('Permissions must be a list.');
+        }
+        foreach ($value as $permission) {
+            if (!is_string($permission) || Permission::tryFrom($permission) === null) {
+                $result->addError('Unknown permission.');
+                break;
+            }
+        }
+
+        return $result;
+    }
 
     /**
      * @return list<Permission>

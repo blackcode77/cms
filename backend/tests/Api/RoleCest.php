@@ -254,6 +254,19 @@ final class RoleCest
         assertNotContains('edit_page', $me['permissions']);
     }
 
+    public function malformedPermissionsAreValidationErrorsNotServerErrors(ApiTester $I): void
+    {
+        $admin = $I->haveSessionFor('admin');
+        $role = $I->decode($I->sendApiRequest('POST', '/api/v1/roles', ['name' => 'ok-role', 'permissions' => []], $admin))['data']['id'];
+
+        foreach ([[true], [1], [null], [['x']], ['edit_page', false]] as $bad) {
+            $create = $I->sendApiRequest('POST', '/api/v1/roles', ['name' => 'bad', 'permissions' => $bad], $admin);
+            $update = $I->sendApiRequest('PUT', '/api/v1/roles/' . $role, ['name' => 'ok-role', 'permissions' => $bad], $admin);
+            assertSame(422, $create->getStatusCode(), json_encode($bad));
+            assertSame(422, $update->getStatusCode(), json_encode($bad));
+        }
+    }
+
     /**
      * @param array<string, string> $session
      * @param list<string> $permissions

@@ -7,9 +7,10 @@ namespace App\Infrastructure;
 use App\Application\Shared\Mail;
 use App\Application\Shared\MailDeliveryException;
 use App\Application\Shared\MailerInterface;
-use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
+use Symfony\Component\Mailer\Exception\ExceptionInterface as MailerException;
 use Symfony\Component\Mailer\MailerInterface as SymfonyMailerInterface;
 use Symfony\Component\Mime\Email;
+use Symfony\Component\Mime\Exception\ExceptionInterface as MimeException;
 
 final readonly class SymfonyMailer implements MailerInterface
 {
@@ -20,15 +21,15 @@ final readonly class SymfonyMailer implements MailerInterface
 
     public function send(Mail $mail): void
     {
-        $email = new Email()
-            ->from($this->from)
-            ->to($mail->to)
-            ->subject($mail->subject)
-            ->text($mail->body);
-
         try {
+            $email = new Email()
+                ->from($this->from)
+                ->to($mail->to)
+                ->subject($mail->subject)
+                ->text($mail->body);
             $this->mailer->send($email);
-        } catch (TransportExceptionInterface $e) {
+        } catch (MailerException | MimeException $e) {
+            // transport failures and malformed addresses alike: the caller only needs to know the mail was not sent
             throw new MailDeliveryException('Could not send mail: ' . $e->getMessage(), previous: $e);
         }
     }
