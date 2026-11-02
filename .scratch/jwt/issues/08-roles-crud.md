@@ -4,12 +4,13 @@
 
 **Blocked by:** 03, 04
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] List, create, rename, delete endpoints and Roles page, gated by Permissions
-- [ ] Permission catalog endpoint drives the checkboxes
-- [ ] Editing or deleting the Admin Role is rejected
-- [ ] Deleting Visiter is rejected
-- [ ] Deleting a Role in use returns a business error naming the count
-- [ ] Permission changes affect the next request of Users with that Role
-- [ ] Api Cests + Vitest for menu/route visibility
+- [x] List, create, rename, delete endpoints and Roles page, gated by Permissions
+- [x] Permission catalog endpoint drives the checkboxes
+- [x] Editing or deleting the Admin Role is rejected
+- [x] Deleting Visiter is rejected
+- [x] Deleting a Role in use returns a business error naming the count
+- [x] Permission changes affect the next request of Users with that Role
+- [x] Api Cests + Vitest for menu/route visibility
+- [x] Opening the section's admin URL directly without `view_roles` is blocked on the frontend (redirect/403 page), not only hidden from the menu; `useCurrentUser().can()` is used in the route guard (the global admin middleware currently checks only the Session)

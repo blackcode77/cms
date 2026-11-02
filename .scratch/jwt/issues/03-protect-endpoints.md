@@ -4,11 +4,11 @@
 
 **Blocked by:** 02
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] Unauthenticated `POST /pages` returns 401
-- [ ] Authenticated User without `edit_page` gets 403
-- [ ] `admin` and `manager` can `POST /pages`
-- [ ] Changing a Role's Permissions (via DB in the test) takes effect on the next request
-- [ ] `GET /health` and `GET /pages` remain public
-- [ ] Existing `PageCest` is updated to authenticate and still passes
+- [x] Unauthenticated `POST /pages` returns 401
+- [x] Authenticated User without `edit_page` gets 403
+- [x] `admin` and `manager` can `POST /pages`
+- [x] Changing a Role's Permissions (via DB in the test) takes effect on the next request
+- [x] `GET /health` and `GET /pages` remain public
+- [x] Existing `PageCest` is updated to authenticate and still passes

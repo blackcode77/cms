@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Tests\Support;
 
 use App\Environment;
+use DateTimeImmutable;
+use Ramsey\Uuid\Uuid;
 use HttpSoft\Message\ServerRequest;
 use HttpSoft\Message\StreamFactory;
 use PDO;
@@ -22,9 +24,24 @@ class ApiTester extends \Codeception\Actor
 {
     use _generated\ApiTesterActions;
 
-    public function sendApiRequest(string $method, string $uri, ?array $json = null): ResponseInterface
-    {
-        $request = new ServerRequest(method: $method, uri: $uri);
+    /**
+     * @param array<string, string> $cookies
+     * @param array<string, string> $serverParams e.g. ['REMOTE_ADDR' => '10.0.0.1']
+     * @param array<string, string> $headers e.g. ['X-Real-IP' => '10.0.0.1']
+     */
+    public function sendApiRequest(
+        string $method,
+        string $uri,
+        ?array $json = null,
+        array $cookies = [],
+        array $serverParams = [],
+        array $headers = [],
+    ): ResponseInterface {
+        $request = new ServerRequest(method: $method, uri: $uri, serverParams: $serverParams)
+            ->withCookieParams($cookies);
+        foreach ($headers as $name => $value) {
+            $request = $request->withHeader($name, $value);
+        }
         if ($json !== null) {
             $request = $request
                 ->withHeader('Content-Type', 'application/json')
@@ -46,6 +63,7 @@ class ApiTester extends \Codeception\Actor
         );
 
         $response = $runner->runAndGetResponse($request);
+        $this->dropLeakedAppConnections();
         $body = $response->getBody();
         if ($body->isSeekable()) {
             $body->rewind();
@@ -65,7 +83,194 @@ class ApiTester extends \Codeception\Actor
 
     public function cleanDatabase(): void
     {
-        $this->pdo()->exec('TRUNCATE TABLE page');
+        ShiftableClock::reset();
+        InMemoryMailer::reset();
+        $this->pdo()->exec(
+            'TRUNCATE TABLE page, refresh_tokens, login_attempts, users, role_permissions, roles CASCADE',
+        );
+    }
+
+    /**
+     * Mails sent through the fake mailer since the last cleanDatabase().
+     *
+     * @return list<array{to: string, subject: string, body: string}>
+     */
+    public function sentMails(): array
+    {
+        return InMemoryMailer::sent();
+    }
+
+    /**
+     * Makes every following send fail (until cleanDatabase()).
+     */
+    public function makeMailerFail(): void
+    {
+        InMemoryMailer::failSending();
+    }
+
+    /**
+     * Moves the application clock, e.g. '+16 minutes'. Undone by cleanDatabase().
+     */
+    public function travelTo(string $modifier): void
+    {
+        ShiftableClock::set(new DateTimeImmutable($modifier));
+    }
+
+    /**
+     * Inserts a User (and its Role with default Permissions when missing) straight into the database.
+     */
+    public function haveUser(
+        string $email,
+        string $password,
+        string $role = 'manager',
+        bool $mustChangePassword = false,
+    ): void {
+        $permissions = [
+            'admin' => ['view_dashboard', 'edit_page', 'view_users', 'manage_users', 'view_roles', 'manage_roles'],
+            'manager' => ['view_dashboard', 'edit_page'],
+        ][$role] ?? [];
+
+        $pdo = $this->pdo();
+        $roleId = $pdo->query("SELECT id FROM roles WHERE name = '$role'")->fetchColumn();
+        if ($roleId === false) {
+            $roleId = Uuid::uuid7()->toString();
+            $pdo->prepare('INSERT INTO roles (id, name) VALUES (?, ?)')->execute([$roleId, $role]);
+            foreach ($permissions as $permission) {
+                $pdo->prepare('INSERT INTO role_permissions (role_id, permission) VALUES (?, ?)')
+                    ->execute([$roleId, $permission]);
+            }
+        }
+        $pdo->prepare(
+            'INSERT INTO users (id, email, name, password_hash, role_id, must_change_password, created_at)
+             VALUES (?, ?, ?, ?, ?, ?, now())',
+        )->execute([
+            Uuid::uuid7()->toString(),
+            $email,
+            'Test User',
+            password_hash($password, PASSWORD_ARGON2ID),
+            $roleId,
+            $mustChangePassword ? 'true' : 'false',
+        ]);
+    }
+
+    /**
+     * Cookies set by the response: name => attributes (the cookie value is under key 'value').
+     *
+     * @return array<string, array<string, string|true>>
+     */
+    public function setCookies(ResponseInterface $response): array
+    {
+        $result = [];
+        foreach ($response->getHeader('Set-Cookie') as $header) {
+            $parts = array_map(trim(...), explode(';', $header));
+            [$name, $value] = explode('=', array_shift($parts), 2);
+            $attributes = ['value' => $value];
+            foreach ($parts as $part) {
+                [$key, $val] = array_pad(explode('=', $part, 2), 2, true);
+                $attributes[strtolower($key)] = $val;
+            }
+            $result[$name] = $attributes;
+        }
+
+        return $result;
+    }
+
+    /**
+     * @return array<string, string> name => value, ready to be sent back as request cookies
+     */
+    public function cookieValues(ResponseInterface $response): array
+    {
+        return array_map(static fn(array $a): string => (string) $a['value'], $this->setCookies($response));
+    }
+
+    /**
+     * Logs in and returns the Session cookies.
+     *
+     * @return array<string, string>
+     */
+    public function loginAs(string $email, string $password): array
+    {
+        return $this->cookieValues(
+            $this->sendApiRequest('POST', '/api/v1/auth/login', ['email' => $email, 'password' => $password]),
+        );
+    }
+
+    /**
+     * Creates a User with the given Role and returns their Session cookies.
+     *
+     * @return array<string, string>
+     */
+    public function haveSessionFor(string $role = 'manager'): array
+    {
+        $email = $role . '@example.com';
+        $this->haveUser($email, 'secret-pass', $role);
+
+        return $this->loginAs($email, 'secret-pass');
+    }
+
+    /**
+     * Id of the Role, created with its default Permissions when missing.
+     */
+    public function haveRole(string $name): string
+    {
+        $permissions = [
+            'admin' => ['view_dashboard', 'edit_page', 'view_users', 'manage_users', 'view_roles', 'manage_roles'],
+            'manager' => ['view_dashboard', 'edit_page'],
+        ][$name] ?? [];
+
+        $pdo = $this->pdo();
+        $stmt = $pdo->prepare('SELECT id FROM roles WHERE name = ?');
+        $stmt->execute([$name]);
+        $roleId = $stmt->fetchColumn();
+        if ($roleId !== false) {
+            return (string) $roleId;
+        }
+
+        $roleId = Uuid::uuid7()->toString();
+        $pdo->prepare('INSERT INTO roles (id, name) VALUES (?, ?)')->execute([$roleId, $name]);
+        foreach ($permissions as $permission) {
+            $pdo->prepare('INSERT INTO role_permissions (role_id, permission) VALUES (?, ?)')
+                ->execute([$roleId, $permission]);
+        }
+
+        return $roleId;
+    }
+
+    public function grabPasswordHash(string $email): string
+    {
+        $stmt = $this->pdo()->prepare('SELECT password_hash FROM users WHERE email = ?');
+        $stmt->execute([$email]);
+
+        return (string) $stmt->fetchColumn();
+    }
+
+    public function grabUserId(string $email): string
+    {
+        $stmt = $this->pdo()->prepare('SELECT id FROM users WHERE email = ?');
+        $stmt->execute([$email]);
+
+        return (string) $stmt->fetchColumn();
+    }
+
+    public function roleId(string $name): string
+    {
+        return $this->haveRole($name);
+    }
+
+    /**
+     * Inserts a Role holding exactly the given Permissions.
+     *
+     * @param list<string> $permissions
+     */
+    public function haveRoleWithPermissions(string $name, array $permissions): void
+    {
+        $pdo = $this->pdo();
+        $roleId = Uuid::uuid7()->toString();
+        $pdo->prepare('INSERT INTO roles (id, name) VALUES (?, ?)')->execute([$roleId, $name]);
+        foreach ($permissions as $permission) {
+            $pdo->prepare('INSERT INTO role_permissions (role_id, permission) VALUES (?, ?)')
+                ->execute([$roleId, $permission]);
+        }
     }
 
     public function countRows(string $table): int
@@ -73,9 +278,51 @@ class ApiTester extends \Codeception\Actor
         return (int) $this->pdo()->query('SELECT COUNT(*) FROM ' . $table)->fetchColumn();
     }
 
+    public function countRowsWhere(string $table, string $where): int
+    {
+        return (int) $this->pdo()->query('SELECT COUNT(*) FROM ' . $table . ' WHERE ' . $where)->fetchColumn();
+    }
+
+    public function userId(string $email): string
+    {
+        $stmt = $this->pdo()->prepare('SELECT id FROM users WHERE email = ?');
+        $stmt->execute([$email]);
+
+        return (string) $stmt->fetchColumn();
+    }
+
+    public function grabRoleName(string $email): string
+    {
+        $stmt = $this->pdo()->prepare('SELECT r.name FROM users u JOIN roles r ON r.id = u.role_id WHERE u.email = ?');
+        $stmt->execute([$email]);
+
+        return (string) $stmt->fetchColumn();
+    }
+
+    public function havePermission(string $role, string $permission): void
+    {
+        $this->pdo()->prepare(
+            'INSERT INTO role_permissions (role_id, permission) VALUES (?, ?) ON CONFLICT DO NOTHING',
+        )->execute([$this->haveRole($role), $permission]);
+    }
+
+    /**
+     * Every in-process request builds a fresh container with its own DB connection that is never released
+     * (the runner's error handler keeps it alive), so a long suite would exhaust PostgreSQL's connection limit.
+     */
+    private function dropLeakedAppConnections(): void
+    {
+        $this->pdo()->exec(
+            'SELECT pg_terminate_backend(pid) FROM pg_stat_activity
+             WHERE datname = current_database() AND pid <> pg_backend_pid()',
+        );
+    }
+
+    private ?PDO $pdo = null;
+
     private function pdo(): PDO
     {
-        return new PDO(
+        return $this->pdo ??= new PDO(
             sprintf(
                 'pgsql:host=%s;port=%s;dbname=%s',
                 getenv('DB_HOST') ?: 'postgres',

@@ -1,16 +1,12 @@
+<script setup lang="ts">
+import { AdminSidebar } from '@widgets/admin-sidebar'
+</script>
+
 <template>
   <UApp>
     <UDashboardGroup>
-    <UDashboardSidebar>
-      <template #header>
-        <span class="font-semibold">CMS admin</span>
-      </template>
-      <UNavigationMenu
-        orientation="vertical"
-        :items="[{ label: 'Dashboard', icon: 'i-lucide-layout-dashboard', to: '/admin' }]"
-      />
-    </UDashboardSidebar>
-    <slot />
+      <AdminSidebar />
+      <slot />
     </UDashboardGroup>
   </UApp>
 </template>

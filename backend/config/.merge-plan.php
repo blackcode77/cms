@@ -241,5 +241,10 @@ return [
                 'environments/test/params.php',
             ],
         ],
+        'di' => [
+            '/' => [
+                'environments/test/di.php',
+            ],
+        ],
     ],
 ];

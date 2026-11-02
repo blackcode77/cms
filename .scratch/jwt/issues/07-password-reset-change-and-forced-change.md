@@ -4,10 +4,10 @@
 
 **Blocked by:** 05
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] Reset generates a new password, invalidates the old one, and emails the new one
-- [ ] Reset with a mail failure reports `mail_sent: false`
-- [ ] Change-password requires the current password and clears the must-change flag
-- [ ] A flagged User is redirected to change password and cannot reach other admin pages until done
-- [ ] Api Cests and Vitest for the redirect
+- [x] Reset generates a new password, invalidates the old one, and emails the new one
+- [x] Reset with a mail failure reports `mail_sent: false`
+- [x] Change-password requires the current password and clears the must-change flag
+- [x] A flagged User is redirected to change password and cannot reach other admin pages until done
+- [x] Api Cests and Vitest for the redirect

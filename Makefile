@@ -13,6 +13,9 @@ help: ## Show this help
 
 .env:
 	cp .env.example .env
+	sed -i "s|^JWT_SECRET=.*|JWT_SECRET=$$(openssl rand -hex 32)|" .env
+	sed -i "s|^ADMIN_PASSWORD=.*|ADMIN_PASSWORD=$$(openssl rand -hex 12)|" .env
+	@echo "Generated JWT_SECRET and ADMIN_PASSWORD in .env (sign in as ADMIN_EMAIL with ADMIN_PASSWORD)"
 
 init: .env build composer-install npm-install up migrate ## First-time setup: build, install deps, start, migrate
 
