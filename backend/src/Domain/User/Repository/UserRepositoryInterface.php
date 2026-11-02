@@ -30,4 +30,5 @@ interface UserRepositoryInterface
      * Number of Users holding the Role.
      */
     public function countByRole(RoleId $roleId): int;
+    public function changePassword(UserId $id, string $passwordHash, bool $mustChangePassword): void;
 }

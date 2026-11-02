@@ -28,3 +28,8 @@ export interface CreateUserResult {
 
 /** Body of `PUT /users/{id}`. */
 export type UpdateUserInput = CreateUserInput
+
+/** Payload of `POST /users/{id}/reset-password`; `mail_sent` is false when the email could not be delivered. */
+export interface ResetPasswordResult {
+  mail_sent: boolean
+}

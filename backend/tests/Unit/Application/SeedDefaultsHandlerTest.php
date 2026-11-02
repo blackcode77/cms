@@ -142,4 +142,5 @@ final class InMemoryUserRepository implements UserRepositoryInterface
     {
         return 0;
     }
+    public function changePassword(UserId $id, string $passwordHash, bool $mustChangePassword): void {}
 }

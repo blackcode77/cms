@@ -14,6 +14,9 @@ return [
     Route::post('/auth/login')->action(Api\Auth\Login\Action::class),
     Route::post('/auth/refresh')->action(Api\Auth\Refresh\Action::class),
     Route::post('/auth/logout')->action(Api\Auth\Logout\Action::class),
+    Route::post('/auth/change-password')
+        ->middleware(Authenticate::class)
+        ->action(Api\Auth\ChangePassword\Action::class),
     Route::get('/auth/me')->action(Api\Auth\Me\Action::class),
     Route::post('/pages')
         ->middleware(Authenticate::class, RequirePermission::for(Permission::EditPage))
@@ -33,6 +36,9 @@ return [
     Route::delete('/users/{id}')
         ->middleware(Authenticate::class, RequirePermission::for(Permission::ManageUsers))
         ->action(Api\User\Delete\Action::class),
+    Route::post('/users/{id}/reset-password')
+        ->middleware(Authenticate::class, RequirePermission::for(Permission::ManageUsers))
+        ->action(Api\User\ResetPassword\Action::class),
     Route::get('/roles')
         ->middleware(Authenticate::class, RequirePermission::for(Permission::ViewRoles))
         ->action(Api\Role\List\Action::class),

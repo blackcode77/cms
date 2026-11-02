@@ -1,6 +1,13 @@
 import { unwrap, useApi } from '@shared/api'
 import type { ApiSuccess } from '@shared/api'
-import type { CreateUserInput, CreateUserResult, RoleOption, UpdateUserInput, UserListItem } from '../model/types'
+import type {
+  CreateUserInput,
+  CreateUserResult,
+  ResetPasswordResult,
+  RoleOption,
+  UpdateUserInput,
+  UserListItem,
+} from '../model/types'
 
 export async function fetchUsers(): Promise<UserListItem[]> {
   const api = useApi()
@@ -25,4 +32,9 @@ export async function updateUser(id: string, input: UpdateUserInput): Promise<vo
 export async function deleteUser(id: string): Promise<void> {
   const api = useApi()
   unwrap(await api<ApiSuccess<unknown>>(`/v1/users/${id}`, { method: 'DELETE' }))
+}
+
+export async function resetUserPassword(id: string): Promise<ResetPasswordResult> {
+  const api = useApi()
+  return unwrap(await api<ApiSuccess<ResetPasswordResult>>(`/v1/users/${id}/reset-password`, { method: 'POST' }))
 }

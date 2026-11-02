@@ -54,6 +54,17 @@ final readonly class DbUserRepository implements UserRepositoryInterface
             ->execute();
     }
 
+    public function changePassword(UserId $id, string $passwordHash, bool $mustChangePassword): void
+    {
+        $this->db->createCommand()
+            ->update(
+                Table::USERS,
+                ['password_hash' => $passwordHash, 'must_change_password' => $mustChangePassword],
+                ['id' => $id->toString()],
+            )
+            ->execute();
+    }
+
     public function update(User $user): void
     {
         $this->db->createCommand()

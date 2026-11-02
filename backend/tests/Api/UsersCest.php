@@ -295,7 +295,7 @@ final class UsersCest
         assertSame(400, $I->sendApiRequest('PUT', $url, $unknown, $session)->getStatusCode());
     }
 
-    public function updateOfUnknownUserIsBusinessError(ApiTester $I): void
+    public function updateOfUnknownUserIsNotFound(ApiTester $I): void
     {
         $session = $I->haveSessionFor('admin');
 
@@ -306,7 +306,7 @@ final class UsersCest
             $session,
         );
 
-        assertSame(400, $response->getStatusCode());
+        assertSame(404, $response->getStatusCode());
     }
 
     public function updateRejectsInvalidInput(ApiTester $I): void
@@ -426,7 +426,7 @@ final class UsersCest
         assertSame(1, $I->countRows('users'));
     }
 
-    public function deleteOfUnknownUserIsBusinessError(ApiTester $I): void
+    public function deleteOfUnknownUserIsNotFound(ApiTester $I): void
     {
         $session = $I->haveSessionFor('admin');
 
@@ -437,6 +437,6 @@ final class UsersCest
             $session,
         );
 
-        assertSame(400, $response->getStatusCode());
+        assertSame(404, $response->getStatusCode());
     }
 }

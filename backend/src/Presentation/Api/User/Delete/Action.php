@@ -10,7 +10,6 @@ use App\Application\User\Exception\UserNotFoundException;
 use App\Domain\User\Value\UserId;
 use App\Presentation\Api\Auth\Shared\Authenticate;
 use App\Presentation\Api\Shared\ResponseFactory\ResponseFactory;
-use InvalidArgumentException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Yiisoft\Router\CurrentRoute;
@@ -25,13 +24,16 @@ final readonly class Action
 
     public function __invoke(ServerRequestInterface $request): ResponseInterface
     {
-        try {
-            $id = UserId::fromString((string) $this->currentRoute->getArgument('id'));
-        } catch (InvalidArgumentException) {
-            throw UserNotFoundException::create();
+        $id = UserId::tryFromString((string) $this->currentRoute->getArgument('id'));
+        if ($id === null) {
+            return $this->responseFactory->notFound('User not found.');
         }
 
-        $this->handler->handle(new Command($id, Authenticate::currentUser($request)->user->id));
+        try {
+            $this->handler->handle(new Command($id, Authenticate::currentUser($request)->user->id));
+        } catch (UserNotFoundException $e) {
+            return $this->responseFactory->notFound($e->getMessage());
+        }
 
         return $this->responseFactory->success(['id' => $id->toString()]);
     }

@@ -10,6 +10,7 @@ use App\Application\User\Exception\UserNotFoundException;
 use App\Domain\Auth\Repository\RefreshTokenRepositoryInterface;
 use App\Domain\Role\Repository\RoleRepositoryInterface;
 use App\Domain\User\Repository\UserRepositoryInterface;
+use Psr\Clock\ClockInterface;
 
 final readonly class Handler
 {
@@ -17,6 +18,7 @@ final readonly class Handler
         private UserRepositoryInterface $userRepository,
         private RoleRepositoryInterface $roleRepository,
         private RefreshTokenRepositoryInterface $refreshTokens,
+        private ClockInterface $clock,
     ) {}
 
     /**
@@ -36,7 +38,7 @@ final readonly class Handler
             throw LastAdminException::create();
         }
 
-        $this->refreshTokens->revokeAllForUser($user->id);
+        $this->refreshTokens->revokeAllForUser($user->id, $this->clock->now());
         $this->userRepository->remove($user->id);
     }
 }

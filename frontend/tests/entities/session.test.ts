@@ -153,6 +153,45 @@ describe('session', () => {
       expect(await resolveAdminRoute('/admin', 'view_users')).toBeUndefined()
     })
 
+    describe('forced password change', () => {
+      const flagged = { ...me, must_change_password: true }
+
+      it('redirects a flagged user from any admin page to change-password', async () => {
+        meEndpoint(() => ({ status: 'success', data: flagged }))
+
+        expect(await resolveAdminRoute('/admin')).toBe('/admin/change-password')
+        expect(await resolveAdminRoute('/admin/pages', 'edit_page')).toBe('/admin/change-password')
+      })
+
+      it('lets a flagged user open the change-password page itself', async () => {
+        meEndpoint(() => ({ status: 'success', data: flagged }))
+
+        expect(await resolveAdminRoute('/admin/change-password')).toBeUndefined()
+      })
+
+      it('sends a flagged user from the login page to change-password', async () => {
+        meEndpoint(() => ({ status: 'success', data: flagged }))
+
+        expect(await resolveAdminRoute('/admin/login')).toBe('/admin/change-password')
+      })
+
+      it('sends a guest from change-password to login', async () => {
+        meEndpoint(() => {
+          throw createError({ statusCode: 401 })
+        })
+        refreshEndpoint(false)
+
+        expect(await resolveAdminRoute('/admin/change-password')).toBe('/admin/login')
+      })
+
+      it('does not trap an unflagged user', async () => {
+        meEndpoint(() => ({ status: 'success', data: me }))
+
+        expect(await resolveAdminRoute('/admin/change-password')).toBeUndefined()
+        expect(await resolveAdminRoute('/admin')).toBeUndefined()
+      })
+    })
+
     it('sends a signed-in user away from the login page to the dashboard', async () => {
       meEndpoint(() => ({ status: 'success', data: me }))
 

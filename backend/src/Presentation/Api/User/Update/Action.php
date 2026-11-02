@@ -11,7 +11,6 @@ use App\Domain\Role\Value\RoleId;
 use App\Domain\User\Value\UserEmail;
 use App\Domain\User\Value\UserId;
 use App\Presentation\Api\Shared\ResponseFactory\ResponseFactory;
-use InvalidArgumentException;
 use Psr\Http\Message\ResponseInterface;
 use Yiisoft\Router\CurrentRoute;
 
@@ -25,20 +24,23 @@ final readonly class Action
 
     public function __invoke(Input $input): ResponseInterface
     {
-        try {
-            $id = UserId::fromString((string) $this->currentRoute->getArgument('id'));
-        } catch (InvalidArgumentException) {
-            throw UserNotFoundException::create();
+        $id = UserId::tryFromString((string) $this->currentRoute->getArgument('id'));
+        if ($id === null) {
+            return $this->responseFactory->notFound('User not found.');
         }
 
-        $this->handler->handle(
-            new Command(
-                $id,
-                new UserEmail($input->email),
-                trim($input->name),
-                RoleId::fromString($input->role_id),
-            ),
-        );
+        try {
+            $this->handler->handle(
+                new Command(
+                    $id,
+                    new UserEmail($input->email),
+                    trim($input->name),
+                    RoleId::fromString($input->role_id),
+                ),
+            );
+        } catch (UserNotFoundException $e) {
+            return $this->responseFactory->notFound($e->getMessage());
+        }
 
         return $this->responseFactory->success(['id' => $id->toString()]);
     }

@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { mountSuspended, registerEndpoint } from '@nuxt/test-utils/runtime'
 import { AdminUsersPage } from '@pages/admin-users'
 import { useCurrentUser } from '@entities/session'
@@ -59,6 +59,31 @@ describe('AdminUsersPage', () => {
     const wrapper = await mountSuspended(AdminUsersPage)
 
     expect(wrapper.find('[data-testid="create-user-form"]').exists()).toBe(true)
+  })
+
+  it('resets a password with manage_users and reports the email result', async () => {
+    signInWith(['view_users', 'manage_users'])
+    let calls = 0
+    registerEndpoint('/api/v1/users/u9/reset-password', {
+      method: 'POST',
+      handler: () => {
+        calls++
+        return { status: 'success', data: { mail_sent: false } }
+      },
+    })
+
+    const wrapper = await mountSuspended(AdminUsersPage)
+    await wrapper.find('[data-testid="reset-password-u9"]').trigger('click')
+    await vi.waitFor(() => expect(calls).toBe(1))
+    await vi.waitFor(() => expect(wrapper.find('[data-testid="create-user-notice"]').text()).toContain('could not be sent'))
+  })
+
+  it('hides the reset action without manage_users', async () => {
+    signInWith(['view_users'])
+
+    const wrapper = await mountSuspended(AdminUsersPage)
+
+    expect(wrapper.find('[data-testid="reset-password-u9"]').exists()).toBe(false)
   })
 
   it('hides edit and delete actions without manage_users', async () => {
