@@ -54,3 +54,17 @@ Feature-Sliced Design inside Nuxt 4 (`app/` is srcDir):
 - Containers run as your UID/GID (Makefile exports them); `docker compose run` options like `-u`/`-e` must come **before** the service name.
 - `rector` is intentionally not installed (its `phpstan` dependency download stalled); add it back with `make composer c="require --dev rector/rector"` when needed.
 - Auth (JWT access + refresh) is planned but not implemented; the intended design is httpOnly cookies, so SSR requests can carry the session.
+
+## Agent skills
+
+### Issue tracker
+
+Issues and specs are local markdown files under `.scratch/<feature-slug>/`. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Default five-role vocabulary (`needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`), recorded as a `Status:` line. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: `GLOSSARY.md` and `docs/adr/` at the repo root. See `docs/agents/domain.md`.
