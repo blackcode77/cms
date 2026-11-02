@@ -22,6 +22,9 @@ export default defineNuxtConfig({
   // Nuxt UI would download web fonts from external CDNs at dev/build time; use system fonts instead.
   ui: { fonts: false },
 
+  // Admin is dark-only (Nuxt UI dashboard look); the public site has its own stylesheet.
+  colorMode: { preference: 'dark', fallback: 'dark', storageKey: 'cms-color-mode' },
+
   // FSD slices are imported explicitly through their public API (index.ts), never auto-imported.
   components: { dirs: [] },
   alias: {
