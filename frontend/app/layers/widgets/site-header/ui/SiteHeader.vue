@@ -1,10 +1,16 @@
 <script setup lang="ts">
-import { navigation, offices, telHref } from '@shared/config'
+import { CmsText, defineContentSchema, useCmsElement } from '@entities/page-content'
+import { navigation, officeElements, telHref } from '@shared/config'
+
+defineContentSchema('site', officeElements)
 
 const route = useRoute()
 const open = ref(false)
 
-const [vladivostok, moscow] = offices
+const vladivostokPhone = useCmsElement(() => 'site', () => 'office.vladivostok.phone')
+const moscowPhone = useCmsElement(() => 'site', () => 'office.moscow.phone')
+const email = useCmsElement(() => 'site', () => 'office.vladivostok.email')
+const telOf = (el: typeof email) => telHref(el.element.value?.value ?? '')
 const isCurrent = (to: string) => (to === '/' ? route.path === '/' : route.path === to || route.path.startsWith(`${to}/`))
 
 watch(() => route.path, () => {
@@ -18,9 +24,9 @@ watch(() => route.path, () => {
     <div class="topbar">
       <div class="container">
         <div class="topbar__contacts">
-          <a :href="telHref(vladivostok!.phone!)">{{ vladivostok!.phone }} · Владивосток</a>
-          <a class="hide-sm" :href="telHref(moscow!.phone!)">{{ moscow!.phone }} · Москва</a>
-          <a class="hide-sm" :href="`mailto:${vladivostok!.email}`">{{ vladivostok!.email }}</a>
+          <a v-if="vladivostokPhone.visible.value" :href="telOf(vladivostokPhone)"><CmsText page="site" path="office.vladivostok.phone" /> · Владивосток</a>
+          <a v-if="moscowPhone.visible.value" class="hide-sm" :href="telOf(moscowPhone)"><CmsText page="site" path="office.moscow.phone" /> · Москва</a>
+          <a v-if="email.visible.value" class="hide-sm" :href="`mailto:${email.element.value?.value}`"><CmsText page="site" path="office.vladivostok.email" /></a>
         </div>
         <div class="lang" aria-label="Язык">
           <span class="is-active" aria-current="true">RU</span>

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it } from 'vitest'
 import { mountSuspended } from '@nuxt/test-utils/runtime'
 import { HomePage } from '@pages/home'
 import { AboutPage } from '@pages/about'
@@ -8,6 +8,9 @@ import { SchedulesPage } from '@pages/schedules'
 import { DangerousGoodsPage } from '@pages/dangerous-goods'
 import { ContactsPage } from '@pages/contacts'
 import { ProjectCargoPage } from '@pages/project-cargo'
+import { SiteHeader } from '@widgets/site-header'
+import { CtaBanner } from '@widgets/cta-banner'
+import { usePageContent } from '@entities/page-content'
 
 const pages = [
   ['home', HomePage, 'Кратчайший путь вашего груза'],
@@ -27,5 +30,42 @@ describe('public pages', () => {
 
     expect(headings).toHaveLength(1)
     expect(headings[0]!.text().toLowerCase()).toContain(h1.toLowerCase())
+  })
+})
+
+describe('editable content on public pages', () => {
+  beforeEach(() => {
+    useState('cms-content').value = {}
+    useState('cms-content-loaded').value = []
+  })
+
+  it('home shows the saved headline instead of the default', async () => {
+    usePageContent().apply('home', 'hero.title', { type: 'string', value: 'Edited headline' })
+
+    const wrapper = await mountSuspended(HomePage)
+
+    expect(wrapper.get('h1').text()).toBe('Edited headline')
+    expect(wrapper.text()).not.toContain('Кратчайший путь вашего груза')
+  })
+
+  it('contacts hero and the shared header phone follow saved content', async () => {
+    const content = usePageContent()
+    content.apply('contacts', 'hero.title', { type: 'string', value: 'Edited contacts' })
+    content.apply('site', 'office.vladivostok.phone', { type: 'string', value: '+7 (423) 111-22-33' })
+
+    const contacts = await mountSuspended(ContactsPage)
+    const header = await mountSuspended(SiteHeader)
+
+    expect(contacts.get('h1').text()).toBe('Edited contacts')
+    expect(header.find('a[href="tel:+74231112233"]').text()).toContain('+7 (423) 111-22-33')
+  })
+
+  it('a disabled shared element disappears for visitors', async () => {
+    usePageContent().apply('site', 'cta.title', { enabled: false })
+
+    const wrapper = await mountSuspended(CtaBanner)
+
+    expect(wrapper.find('h2').exists()).toBe(false)
+    expect(wrapper.text()).toContain('Запросить расчёт')
   })
 })

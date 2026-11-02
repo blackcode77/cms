@@ -48,6 +48,8 @@ Feature-Sliced Design inside Nuxt 4 (`app/` is srcDir):
 - `/admin/**` is SPA (`routeRules ssr: false`); everything else is SSR.
 - Tests: Vitest with `@nuxt/test-utils` (`environment: 'nuxt'`); mock API with `registerEndpoint`, and `clearNuxtData(key)` between tests that share a `useAsyncData` key.
 
+- Editable content (ADR 0004, `GLOSSARY.md`): a public page declares its Content elements with `defineContentSchema(pageKey, {path: {type, default, label}})` and renders them with `CmsText`/`CmsHtml`/`CmsImage` from `@entities/page-content` (e.g. `<CmsText as="h1" page="home" path="hero.title" />`); the code default is shown until an editor saves a value. A routing file in `app/pages/` sets `definePageMeta({ cmsPage: '<key>' })` so the global middleware loads that page's content (plus the shared `site` key) before SSR. Edit mode (button + iframe panel at `/admin/cms-editor`) is mounted in `layouts/default.vue`. Backend: `GET /page-content?keys=`, `PATCH /page-content/{key}`, `POST /uploads/image`.
+
 ## Gotchas
 
 - Nuxt UI's fonts module downloads from external CDNs and, when blocked/slow, crashes SSR with `IPC connection closed` on every request. It is disabled with `ui: { fonts: false }` in `nuxt.config.ts` — keep it that way.

@@ -9,13 +9,13 @@ const props = withDefaults(defineProps<{
 }>(), { as: 'span' })
 
 const { element, visible, editAttrs } = useCmsElement(() => props.page, () => props.path)
+
+// `text` keeps its line breaks; the style attribute only exists when needed.
+const attrs = computed(() => element.value?.type === 'text'
+  ? { ...editAttrs.value, style: { whiteSpace: 'pre-line' } }
+  : editAttrs.value)
 </script>
 
 <template>
-  <component
-    :is="as"
-    v-if="visible && element"
-    v-bind="editAttrs"
-    :style="element.type === 'text' ? { whiteSpace: 'pre-line' } : undefined"
-  >{{ element.value }}</component>
+  <component :is="as" v-if="visible && element" v-bind="attrs">{{ element.value }}</component>
 </template>

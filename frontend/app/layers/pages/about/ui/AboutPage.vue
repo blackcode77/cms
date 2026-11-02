@@ -1,10 +1,17 @@
 <script setup lang="ts">
 import { CtaBanner } from '@widgets/cta-banner'
 import { PageHero } from '@widgets/page-hero'
-import { offices } from '@shared/config'
+import { CmsText, defineContentSchema, usePageContent } from '@entities/page-content'
+import { offices, officeElements } from '@shared/config'
 import { usePageSeo } from '@shared/seo'
 import { SvgIcon } from '@shared/ui'
 import { companies, facts, history, managers, partners, personIcon, pinIcon } from '../model/content'
+
+defineContentSchema('site', officeElements)
+
+/** Current value of an office detail, for href attributes. */
+const { resolve } = usePageContent()
+const officeValue = (id: string, field: string) => resolve('site', `office.${id}.${field}`)?.value ?? ''
 
 const title = 'О компании — Гарант Интермодал'
 const description = 'Группа компаний Гарант Интермодал: структура, офисы во Владивостоке, Москве и Находке, руководство, история и партнёры.'
@@ -81,9 +88,9 @@ usePageSeo({
           <span class="icon" aria-hidden="true"><SvgIcon :inner="pinIcon" /></span>
           <h3>{{ office.city }}</h3>
           <p>
-            {{ office.address }}<br>
-            <template v-if="office.phone">{{ office.phone }}<br></template>
-            <a :href="`mailto:${office.email}`">{{ office.email }}</a>
+            <CmsText page="site" :path="`office.${office.id}.address`" /><br>
+            <template v-if="office.phone"><CmsText page="site" :path="`office.${office.id}.phone`" /><br></template>
+            <a :href="`mailto:${officeValue(office.id, 'email')}`"><CmsText page="site" :path="`office.${office.id}.email`" /></a>
           </p>
         </article>
       </div>
