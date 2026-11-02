@@ -96,6 +96,18 @@ describe('session', () => {
       expect(await resolveAdminRoute('/admin')).toBeUndefined()
     })
 
+    it('redirects to the dashboard when the route permission is missing', async () => {
+      meEndpoint(() => ({ status: 'success', data: me }))
+
+      expect(await resolveAdminRoute('/admin/roles', 'view_roles')).toBe('/admin')
+    })
+
+    it('lets a user holding the route permission through', async () => {
+      meEndpoint(() => ({ status: 'success', data: me }))
+
+      expect(await resolveAdminRoute('/admin/pages', 'edit_page')).toBeUndefined()
+    })
+
     it('leaves non-admin routes alone without calling the API', async () => {
       meEndpoint(() => {
         throw createError({ statusCode: 401 })

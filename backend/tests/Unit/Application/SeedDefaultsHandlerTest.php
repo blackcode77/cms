@@ -98,6 +98,15 @@ final class InMemoryRoleRepository implements RoleRepositoryInterface
     {
         $this->roles[$role->name->toString()] = $role;
     }
+
+    public function save(Role $role): void {}
+
+    public function delete(RoleId $id): void {}
+
+    public function countUsers(RoleId $id): int
+    {
+        return 0;
+    }
 }
 
 final class InMemoryUserRepository implements UserRepositoryInterface

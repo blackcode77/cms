@@ -12,6 +12,7 @@ export interface AdminMenuItem {
 export const adminMenuItems: AdminMenuItem[] = [
   { label: 'Dashboard', icon: 'i-lucide-layout-dashboard', to: '/admin', permission: 'view_dashboard' },
   { label: 'Users', icon: 'i-lucide-users', to: '/admin/users', permission: 'view_users' },
+  { label: 'Roles', icon: 'i-lucide-shield', to: '/admin/roles', permission: 'view_roles' },
 ]
 
 export function visibleMenuItems<T extends { permission?: Permission }>(

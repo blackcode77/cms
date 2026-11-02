@@ -60,6 +60,7 @@ class ApiTester extends \Codeception\Actor
         );
 
         $response = $runner->runAndGetResponse($request);
+        $this->dropLeakedAppConnections();
         $body = $response->getBody();
         if ($body->isSeekable()) {
             $body->rewind();
@@ -240,6 +241,27 @@ class ApiTester extends \Codeception\Actor
         return (string) $stmt->fetchColumn();
     }
 
+    public function roleId(string $name): string
+    {
+        return $this->haveRole($name);
+    }
+
+    /**
+     * Inserts a Role holding exactly the given Permissions.
+     *
+     * @param list<string> $permissions
+     */
+    public function haveRoleWithPermissions(string $name, array $permissions): void
+    {
+        $pdo = $this->pdo();
+        $roleId = Uuid::uuid7()->toString();
+        $pdo->prepare('INSERT INTO roles (id, name) VALUES (?, ?)')->execute([$roleId, $name]);
+        foreach ($permissions as $permission) {
+            $pdo->prepare('INSERT INTO role_permissions (role_id, permission) VALUES (?, ?)')
+                ->execute([$roleId, $permission]);
+        }
+    }
+
     public function countRows(string $table, string $where = 'true'): int
     {
         return (int) $this->pdo()->query('SELECT COUNT(*) FROM ' . $table . ' WHERE ' . $where)->fetchColumn();
@@ -268,9 +290,23 @@ class ApiTester extends \Codeception\Actor
         )->execute([$this->haveRole($role), $permission]);
     }
 
+    /**
+     * Every in-process request builds a fresh container with its own DB connection that is never released
+     * (the runner's error handler keeps it alive), so a long suite would exhaust PostgreSQL's connection limit.
+     */
+    private function dropLeakedAppConnections(): void
+    {
+        $this->pdo()->exec(
+            'SELECT pg_terminate_backend(pid) FROM pg_stat_activity
+             WHERE datname = current_database() AND pid <> pg_backend_pid()',
+        );
+    }
+
+    private ?PDO $pdo = null;
+
     private function pdo(): PDO
     {
-        return new PDO(
+        return $this->pdo ??= new PDO(
             sprintf(
                 'pgsql:host=%s;port=%s;dbname=%s',
                 getenv('DB_HOST') ?: 'postgres',

@@ -33,4 +33,19 @@ return [
     Route::delete('/users/{id}')
         ->middleware(Authenticate::class, RequirePermission::for(Permission::ManageUsers))
         ->action(Api\User\Delete\Action::class),
+    Route::get('/roles')
+        ->middleware(Authenticate::class, RequirePermission::for(Permission::ViewRoles))
+        ->action(Api\Role\List\Action::class),
+    Route::get('/permissions')
+        ->middleware(Authenticate::class, RequirePermission::for(Permission::ViewRoles))
+        ->action(Api\Role\Permissions\Action::class),
+    Route::post('/roles')
+        ->middleware(Authenticate::class, RequirePermission::for(Permission::ManageRoles))
+        ->action(Api\Role\Create\Action::class),
+    Route::put('/roles/{id}')
+        ->middleware(Authenticate::class, RequirePermission::for(Permission::ManageRoles))
+        ->action(Api\Role\Update\Action::class),
+    Route::delete('/roles/{id}')
+        ->middleware(Authenticate::class, RequirePermission::for(Permission::ManageRoles))
+        ->action(Api\Role\Delete\Action::class),
 ];
