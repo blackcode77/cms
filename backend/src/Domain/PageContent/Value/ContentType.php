@@ -9,6 +9,7 @@ enum ContentType: string
     case String = 'string';
     case Text = 'text';
     case Html = 'html';
+    case Image = 'image';
 
     /**
      * @return positive-int
@@ -19,6 +20,7 @@ enum ContentType: string
             self::String => 255,
             self::Text => 5_000,
             self::Html => 50_000,
+            self::Image => 255,
         };
     }
 }

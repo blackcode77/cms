@@ -9,6 +9,7 @@ use DateTimeImmutable;
 use Ramsey\Uuid\Uuid;
 use HttpSoft\Message\ServerRequest;
 use HttpSoft\Message\StreamFactory;
+use HttpSoft\Message\UploadedFile;
 use PDO;
 use Psr\Http\Message\ResponseInterface;
 use Yiisoft\Yii\Runner\Http\HttpApplicationRunner;
@@ -28,6 +29,7 @@ class ApiTester extends \Codeception\Actor
      * @param array<string, string> $cookies
      * @param array<string, string> $serverParams e.g. ['REMOTE_ADDR' => '10.0.0.1']
      * @param array<string, string> $headers e.g. ['X-Real-IP' => '10.0.0.1']
+     * @param array<string, string> $files multipart field => file content, e.g. ['file' => $pngBytes]
      */
     public function sendApiRequest(
         string $method,
@@ -36,11 +38,25 @@ class ApiTester extends \Codeception\Actor
         array $cookies = [],
         array $serverParams = [],
         array $headers = [],
+        array $files = [],
     ): ResponseInterface {
         $request = new ServerRequest(method: $method, uri: $uri, serverParams: $serverParams)
             ->withCookieParams($cookies);
         foreach ($headers as $name => $value) {
             $request = $request->withHeader($name, $value);
+        }
+        if ($files !== []) {
+            $uploaded = [];
+            foreach ($files as $field => $content) {
+                $uploaded[$field] = new UploadedFile(
+                    new StreamFactory()->createStream($content),
+                    strlen($content),
+                    UPLOAD_ERR_OK,
+                    'client-name.jpg',
+                    'image/jpeg',
+                );
+            }
+            $request = $request->withUploadedFiles($uploaded);
         }
         if ($json !== null) {
             $request = $request
@@ -85,6 +101,7 @@ class ApiTester extends \Codeception\Actor
     {
         ShiftableClock::reset();
         InMemoryMailer::reset();
+        array_map(unlink(...), glob(dirname(__DIR__, 2) . '/runtime/test-uploads/*') ?: []);
         $this->pdo()->exec(
             'TRUNCATE TABLE page_content, refresh_tokens, login_attempts, users, role_permissions, roles CASCADE',
         );

@@ -12,6 +12,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN groupmod -o -g "${GID}" www-data && usermod -o -u "${UID}" -g "${GID}" www-data
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+COPY docker/php/uploads.ini $PHP_INI_DIR/conf.d/zz-uploads.ini
 ENV LC_ALL=C.UTF-8
 
 WORKDIR /app

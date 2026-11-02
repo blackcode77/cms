@@ -4,3 +4,5 @@
 /tests/_output
 /tests/Support/_generated
 .php-cs-fixer.cache
+/storage/uploads/*
+!/storage/uploads/.gitkeep

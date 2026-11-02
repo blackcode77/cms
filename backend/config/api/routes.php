@@ -21,6 +21,9 @@ return [
     Route::patch('/page-content/{key}')
         ->middleware(Authenticate::class, RequirePermission::for(Permission::EditPage))
         ->action(Api\PageContent\Update\Action::class),
+    Route::post('/uploads/image')
+        ->middleware(Authenticate::class, RequirePermission::for(Permission::EditPage))
+        ->action(Api\PageContent\UploadImage\Action::class),
     Route::get('/users')
         ->middleware(Authenticate::class, RequirePermission::for(Permission::ViewUsers))
         ->action(Api\User\List\Action::class),
