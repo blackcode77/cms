@@ -114,6 +114,33 @@ describe('session', () => {
       expect(await resolveAdminRoute('/admin/login')).toBeUndefined()
     })
 
+    it('redirects to the dashboard when the route needs a permission the user lacks', async () => {
+      meEndpoint(() => ({ status: 'success', data: me }))
+
+      expect(await resolveAdminRoute('/admin/users', 'view_users')).toBe('/admin')
+    })
+
+    it('lets the user in when they hold the route permission', async () => {
+      meEndpoint(() => ({ status: 'success', data: me }))
+
+      expect(await resolveAdminRoute('/admin/pages', 'edit_page')).toBeUndefined()
+    })
+
+    it('sends a guest to login (not the dashboard) for a permission-gated route', async () => {
+      meEndpoint(() => {
+        throw createError({ statusCode: 401 })
+      })
+      refreshEndpoint(false)
+
+      expect(await resolveAdminRoute('/admin/users', 'view_users')).toBe('/admin/login')
+    })
+
+    it('never redirects the dashboard to itself', async () => {
+      meEndpoint(() => ({ status: 'success', data: me }))
+
+      expect(await resolveAdminRoute('/admin', 'view_users')).toBeUndefined()
+    })
+
     it('sends a signed-in user away from the login page to the dashboard', async () => {
       meEndpoint(() => ({ status: 'success', data: me }))
 

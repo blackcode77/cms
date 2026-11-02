@@ -11,6 +11,7 @@ export interface AdminMenuItem {
 /** Register new admin sections here, gated by the Permission that grants access. */
 export const adminMenuItems: AdminMenuItem[] = [
   { label: 'Dashboard', icon: 'i-lucide-layout-dashboard', to: '/admin', permission: 'view_dashboard' },
+  { label: 'Users', icon: 'i-lucide-users', to: '/admin/users', permission: 'view_users' },
 ]
 
 export function visibleMenuItems<T extends { permission?: Permission }>(

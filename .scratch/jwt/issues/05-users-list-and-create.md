@@ -4,14 +4,14 @@
 
 **Blocked by:** 03, 04
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] List endpoint (read model) and Users page, gated by `view_users`
-- [ ] Create endpoint and form, gated by `manage_users`
-- [ ] Duplicate email returns a business error
-- [ ] Assigning `visiter` is rejected
-- [ ] Email containing login and password is sent (asserted through the in-memory fake mailer)
-- [ ] Simulated send failure still creates the User and returns `mail_sent: false`
-- [ ] Mailpit works in dev and shows the email
-- [ ] Api Cests + Vitest for visibility by Permission
-- [ ] Opening the section's admin URL directly without `view_users` is blocked on the frontend (redirect/403 page), not only hidden from the menu; `useCurrentUser().can()` is used in the route guard (the global admin middleware currently checks only the Session)
+- [x] List endpoint (read model) and Users page, gated by `view_users`
+- [x] Create endpoint and form, gated by `manage_users`
+- [x] Duplicate email returns a business error
+- [x] Assigning `visiter` is rejected
+- [x] Email containing login and password is sent (asserted through the in-memory fake mailer)
+- [x] Simulated send failure still creates the User and returns `mail_sent: false`
+- [x] Mailpit works in dev and shows the email
+- [x] Api Cests + Vitest for visibility by Permission
+- [x] Opening the section's admin URL directly without `view_users` is blocked on the frontend (redirect/403 page), not only hidden from the menu; `useCurrentUser().can()` is used in the route guard (the global admin middleware currently checks only the Session)

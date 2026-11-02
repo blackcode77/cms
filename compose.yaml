@@ -33,6 +33,8 @@ services:
       ADMIN_EMAIL: ${ADMIN_EMAIL:-}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
       JWT_SECRET: ${JWT_SECRET:-}
+      MAILER_DSN: ${MAILER_DSN:-smtp://mailpit:1025}
+      MAIL_FROM: ${MAIL_FROM:-cms@cms.localhost}
       XDEBUG_MODE: ${XDEBUG_MODE:-off}
       COMPOSER_CACHE_DIR: /app/runtime/cache/composer
     volumes:
@@ -42,6 +44,11 @@ services:
         condition: service_healthy
     extra_hosts:
       - host.docker.internal:host-gateway
+
+  mailpit:
+    image: axllent/mailpit:latest
+    ports:
+      - "${MAILPIT_PORT:-8025}:8025"
 
   node:
     build:
