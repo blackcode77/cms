@@ -65,14 +65,14 @@ ul{margin:0 0 1em;padding-left:1.2em}
 
 /* Hero */
 .hero{position:relative;color:#fff;background:var(--green-deep) center/cover no-repeat;isolation:isolate}
-.hero::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(100deg,rgba(31,74,30,.92) 0%,rgba(31,74,30,.75) 45%,rgba(31,74,30,.15) 100%)}
+.hero::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(100deg,rgba(24,26,25,.9) 0%,rgba(24,26,25,.7) 45%,rgba(24,26,25,.15) 100%)}
 .hero .container{padding-top:88px;padding-bottom:88px}
 .hero__lead{max-width:640px;font-size:1.15rem;color:#eef5ec}
 .hero h1{max-width:760px}
 .hero__actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:28px}
-.eyebrow{font:700 .9rem var(--font-head);text-transform:uppercase;letter-spacing:.14em;color:#b9dcb3;margin-bottom:14px;display:block}
+.eyebrow{font:700 .9rem var(--font-head);text-transform:uppercase;letter-spacing:.14em;color:#9fd197;margin-bottom:14px;display:block}
 .page-hero{position:relative;color:#fff;background:var(--green-deep) center/cover no-repeat;isolation:isolate}
-.page-hero::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(100deg,rgba(31,74,30,.93),rgba(31,74,30,.6))}
+.page-hero::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(100deg,rgba(24,26,25,.9),rgba(24,26,25,.55))}
 .page-hero .container{padding-top:56px;padding-bottom:56px}
 .page-hero p{max-width:680px;color:#eef5ec;font-size:1.08rem;margin:0}
 .breadcrumbs{font-size:.85rem;margin-bottom:14px;color:#cfe3cb}
@@ -234,7 +234,7 @@ input:focus,select:focus,textarea:focus{outline:3px solid #8cc084;border-color:v
   .site-header .container{min-height:68px}
   .logo img{height:48px}
   .hero .container{padding-top:56px;padding-bottom:56px}
-  .hero::before{background:linear-gradient(180deg,rgba(31,74,30,.9),rgba(31,74,30,.75))}
+  .hero::before{background:linear-gradient(180deg,rgba(24,26,25,.88),rgba(24,26,25,.7))}
   .stats ul{grid-template-columns:repeat(2,1fr)}
   .stats li{border-bottom:1px solid rgba(255,255,255,.2)}
   .stats li:last-child{grid-column:1/-1}
@@ -254,3 +254,5 @@ input:focus,select:focus,textarea:focus{outline:3px solid #8cc084;border-color:v
 }
 @media print{.topbar,.site-header,.cta,.nav-toggle{display:none}}
 .btn--ghost[aria-pressed="true"]{background:var(--green);color:#fff}
+
+.stats .stat-ico{display:block;width:34px;height:34px;margin:0 auto 10px;stroke:#fff;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
