@@ -22,9 +22,16 @@ final class Role
     {
         $this->id = $id;
         $this->name = $name;
-        $this->permissions = $name->toString() === RoleName::ADMIN
-            ? Permission::cases()
-            : array_values(array_unique($permissions, SORT_REGULAR));
+        $this->permissions = self::normalize($name, $permissions);
+    }
+
+    /**
+     * @param list<Permission> $permissions
+     */
+    public function update(RoleName $name, array $permissions): void
+    {
+        $this->name = $name;
+        $this->permissions = self::normalize($name, $permissions);
     }
 
     public function isAdmin(): bool
@@ -32,8 +39,24 @@ final class Role
         return $this->name->toString() === RoleName::ADMIN;
     }
 
+    public function isVisiter(): bool
+    {
+        return $this->name->toString() === RoleName::VISITER;
+    }
+
     public function has(Permission $permission): bool
     {
         return in_array($permission, $this->permissions, true);
+    }
+
+    /**
+     * @param list<Permission> $permissions
+     * @return list<Permission>
+     */
+    private static function normalize(RoleName $name, array $permissions): array
+    {
+        return $name->toString() === RoleName::ADMIN
+            ? Permission::cases()
+            : array_values(array_unique($permissions, SORT_REGULAR));
     }
 }

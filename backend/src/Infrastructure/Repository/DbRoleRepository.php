@@ -71,6 +71,39 @@ final readonly class DbRoleRepository implements RoleRepositoryInterface
             ])
             ->execute();
 
+        $this->insertPermissions($role);
+    }
+
+    public function save(Role $role): void
+    {
+        $this->db->transaction(function () use ($role): void {
+            $this->db->createCommand()
+                ->update(Table::ROLES, ['name' => $role->name->toString()], ['id' => $role->id->toString()])
+                ->execute();
+            $this->db->createCommand()
+                ->delete(Table::ROLE_PERMISSIONS, ['role_id' => $role->id->toString()])
+                ->execute();
+            $this->insertPermissions($role);
+        });
+    }
+
+    public function delete(RoleId $id): void
+    {
+        $this->db->createCommand()
+            ->delete(Table::ROLES, ['id' => $id->toString()])
+            ->execute();
+    }
+
+    public function countUsers(RoleId $id): int
+    {
+        return (int) $this->db->createQuery()
+            ->from(Table::USERS)
+            ->where(['role_id' => $id->toString()])
+            ->count();
+    }
+
+    private function insertPermissions(Role $role): void
+    {
         foreach ($role->permissions as $permission) {
             $this->db->createCommand()
                 ->insert(Table::ROLE_PERMISSIONS, [
