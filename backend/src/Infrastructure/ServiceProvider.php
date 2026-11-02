@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace App\Infrastructure;
 
+use App\Application\Shared\HtmlSanitizerInterface;
+use App\Application\Shared\ImageStorageInterface;
 use App\Application\Shared\PasswordHasherInterface;
 use App\Application\Auth\TokenIssuerInterface;
 use App\Domain\Auth\Repository\LoginAttemptRepositoryInterface;
 use App\Domain\Auth\Repository\RefreshTokenRepositoryInterface;
-use App\Domain\Page\Repository\PageRepositoryInterface;
+use App\Domain\PageContent\Repository\PageContentRepositoryInterface;
 use App\Domain\Role\Repository\RoleRepositoryInterface;
 use App\Domain\User\Repository\UserRepositoryInterface;
 use App\Environment;
@@ -17,7 +19,7 @@ use App\Infrastructure\DataMapper\PropertyReaderInterface;
 use App\Infrastructure\DataMapper\ReflectionPropertyReader;
 use App\Infrastructure\DataMapper\YiiHydratorEntityHydrator;
 use App\Infrastructure\Repository\DbLoginAttemptRepository;
-use App\Infrastructure\Repository\DbPageRepository;
+use App\Infrastructure\Repository\DbPageContentRepository;
 use App\Infrastructure\Repository\DbRefreshTokenRepository;
 use App\Infrastructure\Repository\DbRoleRepository;
 use App\Infrastructure\Repository\DbUserRepository;
@@ -37,11 +39,17 @@ final readonly class ServiceProvider implements ServiceProviderInterface
     {
         return [
             // Repositories
-            PageRepositoryInterface::class => DbPageRepository::class,
+            PageContentRepositoryInterface::class => DbPageContentRepository::class,
             RoleRepositoryInterface::class => DbRoleRepository::class,
             UserRepositoryInterface::class => DbUserRepository::class,
             RefreshTokenRepositoryInterface::class => DbRefreshTokenRepository::class,
             LoginAttemptRepositoryInterface::class => DbLoginAttemptRepository::class,
+            HtmlSanitizerInterface::class => SymfonyHtmlSanitizer::class,
+            ImageStorageInterface::class => static fn(Aliases $aliases) => new LocalImageStorage(
+                Environment::isTest()
+                    ? $aliases->get('@runtime/test-uploads')
+                    : self::env('UPLOAD_DIR', $aliases->get('@root/storage/uploads')),
+            ),
             PasswordHasherInterface::class => Argon2idPasswordHasher::class,
             TokenIssuerInterface::class => static fn() => new JwtTokenIssuer(self::env('JWT_SECRET', '')),
 

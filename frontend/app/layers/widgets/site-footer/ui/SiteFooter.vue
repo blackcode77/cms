@@ -1,5 +1,12 @@
 <script setup lang="ts">
-import { navigation, offices, telHref } from '@shared/config'
+import { CmsText, defineContentSchema, useCmsElement } from '@entities/page-content'
+import { navigation, officeElements, telHref } from '@shared/config'
+
+defineContentSchema('site', {
+  ...officeElements,
+  'footer.about': { type: 'text', default: 'Профессиональный мультимодальный оператор. Кратчайший, простой и эффективный маршрут для вашего груза.', label: 'Футер: о компании' },
+  'footer.address_moscow': { type: 'string', default: 'Киевское ш., 1, БП «Румянцево»', label: 'Футер: адрес в Москве' },
+})
 
 const sections = navigation.filter(item => item.to !== '/')
 const services = [
@@ -9,7 +16,9 @@ const services = [
   { label: 'Таможенные услуги', to: '/services#customs' },
   { label: 'Расписания', to: '/schedules' },
 ]
-const [vladivostok, moscow] = offices
+const vladivostokPhone = useCmsElement(() => 'site', () => 'office.vladivostok.phone')
+const moscowPhone = useCmsElement(() => 'site', () => 'office.moscow.phone')
+const telOf = (el: typeof vladivostokPhone) => telHref(el.element.value?.value ?? '')
 const year = new Date().getFullYear()
 </script>
 
@@ -19,7 +28,7 @@ const year = new Date().getFullYear()
       <div class="footer-grid">
         <div class="footer-logo">
           <img src="/img/logo-white.png" alt="Garant Intermodal" width="378" height="190" loading="lazy">
-          <p>Профессиональный мультимодальный оператор. Кратчайший, простой и эффективный маршрут для вашего груза.</p>
+          <CmsText as="p" page="site" path="footer.about" />
         </div>
         <div>
           <h3>Разделы</h3>
@@ -41,14 +50,14 @@ const year = new Date().getFullYear()
           <h3>Контакты</h3>
           <address style="font-style:normal">
             <p>
-              Владивосток: {{ vladivostok!.address }}<br>
-              <a :href="telHref(vladivostok!.phone!)">{{ vladivostok!.phone }}</a>
+              Владивосток: <CmsText page="site" path="office.vladivostok.address" /><br>
+              <a v-if="vladivostokPhone.visible.value" :href="telOf(vladivostokPhone)"><CmsText page="site" path="office.vladivostok.phone" /></a>
             </p>
             <p>
-              Москва: Киевское ш., 1, БП «Румянцево»<br>
-              <a :href="telHref(moscow!.phone!)">{{ moscow!.phone }}</a>
+              Москва: <CmsText page="site" path="footer.address_moscow" /><br>
+              <a v-if="moscowPhone.visible.value" :href="telOf(moscowPhone)"><CmsText page="site" path="office.moscow.phone" /></a>
             </p>
-            <p>{{ vladivostok!.hours }}</p>
+            <p><CmsText page="site" path="office.vladivostok.hours" /></p>
           </address>
         </div>
       </div>

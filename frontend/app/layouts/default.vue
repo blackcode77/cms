@@ -2,6 +2,7 @@
 import '@shared/styles'
 import { SiteHeader } from '@widgets/site-header'
 import { SiteFooter } from '@widgets/site-footer'
+import { CmsEditorControls } from '@widgets/cms-editor'
 
 useHead({
   link: [
@@ -20,5 +21,6 @@ useHead({
       <slot />
     </main>
     <SiteFooter />
+    <CmsEditorControls />
   </div>
 </template>

@@ -20,6 +20,8 @@ export const navigation: NavItem[] = [
 export const extraRoutes: string[] = ['/project-cargo', '/services/multimodal']
 
 export interface Office {
+  /** Stable id used in Content element paths, e.g. `office.vladivostok.phone`. */
+  id: string
   city: string
   address: string
   phone?: string
@@ -29,6 +31,7 @@ export interface Office {
 
 export const offices: Office[] = [
   {
+    id: 'vladivostok',
     city: 'Владивосток',
     address: 'ул. Запорожская, д. 77, офис 640',
     phone: '+7 (423) 230-20-20',
@@ -36,6 +39,7 @@ export const offices: Office[] = [
     hours: 'Пн–Пт 09:00–18:00',
   },
   {
+    id: 'moscow',
     city: 'Москва',
     address: 'Киевское шоссе, д. 1, БП «Румянцево», стр. 1, корп. А, подъезд 8, офис А-532',
     phone: '+7 (499) 649-46-79',
@@ -43,6 +47,7 @@ export const offices: Office[] = [
     hours: 'Пн–Пт 09:00–18:00',
   },
   {
+    id: 'nakhodka',
     city: 'Находка (Восточный)',
     address: 'Врангель, ул. Внутрипортовая, 19А, каб. 16',
     email: 'vdurnovskiy@garant-intermodal.com',
@@ -52,3 +57,27 @@ export const offices: Office[] = [
 
 /** Digits-only form for tel: links. */
 export const telHref = (phone: string): string => `tel:+${phone.replace(/\D/g, '')}`
+
+/** Declaration of one editable string, structurally compatible with the page-content schema. */
+export interface OfficeElement {
+  type: 'string'
+  default: string
+  label: string
+}
+
+/**
+ * Editable office details, shared by the header, footer, contacts and about pages
+ * (they live in the `site` content so one edit shows everywhere). Defaults are the values above.
+ */
+export const officeElements: Record<string, OfficeElement> = Object.fromEntries(
+  offices.flatMap(office => ([
+    ['address', 'Адрес', office.address],
+    ['phone', 'Телефон', office.phone],
+    ['email', 'Email', office.email],
+    ['hours', 'Часы работы', office.hours],
+  ] as const).flatMap(([field, label, value]) => (
+    value === undefined
+      ? []
+      : [[`office.${office.id}.${field}`, { type: 'string' as const, default: value, label: `${label}: ${office.city}` }]]
+  ))),
+)

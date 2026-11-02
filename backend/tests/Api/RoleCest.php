@@ -237,8 +237,8 @@ final class RoleCest
     {
         $admin = $I->haveSessionFor('admin');
         $manager = $I->haveSessionFor('manager');
-        $page = ['title' => 'T', 'slug' => 't', 'content' => ''];
-        assertSame(201, $I->sendApiRequest('POST', '/api/v1/pages', $page, $manager)->getStatusCode());
+        $page = ['path' => 'a', 'type' => 'string', 'value' => 'T'];
+        assertSame(200, $I->sendApiRequest('PATCH', '/api/v1/page-content/home', $page, $manager)->getStatusCode());
 
         $I->sendApiRequest(
             'PUT',
@@ -247,8 +247,8 @@ final class RoleCest
             $admin,
         );
 
-        $page['slug'] = 'u';
-        assertSame(403, $I->sendApiRequest('POST', '/api/v1/pages', $page, $manager)->getStatusCode());
+        $page['value'] = 'U';
+        assertSame(403, $I->sendApiRequest('PATCH', '/api/v1/page-content/home', $page, $manager)->getStatusCode());
         $me = $I->decode($I->sendApiRequest('GET', '/api/v1/auth/me', null, $manager))['data'];
         assertContains('view_dashboard', $me['permissions']);
         assertNotContains('edit_page', $me['permissions']);

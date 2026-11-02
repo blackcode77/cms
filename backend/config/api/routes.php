@@ -10,7 +10,7 @@ use Yiisoft\Router\Route;
 
 return [
     Route::get('/health')->action(Api\Health\Action::class),
-    Route::get('/pages')->action(Api\Page\List\Action::class),
+    Route::get('/page-content')->action(Api\PageContent\Read\Action::class),
     Route::post('/auth/login')->action(Api\Auth\Login\Action::class),
     Route::post('/auth/refresh')->action(Api\Auth\Refresh\Action::class),
     Route::post('/auth/logout')->action(Api\Auth\Logout\Action::class),
@@ -18,9 +18,12 @@ return [
         ->middleware(Authenticate::allowingPendingPasswordChange())
         ->action(Api\Auth\ChangePassword\Action::class),
     Route::get('/auth/me')->action(Api\Auth\Me\Action::class),
-    Route::post('/pages')
+    Route::patch('/page-content/{key}')
         ->middleware(Authenticate::class, RequirePermission::for(Permission::EditPage))
-        ->action(Api\Page\Create\Action::class),
+        ->action(Api\PageContent\Update\Action::class),
+    Route::post('/uploads/image')
+        ->middleware(Authenticate::class, RequirePermission::for(Permission::EditPage))
+        ->action(Api\PageContent\UploadImage\Action::class),
     Route::get('/users')
         ->middleware(Authenticate::class, RequirePermission::for(Permission::ViewUsers))
         ->action(Api\User\List\Action::class),
