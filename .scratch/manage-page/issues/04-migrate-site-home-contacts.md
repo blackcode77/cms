@@ -11,3 +11,4 @@
 - [ ] A change in `site` (e.g. phone) shows on every page, a change in home does not leak into contacts
 - [ ] JSON-LD and meta tags use the edited values
 - [ ] Existing frontend tests updated and passing
+- [ ] Carried over from 03: in a real browser, Edit mode on a migrated page opens the panel, saving updates the page without reload, and a reload (SSR) shows the saved value
