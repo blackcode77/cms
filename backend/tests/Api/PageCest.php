@@ -32,7 +32,7 @@ final class PageCest
             'title' => 'About us',
             'slug' => 'about-us',
             'content' => 'Hello',
-        ]);
+        ], $I->haveSessionFor('manager'));
 
         assertSame(201, $response->getStatusCode());
         $id = $I->decode($response)['data']['id'];
@@ -51,7 +51,7 @@ final class PageCest
         $response = $I->sendApiRequest('POST', '/api/v1/pages', [
             'title' => '',
             'slug' => 'Not A Slug',
-        ]);
+        ], $I->haveSessionFor('manager'));
 
         assertSame(422, $response->getStatusCode());
         $body = $I->decode($response);
@@ -64,9 +64,10 @@ final class PageCest
     public function createRejectsDuplicateSlug(ApiTester $I): void
     {
         $payload = ['title' => 'Page', 'slug' => 'same-slug', 'content' => ''];
-        $I->sendApiRequest('POST', '/api/v1/pages', $payload);
+        $session = $I->haveSessionFor('manager');
+        $I->sendApiRequest('POST', '/api/v1/pages', $payload, $session);
 
-        $response = $I->sendApiRequest('POST', '/api/v1/pages', $payload);
+        $response = $I->sendApiRequest('POST', '/api/v1/pages', $payload, $session);
 
         assertSame(400, $response->getStatusCode());
         assertSame('Page with slug "same-slug" already exists.', $I->decode($response)['error_message']);
