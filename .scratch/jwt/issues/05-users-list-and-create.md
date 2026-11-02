@@ -14,3 +14,4 @@
 - [ ] Simulated send failure still creates the User and returns `mail_sent: false`
 - [ ] Mailpit works in dev and shows the email
 - [ ] Api Cests + Vitest for visibility by Permission
+- [ ] Opening the section's admin URL directly without `view_users` is blocked on the frontend (redirect/403 page), not only hidden from the menu; `useCurrentUser().can()` is used in the route guard (the global admin middleware currently checks only the Session)

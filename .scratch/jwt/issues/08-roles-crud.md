@@ -13,3 +13,4 @@
 - [ ] Deleting a Role in use returns a business error naming the count
 - [ ] Permission changes affect the next request of Users with that Role
 - [ ] Api Cests + Vitest for menu/route visibility
+- [ ] Opening the section's admin URL directly without `view_roles` is blocked on the frontend (redirect/403 page), not only hidden from the menu; `useCurrentUser().can()` is used in the route guard (the global admin middleware currently checks only the Session)
