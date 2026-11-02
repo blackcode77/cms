@@ -20,3 +20,15 @@ The first User with the Admin Role, created idempotently from `ADMIN_EMAIL` / `A
 
 **Session**:
 A signed-in User's authenticated state: a short-lived access token plus a longer-lived, revocable refresh token, both carried in httpOnly cookies.
+
+**Page**:
+A public site page identified by a stable page key (e.g. `home`, `contacts`). Its editable text and media are its Content elements. Not a database record of title/slug/body: the page layout itself is fixed, only its content is editable. The special page key `site` holds content shared by every public page (header, footer, call-to-action banner).
+
+**Content element**:
+One editable piece of a Page, addressed by a dotted path within the Page (e.g. `header.phone_number_one`). Has a type (string, text, html, image), can be switched off (disabled elements are hidden from visitors), and falls back to its default when no value has been saved.
+
+**Page content**:
+The saved values of a Page's Content elements. Only values that differ from the defaults are stored.
+
+**Edit mode**:
+A switchable state of the public site, available only to a signed-in User whose Role holds the `edit_page` Permission, in which Content elements are highlighted and can be edited in place; each change is saved immediately.
