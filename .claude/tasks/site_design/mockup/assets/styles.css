@@ -255,3 +255,24 @@ input:focus,select:focus,textarea:focus{outline:3px solid #8cc084;border-color:v
 .btn--ghost[aria-pressed="true"]{background:var(--green);color:#fff}
 
 .stats .stat-ico{display:block;width:34px;height:34px;margin:0 auto 10px;stroke:#fff;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+@media (max-width:860px){
+  .stats ul{grid-template-columns:repeat(3,1fr)}
+  .stats li{padding:12px 6px;border-bottom:1px solid rgba(255,255,255,.2)}
+  .stats li:nth-child(3){border-right:0}
+  .stats li:nth-child(n+4){border-bottom:0}
+  .stats li:nth-child(4){border-right:1px solid rgba(255,255,255,.2)}
+  .stats li:last-child{grid-column:auto;border-right:0}
+  .stats .stat-ico{width:20px;height:20px;margin-bottom:4px}
+  .stats b{font-size:1.5rem}
+  .stats span{display:block;font-size:.72rem;line-height:1.25;margin-top:2px}
+}
+@media (max-width:420px){
+  .stats ul{grid-template-columns:repeat(3,1fr)}
+  .stats span{font-size:.68rem}
+}
+@media (max-width:860px){
+  .stats ul{grid-template-columns:repeat(6,1fr)}
+  .stats li{grid-column:span 2}
+  .stats li:nth-child(n+4){grid-column:span 3}
+  .stats li:nth-child(4){border-right:1px solid rgba(255,255,255,.2)}
+}

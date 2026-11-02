@@ -1,5 +1,6 @@
 <template>
-  <UDashboardGroup>
+  <UApp>
+    <UDashboardGroup>
     <UDashboardSidebar>
       <template #header>
         <span class="font-semibold">CMS admin</span>
@@ -10,5 +11,10 @@
       />
     </UDashboardSidebar>
     <slot />
-  </UDashboardGroup>
+    </UDashboardGroup>
+  </UApp>
 </template>
+
+<style>
+@import "~/assets/css/main.css";
+</style>
