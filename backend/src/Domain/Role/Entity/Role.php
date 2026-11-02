@@ -39,6 +39,9 @@ final class Role
         return $this->name->toString() === RoleName::ADMIN;
     }
 
+    /**
+     * The Visiter Role is the implicit guest Role: it can never be assigned to a User.
+     */
     public function isVisiter(): bool
     {
         return $this->name->toString() === RoleName::VISITER;

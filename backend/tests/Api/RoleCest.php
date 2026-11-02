@@ -35,7 +35,7 @@ final class RoleCest
 
     public function viewRolesWithoutManageCanOnlyRead(ApiTester $I): void
     {
-        $I->haveRole('viewer', ['view_roles']);
+        $I->haveRoleWithPermissions('viewer', ['view_roles']);
         $I->haveUser('viewer@example.com', 'secret-pass', 'viewer');
         $viewer = $I->loginAs('viewer@example.com', 'secret-pass');
 

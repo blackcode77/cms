@@ -11,7 +11,9 @@ function isAdminPath(path: string): boolean {
 /**
  * Decides where a navigation to `path` must go. Returns a redirect target,
  * or undefined to let the navigation proceed. Only `/admin/login` is public.
- * `permission` is the route's `meta.permission`: without it the user is sent to the admin home.
+ *
+ * `permission` is the route's `definePageMeta({ permission })`: when set, a signed-in User
+ * lacking it is sent to the admin home (the menu hiding the item is not enough).
  */
 export async function resolveAdminRoute(path: string, permission?: Permission): Promise<string | undefined> {
   if (!isAdminPath(path)) return undefined
@@ -21,6 +23,6 @@ export async function resolveAdminRoute(path: string, permission?: Permission): 
 
   if (path === ADMIN_LOGIN_PATH) return session ? ADMIN_HOME_PATH : undefined
   if (!session) return ADMIN_LOGIN_PATH
-  if (permission && !current.can(permission)) return ADMIN_HOME_PATH
+  if (permission && !current.can(permission) && path !== ADMIN_HOME_PATH) return ADMIN_HOME_PATH
   return undefined
 }

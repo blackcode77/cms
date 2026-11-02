@@ -18,6 +18,15 @@ return [
     Route::post('/pages')
         ->middleware(Authenticate::class, RequirePermission::for(Permission::EditPage))
         ->action(Api\Page\Create\Action::class),
+    Route::get('/users')
+        ->middleware(Authenticate::class, RequirePermission::for(Permission::ViewUsers))
+        ->action(Api\User\List\Action::class),
+    Route::get('/users/assignable-roles')
+        ->middleware(Authenticate::class, RequirePermission::for(Permission::ViewUsers))
+        ->action(Api\User\AssignableRoles\Action::class),
+    Route::post('/users')
+        ->middleware(Authenticate::class, RequirePermission::for(Permission::ManageUsers))
+        ->action(Api\User\Create\Action::class),
     Route::get('/roles')
         ->middleware(Authenticate::class, RequirePermission::for(Permission::ViewRoles))
         ->action(Api\Role\List\Action::class),

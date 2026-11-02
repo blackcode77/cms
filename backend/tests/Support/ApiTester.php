@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\Support;
 
 use App\Environment;
+use App\Infrastructure\InMemoryMailer;
 use App\Infrastructure\ShiftableClock;
 use DateTimeImmutable;
 use Ramsey\Uuid\Uuid;
@@ -80,9 +81,28 @@ class ApiTester extends \Codeception\Actor
     public function cleanDatabase(): void
     {
         ShiftableClock::reset();
+        InMemoryMailer::reset();
         $this->pdo()->exec(
             'TRUNCATE TABLE page, refresh_tokens, login_attempts, users, role_permissions, roles CASCADE',
         );
+    }
+
+    /**
+     * Mails sent through the fake mailer since the last cleanDatabase().
+     *
+     * @return list<array{to: string, subject: string, body: string}>
+     */
+    public function sentMails(): array
+    {
+        return InMemoryMailer::sent();
+    }
+
+    /**
+     * Makes every following send fail (until cleanDatabase()).
+     */
+    public function makeMailerFail(): void
+    {
+        InMemoryMailer::failSending();
     }
 
     /**
@@ -186,15 +206,53 @@ class ApiTester extends \Codeception\Actor
     }
 
     /**
-     * Inserts a Role with exactly the given Permissions unless a Role with that name exists.
+     * Id of the Role, created with its default Permissions when missing.
+     */
+    public function haveRole(string $name): string
+    {
+        $permissions = [
+            'admin' => ['view_dashboard', 'edit_page', 'view_users', 'manage_users', 'view_roles', 'manage_roles'],
+            'manager' => ['view_dashboard', 'edit_page'],
+        ][$name] ?? [];
+
+        $pdo = $this->pdo();
+        $stmt = $pdo->prepare('SELECT id FROM roles WHERE name = ?');
+        $stmt->execute([$name]);
+        $roleId = $stmt->fetchColumn();
+        if ($roleId !== false) {
+            return (string) $roleId;
+        }
+
+        $roleId = Uuid::uuid7()->toString();
+        $pdo->prepare('INSERT INTO roles (id, name) VALUES (?, ?)')->execute([$roleId, $name]);
+        foreach ($permissions as $permission) {
+            $pdo->prepare('INSERT INTO role_permissions (role_id, permission) VALUES (?, ?)')
+                ->execute([$roleId, $permission]);
+        }
+
+        return $roleId;
+    }
+
+    public function grabPasswordHash(string $email): string
+    {
+        $stmt = $this->pdo()->prepare('SELECT password_hash FROM users WHERE email = ?');
+        $stmt->execute([$email]);
+
+        return (string) $stmt->fetchColumn();
+    }
+
+    public function roleId(string $name): string
+    {
+        return $this->haveRole($name);
+    }
+
+    /**
+     * Inserts a Role holding exactly the given Permissions.
      *
      * @param list<string> $permissions
      */
-    public function haveRole(string $name, array $permissions = []): void
+    public function haveRoleWithPermissions(string $name, array $permissions): void
     {
-        if ($this->roleId($name) !== '') {
-            return;
-        }
         $pdo = $this->pdo();
         $roleId = Uuid::uuid7()->toString();
         $pdo->prepare('INSERT INTO roles (id, name) VALUES (?, ?)')->execute([$roleId, $name]);
@@ -202,11 +260,6 @@ class ApiTester extends \Codeception\Actor
             $pdo->prepare('INSERT INTO role_permissions (role_id, permission) VALUES (?, ?)')
                 ->execute([$roleId, $permission]);
         }
-    }
-
-    public function roleId(string $name): string
-    {
-        return (string) $this->pdo()->query("SELECT id FROM roles WHERE name = '$name'")->fetchColumn();
     }
 
     public function countRows(string $table): int
