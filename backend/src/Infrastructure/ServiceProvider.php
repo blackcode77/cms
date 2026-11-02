@@ -4,13 +4,18 @@ declare(strict_types=1);
 
 namespace App\Infrastructure;
 
+use App\Application\Shared\PasswordHasherInterface;
 use App\Domain\Page\Repository\PageRepositoryInterface;
+use App\Domain\Role\Repository\RoleRepositoryInterface;
+use App\Domain\User\Repository\UserRepositoryInterface;
 use App\Environment;
 use App\Infrastructure\DataMapper\EntityHydratorInterface;
 use App\Infrastructure\DataMapper\PropertyReaderInterface;
 use App\Infrastructure\DataMapper\ReflectionPropertyReader;
 use App\Infrastructure\DataMapper\YiiHydratorEntityHydrator;
 use App\Infrastructure\Repository\DbPageRepository;
+use App\Infrastructure\Repository\DbRoleRepository;
+use App\Infrastructure\Repository\DbUserRepository;
 use Psr\Clock\ClockInterface;
 use Yiisoft\Aliases\Aliases;
 use Yiisoft\Cache\File\FileCache;
@@ -29,6 +34,9 @@ final readonly class ServiceProvider implements ServiceProviderInterface
         return [
             // Repositories
             PageRepositoryInterface::class => DbPageRepository::class,
+            RoleRepositoryInterface::class => DbRoleRepository::class,
+            UserRepositoryInterface::class => DbUserRepository::class,
+            PasswordHasherInterface::class => Argon2idPasswordHasher::class,
 
             // DB (credentials come from the environment, see compose.yaml)
             ConnectionInterface::class => static fn(Aliases $aliases) => new Connection(

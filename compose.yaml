@@ -30,6 +30,8 @@ services:
       DB_TEST_NAME: app_test
       DB_USER: ${POSTGRES_USER:-app}
       DB_PASSWORD: ${POSTGRES_PASSWORD:-app}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-}
       XDEBUG_MODE: ${XDEBUG_MODE:-off}
       COMPOSER_CACHE_DIR: /app/runtime/cache/composer
     volumes:

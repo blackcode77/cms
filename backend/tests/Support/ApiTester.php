@@ -65,7 +65,7 @@ class ApiTester extends \Codeception\Actor
 
     public function cleanDatabase(): void
     {
-        $this->pdo()->exec('TRUNCATE TABLE page');
+        $this->pdo()->exec('TRUNCATE TABLE page, users, role_permissions, roles CASCADE');
     }
 
     public function countRows(string $table): int

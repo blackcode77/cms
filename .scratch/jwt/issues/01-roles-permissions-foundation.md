@@ -4,11 +4,11 @@
 
 **Blocked by:** None (can start immediately)
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] Migrations create users, roles, role permissions tables (uuid PKs, unique email, single role reference); test cleanup knows the new tables
-- [ ] Passwords stored as argon2id hashes only
-- [ ] Running the seed command creates the three Roles and the Initial admin with the Admin Role
-- [ ] Running it again changes nothing (no duplicates, existing admin not overwritten)
-- [ ] Console test covers seeding and idempotency
-- [ ] Unit tests cover the Permission catalog and "Admin Role holds all Permissions"
+- [x] Migrations create users, roles, role permissions tables (uuid PKs, unique email, single role reference); test cleanup knows the new tables
+- [x] Passwords stored as argon2id hashes only
+- [x] Running the seed command creates the three Roles and the Initial admin with the Admin Role
+- [x] Running it again changes nothing (no duplicates, existing admin not overwritten)
+- [x] Console test covers seeding and idempotency
+- [x] Unit tests cover the Permission catalog and "Admin Role holds all Permissions"
