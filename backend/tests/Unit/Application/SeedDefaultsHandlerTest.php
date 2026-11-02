@@ -10,10 +10,12 @@ use App\Application\Shared\PasswordHasherInterface;
 use App\Domain\Role\Entity\Role;
 use App\Domain\Role\Repository\RoleRepositoryInterface;
 use App\Domain\Role\Value\Permission;
+use App\Domain\Role\Value\RoleId;
 use App\Domain\Role\Value\RoleName;
 use App\Domain\User\Entity\User;
 use App\Domain\User\Repository\UserRepositoryInterface;
 use App\Domain\User\Value\UserEmail;
+use App\Domain\User\Value\UserId;
 use App\Infrastructure\SystemClock;
 use Codeception\Test\Unit;
 
@@ -82,6 +84,11 @@ final class InMemoryRoleRepository implements RoleRepositoryInterface
     /** @var array<string, Role> */
     public array $roles = [];
 
+    public function findById(RoleId $id): ?Role
+    {
+        return array_find($this->roles, static fn(Role $r) => $r->id->toString() === $id->toString());
+    }
+
     public function findByName(RoleName $name): ?Role
     {
         return $this->roles[$name->toString()] ?? null;
@@ -97,6 +104,16 @@ final class InMemoryUserRepository implements UserRepositoryInterface
 {
     /** @var list<User> */
     public array $users = [];
+
+    public function findByEmail(UserEmail $email): ?User
+    {
+        return array_find($this->users, static fn(User $u) => $u->email->toString() === $email->toString());
+    }
+
+    public function findById(UserId $id): ?User
+    {
+        return array_find($this->users, static fn(User $u) => $u->id->toString() === $id->toString());
+    }
 
     public function hasByEmail(UserEmail $email): bool
     {

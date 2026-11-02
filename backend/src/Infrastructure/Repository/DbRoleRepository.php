@@ -20,13 +20,26 @@ final readonly class DbRoleRepository implements RoleRepositoryInterface
         private ConnectionInterface $db,
     ) {}
 
+    public function findById(RoleId $id): ?Role
+    {
+        return $this->findOneBy(['id' => $id->toString()]);
+    }
+
     public function findByName(RoleName $name): ?Role
+    {
+        return $this->findOneBy(['name' => $name->toString()]);
+    }
+
+    /**
+     * @param array<string, string> $condition
+     */
+    private function findOneBy(array $condition): ?Role
     {
         /** @var array{id: string, name: non-empty-string}|null $row */
         $row = $this->db->createQuery()
             ->from(Table::ROLES)
             ->select(['id', 'name'])
-            ->where(['name' => $name->toString()])
+            ->where($condition)
             ->one();
         if ($row === null) {
             return null;

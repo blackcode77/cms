@@ -15,6 +15,7 @@
         "ext-intl": "*",
         "ext-mbstring": "*",
         "ext-pdo": "*",
+        "firebase/php-jwt": "^7.2",
         "httpsoft/http-message": "^1.1.6",
         "psr/clock": "^1.0",
         "psr/container": "^2.0.2",

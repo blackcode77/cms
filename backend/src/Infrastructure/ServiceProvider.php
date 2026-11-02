@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace App\Infrastructure;
 
 use App\Application\Shared\PasswordHasherInterface;
+use App\Application\Auth\TokenIssuerInterface;
+use App\Domain\Auth\Repository\LoginAttemptRepositoryInterface;
+use App\Domain\Auth\Repository\RefreshTokenRepositoryInterface;
 use App\Domain\Page\Repository\PageRepositoryInterface;
 use App\Domain\Role\Repository\RoleRepositoryInterface;
 use App\Domain\User\Repository\UserRepositoryInterface;
@@ -13,7 +16,9 @@ use App\Infrastructure\DataMapper\EntityHydratorInterface;
 use App\Infrastructure\DataMapper\PropertyReaderInterface;
 use App\Infrastructure\DataMapper\ReflectionPropertyReader;
 use App\Infrastructure\DataMapper\YiiHydratorEntityHydrator;
+use App\Infrastructure\Repository\DbLoginAttemptRepository;
 use App\Infrastructure\Repository\DbPageRepository;
+use App\Infrastructure\Repository\DbRefreshTokenRepository;
 use App\Infrastructure\Repository\DbRoleRepository;
 use App\Infrastructure\Repository\DbUserRepository;
 use Psr\Clock\ClockInterface;
@@ -36,7 +41,10 @@ final readonly class ServiceProvider implements ServiceProviderInterface
             PageRepositoryInterface::class => DbPageRepository::class,
             RoleRepositoryInterface::class => DbRoleRepository::class,
             UserRepositoryInterface::class => DbUserRepository::class,
+            RefreshTokenRepositoryInterface::class => DbRefreshTokenRepository::class,
+            LoginAttemptRepositoryInterface::class => DbLoginAttemptRepository::class,
             PasswordHasherInterface::class => Argon2idPasswordHasher::class,
+            TokenIssuerInterface::class => static fn() => new JwtTokenIssuer(self::env('JWT_SECRET', '')),
 
             // DB (credentials come from the environment, see compose.yaml)
             ConnectionInterface::class => static fn(Aliases $aliases) => new Connection(
@@ -61,7 +69,7 @@ final readonly class ServiceProvider implements ServiceProviderInterface
             ],
 
             // Other
-            ClockInterface::class => SystemClock::class,
+            ClockInterface::class => Environment::isTest() ? ShiftableClock::class : SystemClock::class,
             EntityHydratorInterface::class => YiiHydratorEntityHydrator::class,
             PropertyReaderInterface::class => ReflectionPropertyReader::class,
         ];

@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace App\Tests\Support;
 
 use App\Environment;
+use App\Infrastructure\ShiftableClock;
+use DateTimeImmutable;
+use Ramsey\Uuid\Uuid;
 use HttpSoft\Message\ServerRequest;
 use HttpSoft\Message\StreamFactory;
 use PDO;
@@ -22,9 +25,19 @@ class ApiTester extends \Codeception\Actor
 {
     use _generated\ApiTesterActions;
 
-    public function sendApiRequest(string $method, string $uri, ?array $json = null): ResponseInterface
-    {
-        $request = new ServerRequest(method: $method, uri: $uri);
+    /**
+     * @param array<string, string> $cookies
+     * @param array<string, string> $serverParams e.g. ['REMOTE_ADDR' => '10.0.0.1']
+     */
+    public function sendApiRequest(
+        string $method,
+        string $uri,
+        ?array $json = null,
+        array $cookies = [],
+        array $serverParams = [],
+    ): ResponseInterface {
+        $request = new ServerRequest(method: $method, uri: $uri, serverParams: $serverParams)
+            ->withCookieParams($cookies);
         if ($json !== null) {
             $request = $request
                 ->withHeader('Content-Type', 'application/json')
@@ -65,7 +78,85 @@ class ApiTester extends \Codeception\Actor
 
     public function cleanDatabase(): void
     {
-        $this->pdo()->exec('TRUNCATE TABLE page, users, role_permissions, roles CASCADE');
+        ShiftableClock::reset();
+        $this->pdo()->exec(
+            'TRUNCATE TABLE page, refresh_tokens, login_attempts, users, role_permissions, roles CASCADE',
+        );
+    }
+
+    /**
+     * Moves the application clock, e.g. '+16 minutes'. Undone by cleanDatabase().
+     */
+    public function travelTo(string $modifier): void
+    {
+        ShiftableClock::set(new DateTimeImmutable($modifier));
+    }
+
+    /**
+     * Inserts a User (and its Role with default Permissions when missing) straight into the database.
+     */
+    public function haveUser(
+        string $email,
+        string $password,
+        string $role = 'manager',
+        bool $mustChangePassword = false,
+    ): void {
+        $permissions = [
+            'admin' => ['view_dashboard', 'edit_page', 'view_users', 'manage_users', 'view_roles', 'manage_roles'],
+            'manager' => ['view_dashboard', 'edit_page'],
+        ][$role] ?? [];
+
+        $pdo = $this->pdo();
+        $roleId = $pdo->query("SELECT id FROM roles WHERE name = '$role'")->fetchColumn();
+        if ($roleId === false) {
+            $roleId = Uuid::uuid7()->toString();
+            $pdo->prepare('INSERT INTO roles (id, name) VALUES (?, ?)')->execute([$roleId, $role]);
+            foreach ($permissions as $permission) {
+                $pdo->prepare('INSERT INTO role_permissions (role_id, permission) VALUES (?, ?)')
+                    ->execute([$roleId, $permission]);
+            }
+        }
+        $pdo->prepare(
+            'INSERT INTO users (id, email, name, password_hash, role_id, must_change_password, created_at)
+             VALUES (?, ?, ?, ?, ?, ?, now())',
+        )->execute([
+            Uuid::uuid7()->toString(),
+            $email,
+            'Test User',
+            password_hash($password, PASSWORD_ARGON2ID),
+            $roleId,
+            $mustChangePassword ? 'true' : 'false',
+        ]);
+    }
+
+    /**
+     * Cookies set by the response: name => attributes (the cookie value is under key 'value').
+     *
+     * @return array<string, array<string, string|true>>
+     */
+    public function setCookies(ResponseInterface $response): array
+    {
+        $result = [];
+        foreach ($response->getHeader('Set-Cookie') as $header) {
+            $parts = array_map(trim(...), explode(';', $header));
+            [$name, $value] = explode('=', array_shift($parts), 2);
+            $attributes = ['value' => $value];
+            foreach ($parts as $part) {
+                [$key, $val] = array_pad(explode('=', $part, 2), 2, true);
+                $attributes[strtolower($key)] = $val;
+            }
+            $result[$name] = $attributes;
+        }
+
+        return $result;
+    }
+
+    /**
+     * @return array<string, string> name => value, ready to be sent back as request cookies
+     */
+    public function cookieValues(ResponseInterface $response): array
+    {
+        return array_map(static fn(array $a): string => (string) $a['value'], $this->setCookies($response));
     }
 
     public function countRows(string $table): int

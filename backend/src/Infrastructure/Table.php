@@ -10,4 +10,6 @@ final readonly class Table
     public const string ROLES = 'roles';
     public const string ROLE_PERMISSIONS = 'role_permissions';
     public const string USERS = 'users';
+    public const string REFRESH_TOKENS = 'refresh_tokens';
+    public const string LOGIN_ATTEMPTS = 'login_attempts';
 }

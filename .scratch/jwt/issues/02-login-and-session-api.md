@@ -4,12 +4,12 @@
 
 **Blocked by:** 01
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] Login with valid credentials sets cookies and `me` returns the User with Role and Permissions
-- [ ] Wrong password and unknown email return the same generic error
-- [ ] 5 failures lock the email+IP pair for 15 minutes, then sign-in works again
-- [ ] Refresh issues a new pair and the old refresh token no longer works
-- [ ] Logout revokes the refresh token
-- [ ] `me` without a valid access token returns 401
-- [ ] Api Cest covers all of the above; new tables added to test cleanup
+- [x] Login with valid credentials sets cookies and `me` returns the User with Role and Permissions
+- [x] Wrong password and unknown email return the same generic error
+- [x] 5 failures lock the email+IP pair for 15 minutes, then sign-in works again
+- [x] Refresh issues a new pair and the old refresh token no longer works
+- [x] Logout revokes the refresh token
+- [x] `me` without a valid access token returns 401
+- [x] Api Cest covers all of the above; new tables added to test cleanup

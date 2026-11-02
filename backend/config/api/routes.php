@@ -8,5 +8,9 @@ use Yiisoft\Router\Route;
 return [
     Route::get('/health')->action(Api\Health\Action::class),
     Route::get('/pages')->action(Api\Page\List\Action::class),
+    Route::post('/auth/login')->action(Api\Auth\Login\Action::class),
+    Route::post('/auth/refresh')->action(Api\Auth\Refresh\Action::class),
+    Route::post('/auth/logout')->action(Api\Auth\Logout\Action::class),
+    Route::get('/auth/me')->action(Api\Auth\Me\Action::class),
     Route::post('/pages')->action(Api\Page\Create\Action::class),
 ];
