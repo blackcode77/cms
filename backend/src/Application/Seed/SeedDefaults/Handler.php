@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Application\Seed\SeedDefaults;
 
+use App\Application\Seed\Exception\WeakAdminPasswordException;
 use App\Application\Shared\PasswordHasherInterface;
 use App\Domain\Role\Entity\Role;
 use App\Domain\Role\Repository\RoleRepositoryInterface;
@@ -29,6 +30,9 @@ final readonly class Handler
         private ClockInterface $clock,
     ) {}
 
+    /**
+     * @throws WeakAdminPasswordException when the Initial admin would be created with a weak or placeholder password
+     */
     public function handle(Command $command): void
     {
         $adminRole = null;
@@ -46,6 +50,10 @@ final readonly class Handler
 
         if ($adminRole === null || $this->userRepository->hasByEmail($command->adminEmail)) {
             return;
+        }
+
+        if (strlen($command->adminPassword) < 8 || str_starts_with(strtolower($command->adminPassword), 'change-me')) {
+            throw WeakAdminPasswordException::create();
         }
 
         $this->userRepository->add(

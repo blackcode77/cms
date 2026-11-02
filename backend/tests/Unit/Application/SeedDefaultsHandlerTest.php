@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Tests\Unit\Application;
 
 use App\Application\Seed\SeedDefaults\Command;
+use App\Application\Seed\Exception\WeakAdminPasswordException;
 use App\Application\Seed\SeedDefaults\Handler;
 use App\Application\Shared\PasswordHasherInterface;
 use App\Domain\Role\Entity\Role;
@@ -29,7 +30,7 @@ final class SeedDefaultsHandlerTest extends Unit
     {
         [$roles, $users, $handler] = $this->build();
 
-        $handler->handle(new Command(new UserEmail('Admin@Example.com'), 'secret'));
+        $handler->handle(new Command(new UserEmail('Admin@Example.com'), 'secret-pass'));
 
         assertCount(3, $roles->roles);
         assertCount(6, $roles->roles['admin']->permissions);
@@ -42,18 +43,33 @@ final class SeedDefaultsHandlerTest extends Unit
         $admin = $users->users[0];
         assertSame('admin@example.com', $admin->email->toString());
         assertTrue($admin->roleId->isEqualTo($roles->roles['admin']->id));
-        assertSame('hashed:secret', $admin->passwordHash);
+        assertSame('hashed:secret-pass', $admin->passwordHash);
     }
 
     public function testIsIdempotentAndDoesNotOverwriteExistingAdmin(): void
     {
         [$roles, $users, $handler] = $this->build();
-        $handler->handle(new Command(new UserEmail('admin@example.com'), 'first'));
-        $handler->handle(new Command(new UserEmail('admin@example.com'), 'second'));
+        $handler->handle(new Command(new UserEmail('admin@example.com'), 'first-password'));
+        $handler->handle(new Command(new UserEmail('admin@example.com'), 'second-password'));
 
         assertCount(3, $roles->roles);
         assertCount(1, $users->users);
-        assertSame('hashed:first', $users->users[0]->passwordHash);
+        assertSame('hashed:first-password', $users->users[0]->passwordHash);
+    }
+
+    public function testRefusesPlaceholderAndShortAdminPasswords(): void
+    {
+        foreach (['change-me', 'Change-Me-Please', 'short', ''] as $weak) {
+            [, $users, $handler] = $this->build();
+
+            try {
+                $handler->handle(new Command(new UserEmail('admin@example.com'), $weak));
+                $this->fail('Expected WeakAdminPasswordException for "' . $weak . '"');
+            } catch (WeakAdminPasswordException) {
+            }
+
+            assertCount(0, $users->users);
+        }
     }
 
     /**

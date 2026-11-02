@@ -15,6 +15,7 @@ use Throwable;
 final readonly class JwtTokenIssuer implements TokenIssuerInterface
 {
     private const string ALGORITHM = 'HS256';
+    private const int MIN_SECRET_LENGTH = 32;
 
     public function __construct(
         #[\SensitiveParameter]
@@ -50,6 +51,13 @@ final readonly class JwtTokenIssuer implements TokenIssuerInterface
 
     private function secret(): string
     {
-        return $this->secret !== '' ? $this->secret : throw new RuntimeException('JWT_SECRET is not configured.');
+        if ($this->secret === '' || strlen($this->secret) < self::MIN_SECRET_LENGTH || str_starts_with(strtolower($this->secret), 'change-me')) {
+            throw new RuntimeException(
+                'JWT_SECRET is missing, too short (min ' . self::MIN_SECRET_LENGTH . ' characters) or a placeholder. '
+                . 'Generate one with `openssl rand -hex 32`.',
+            );
+        }
+
+        return $this->secret;
     }
 }
