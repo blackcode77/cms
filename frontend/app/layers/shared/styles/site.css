@@ -5,7 +5,16 @@
 @font-face{font-family:"Roboto Condensed";font-weight:400;font-display:swap;src:url(/fonts/robotocondensed-400.woff2) format("woff2")}
 @font-face{font-family:"Roboto Condensed";font-weight:700;font-display:swap;src:url(/fonts/robotocondensed-700.woff2) format("woff2")}
 
-:root{
+/* Page-level rules: only apply while the public layout (.site) is mounted, so the admin UI is untouched. */
+html:has(.site){scroll-behavior:smooth}
+body:has(.site){margin:0;background:#fff}
+
+/*
+ * Everything below is nested under .site (the root element of layouts/default.vue).
+ * Without this scope, element selectors (body, a, h1, input, table…) and :root variables
+ * would leak into the Nuxt UI admin once a public page has been loaded in the same session.
+ */
+.site{
   --green:#3A7B34; --green-dark:#2B5E27; --green-deep:#1F4A1E; --green-soft:#E8F1E6; --green-tint:#F3F8F2;
   --black:#231F20; --grey:#7C7B7B; --grey-light:#EDEEED; --line:#DCE3DA; --white:#fff;
   --amber:#B7791F; --amber-bg:#FFF6E0;
@@ -13,10 +22,9 @@
   --font-body:"Roboto",Arial,sans-serif;
   --radius:6px; --maxw:1200px;
   --shadow:0 2px 10px rgba(35,31,32,.08);
-}
-*,*::before,*::after{box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{margin:0;font:400 16px/1.6 var(--font-body);color:var(--black);background:#fff;-webkit-font-smoothing:antialiased}
+
+  font:400 16px/1.6 var(--font-body);color:var(--black);background:#fff;-webkit-font-smoothing:antialiased;
+  *,*::before,*::after{box-sizing:border-box}
 img{max-width:100%;height:auto;display:block}
 a{color:var(--green);text-decoration:none}
 a:hover{color:var(--green-dark);text-decoration:underline}
@@ -272,4 +280,5 @@ input:focus,select:focus,textarea:focus{outline:3px solid #8cc084;border-color:v
   .stats li{grid-column:span 2}
   .stats li:nth-child(n+4){grid-column:span 3}
   .stats li:nth-child(4){border-right:1px solid rgba(255,255,255,.2)}
+}
 }

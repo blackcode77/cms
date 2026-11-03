@@ -15,7 +15,7 @@ useHead({
 </script>
 
 <template>
-  <div>
+  <div class="site">
     <SiteHeader />
     <main id="main">
       <slot />
