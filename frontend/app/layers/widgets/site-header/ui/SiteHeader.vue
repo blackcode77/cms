@@ -24,7 +24,10 @@ watch(() => route.path, () => {
     <div class="topbar">
       <div class="container">
         <div class="topbar__contacts">
-          <a v-if="vladivostokPhone.visible.value" :href="telOf(vladivostokPhone)"><CmsText page="site" path="office.vladivostok.phone" /> · Владивосток</a>
+          <a v-if="vladivostokPhone.visible.value" :href="telOf(vladivostokPhone)">
+            <CmsText page="site" path="office.vladivostok.phone" /> · Владивосток
+          </a>
+          
           <a v-if="moscowPhone.visible.value" class="hide-sm" :href="telOf(moscowPhone)"><CmsText page="site" path="office.moscow.phone" /> · Москва</a>
           <a v-if="email.visible.value" class="hide-sm" :href="`mailto:${email.element.value?.value}`"><CmsText page="site" path="office.vladivostok.email" /></a>
         </div>
