@@ -1,0 +1,13 @@
+.git
+.idea
+.vscode
+.claude
+.scratch
+docs
+**/.DS_Store
+**/node_modules
+**/vendor
+backend/runtime
+backend/storage
+frontend/.nuxt
+frontend/.output

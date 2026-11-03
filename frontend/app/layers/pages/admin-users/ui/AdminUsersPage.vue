@@ -72,9 +72,9 @@ const columns = [
           />
         </template>
       </UTable>
-      <UCard v-if="can('manage_users')" data-testid="create-user-card">
+      <UCard v-if="can('manage_users')" data-testid="create-user-card" class="w-100">
         <template #header>
-          <h2 class="font-semibold">New user</h2>
+          <h2 class="font-semibold">Добавить пользователя</h2>
         </template>
         <CreateUserForm :roles="roles" @created="onCreated" />
       </UCard>

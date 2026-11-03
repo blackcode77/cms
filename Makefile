@@ -3,6 +3,16 @@
 export UID := $(shell id -u)
 export GID := $(shell id -g)
 
+# Production server settings (DEPLOY_HOST, DEPLOY_PATH, DEPLOY_SSH_KEY, DEPLOY_URL). Local file, see deploy.env.example.
+-include deploy.env
+DEPLOY_PATH    ?= /opt/cms
+DEPLOY_SSH_KEY ?=
+DEPLOY_URL     ?=
+DEPLOY_SSH     := ssh $(if $(DEPLOY_SSH_KEY),-i $(DEPLOY_SSH_KEY) -o IdentitiesOnly=yes) -o BatchMode=yes
+# Not uploaded: local-only files, dependencies and runtime data (the server keeps its own .env, uploads and DB).
+DEPLOY_EXCLUDES := /.git /.idea /.vscode /.claude /.scratch /docs /.env /deploy.env node_modules vendor \
+	/backend/runtime /backend/storage /frontend/.nuxt /frontend/.output
+
 DC  := docker compose
 PHP := $(DC) run --rm -u $(UID):$(GID) php
 PHP_TEST := $(DC) run --rm -u $(UID):$(GID) -e APP_ENV=test php
@@ -82,3 +92,14 @@ lint: ## psalm + php-cs-fixer (check) + eslint + steiger
 
 cs-fix: ## Fix PHP code style
 	$(PHP) composer cs-fix
+
+deploy-prod: ## Deploy to production: sync code, rebuild stack, migrate, seed, smoke-check
+	@test -n "$(DEPLOY_HOST)" || { echo "Set DEPLOY_HOST in deploy.env (see deploy.env.example)"; exit 1; }
+	rsync -az --delete --no-owner --no-group $(foreach p,$(DEPLOY_EXCLUDES),--exclude=$(p)) \
+		-e "$(DEPLOY_SSH)" ./ $(DEPLOY_HOST):$(DEPLOY_PATH)/
+	$(DEPLOY_SSH) $(DEPLOY_HOST) 'cd $(DEPLOY_PATH) && set -e && \
+		docker compose -f compose.prod.yaml up -d --build --remove-orphans && \
+		docker compose -f compose.prod.yaml exec -T php php yii migrate:up --no-interaction && \
+		docker compose -f compose.prod.yaml exec -T php php yii app:seed && \
+		docker compose -f compose.prod.yaml ps'
+	@test -z "$(DEPLOY_URL)" || curl -fsS -o /dev/null -w "smoke check $(DEPLOY_URL): HTTP %{http_code}\n" $(DEPLOY_URL)

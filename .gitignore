@@ -1,4 +1,5 @@
 /.env
+/deploy.env
 .idea/
 .vscode/*
 !.vscode/extensions.json
