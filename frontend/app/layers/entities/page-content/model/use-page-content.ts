@@ -23,7 +23,11 @@ export function usePageContent() {
       const defaults = withDefaultIds(def.default)
       // A value saved under another type (the schema changed since) is ignored, like an orphan.
       const value = saved?.type === 'list' && Array.isArray(saved.value) ? saved.value : defaults
-      return { type: 'list', value, default: defaults, label, enabled, fields: def.fields, min: def.min ?? 0, max: def.max ?? 100 }
+      const fields = Object.fromEntries(Object.entries(def.fields).map(([name, field]) => {
+        const background = field.background ? resolveElement(page, field.background) : null
+        return [name, background && background.type !== 'list' ? { ...field, backgroundUrl: background.value } : field]
+      }))
+      return { type: 'list', value, default: defaults, label, enabled, fields, min: def.min ?? 0, max: def.max ?? 100 }
     }
 
     const value = typeof saved?.value === 'string' ? saved.value : def.default

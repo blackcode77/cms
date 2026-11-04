@@ -137,6 +137,13 @@ figcaption{font-size:.85rem;color:var(--grey);margin-top:6px}
 .map .route--sea{stroke:#2C7DA0}
 .map .pt{fill:var(--green);stroke:#fff;stroke-width:3}
 .map .pt--hub{fill:var(--black)}
+/* Route map */
+.shipping{display:grid;grid-template-columns:1fr 1.7fr;gap:40px;align-items:center}
+.shipping__scroll{position:relative;overflow-x:auto;border:1px solid var(--line);border-radius:var(--radius);background:#fff}
+.shipping__map{min-width:640px}
+.shipping__legend{list-style:none;padding:0;margin:18px 0 0;display:flex;flex-direction:column;gap:8px;font-size:.92rem}
+.shipping__legend i{display:inline-block;width:30px;height:0;border-top:4px dashed var(--green);vertical-align:middle;margin-right:10px}
+.shipping__bg-edit{position:absolute;top:10px;left:10px;padding:4px 10px;border:1px solid var(--line);border-radius:var(--radius);background:#fff;font:600 .8rem var(--font-body);cursor:pointer}
 .legend{display:flex;gap:18px;flex-wrap:wrap;font-size:.85rem;margin-top:10px}
 .legend i{display:inline-block;width:26px;height:0;border-top:3px dashed var(--green);vertical-align:middle;margin-right:6px}
 .legend i.rail{border-top:3px solid var(--black)}
@@ -226,7 +233,7 @@ input:focus,select:focus,textarea:focus{outline:3px solid #8cc084;border-color:v
   .grid--3{grid-template-columns:repeat(2,1fr)}
   .partners{grid-template-columns:repeat(4,1fr)}
   .footer-grid{grid-template-columns:1fr 1fr}
-  .layout,.geo,.split{grid-template-columns:1fr}
+  .layout,.geo,.split,.shipping{grid-template-columns:1fr}
   .aside-box{position:static}
   .nav a{padding:10px 8px;font-size:.88rem}
 }

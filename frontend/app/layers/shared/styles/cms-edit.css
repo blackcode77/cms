@@ -47,6 +47,12 @@
   visibility: hidden;
   transition: transform 0.2s ease, visibility 0.2s;
 }
+.cms-controls__panel.is-wide {
+  width: min(960px, 100vw);
+}
+.cms-controls__panel.is-wide ~ .cms-toast {
+  right: 976px;
+}
 .cms-controls__panel.is-open {
   transform: none;
   visibility: visible;

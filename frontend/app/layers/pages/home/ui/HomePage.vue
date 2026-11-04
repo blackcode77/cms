@@ -6,6 +6,8 @@ import { organizationJsonLd, usePageSeo } from '@shared/seo'
 import { AppIcon } from '@shared/ui'
 import { NuxtLink } from '#components'
 import { RouteMap } from '@widgets/route-map'
+import { ShippingMap } from '@widgets/shipping-map'
+import { serializeStops } from '@entities/route-map'
 import { PartnersList } from '@widgets/partners-list'
 
 defineContentSchema('site', officeElements)
@@ -32,6 +34,32 @@ defineContentSchema('home', {
       { icon: 'award', value: '25+', label: 'лет опыта в морской отрасли' },
       { icon: 'map-pin', value: '3', label: 'офиса: Владивосток, Москва, Находка' },
       { icon: 'anchor', value: '4', label: 'компании в группе' },
+    ],
+  },
+  'routes.title': { type: 'string', default: 'Схема маршрутов', label: 'Схема маршрутов: заголовок' },
+  'routes.lead': { type: 'text', default: 'Порты погрузки в Китае — Тайцан, Нинбо и Шанхай. Порты выгрузки в России — Владивосток (ВМРП / ВМТП) и Врангель (Терминал Врангель).', label: 'Схема маршрутов: текст' },
+  'routes.map': { type: 'image', default: '/img/map-east-asia.svg', label: 'Схема маршрутов: фон карты' },
+  'routes.items': {
+    type: 'list',
+    label: 'Схема маршрутов: маршруты',
+    max: 10,
+    fields: {
+      name: { type: 'string', label: 'Название (в легенде)' },
+      color: { type: 'color', label: 'Цвет линии', default: '#3a7b34' },
+      stops: { type: 'stops', label: 'Точки маршрута', background: 'routes.map' },
+    },
+    default: [
+      {
+        name: 'Китай → Россия',
+        color: '#3a7b34',
+        stops: serializeStops([
+          { x: 25.3, y: 82.1, label: 'Тайцан', side: 'left' },
+          { x: 27.7, y: 90.2, label: 'Нинбо', side: 'right' },
+          { x: 26.6, y: 83.8, label: 'Шанхай', side: 'right' },
+          { x: 59.1, y: 22.6, label: 'Владивосток\nВМРП / ВМТП', side: 'left' },
+          { x: 62.7, y: 24.7, label: 'Врангель\nТерминал Врангель', side: 'right' },
+        ]),
+      },
     ],
   },
   'about.title': { type: 'string', default: 'Чем мы занимаемся', label: 'О нас: заголовок' },
@@ -177,6 +205,8 @@ usePageSeo({
         </CmsList>
       </div>
     </div>
+
+    <ShippingMap page="home" />
 
     <section>
       <div class="container">

@@ -5,14 +5,17 @@ declare(strict_types=1);
 namespace App\Application\PageContent\UpdateElement;
 
 use App\Application\PageContent\Exception\ContentValueTooLongException;
+use App\Application\PageContent\Exception\InvalidColorException;
 use App\Application\PageContent\Exception\InvalidDocumentUrlException;
 use App\Application\PageContent\Exception\InvalidIconNameException;
 use App\Application\PageContent\Exception\InvalidImageUrlException;
 use App\Application\PageContent\Exception\InvalidLinkException;
+use App\Application\PageContent\Exception\InvalidRouteStopsException;
 use App\Application\PageContent\Exception\InvalidUrlException;
 use App\Application\PageContent\Exception\TooManyItemsException;
 use App\Application\Shared\HtmlSanitizerInterface;
 use App\Domain\PageContent\Repository\PageContentRepositoryInterface;
+use App\Domain\PageContent\Value\ColorHex;
 use App\Domain\PageContent\Value\ContentList;
 use App\Domain\PageContent\Value\ContentType;
 use App\Domain\PageContent\Value\DocumentUrl;
@@ -20,6 +23,7 @@ use App\Domain\PageContent\Value\ExternalUrl;
 use App\Domain\PageContent\Value\IconName;
 use App\Domain\PageContent\Value\ImageUrl;
 use App\Domain\PageContent\Value\LinkPath;
+use App\Domain\PageContent\Value\RouteStops;
 use DateTimeImmutable;
 use Psr\Clock\ClockInterface;
 
@@ -38,6 +42,8 @@ final readonly class Handler
      * @throws InvalidLinkException
      * @throws InvalidUrlException
      * @throws InvalidDocumentUrlException
+     * @throws InvalidColorException
+     * @throws InvalidRouteStopsException
      * @throws TooManyItemsException
      */
     public function handle(Command $command): void
@@ -67,6 +73,8 @@ final readonly class Handler
      * @throws InvalidLinkException
      * @throws InvalidUrlException
      * @throws InvalidDocumentUrlException
+     * @throws InvalidColorException
+     * @throws InvalidRouteStopsException
      */
     private function checkValue(ContentType $type, string $value): string
     {
@@ -81,6 +89,8 @@ final readonly class Handler
             ContentType::Url => ExternalUrl::isValid($value) ? $value : throw InvalidUrlException::create(),
             ContentType::File => DocumentUrl::isValid($value) ? $value : throw InvalidDocumentUrlException::create(),
             ContentType::Html => $this->htmlSanitizer->sanitize($value),
+            ContentType::Color => ColorHex::normalize($value) ?? throw InvalidColorException::create(),
+            ContentType::Stops => RouteStops::normalize($value) ?? throw InvalidRouteStopsException::create(),
             default => $value,
         };
     }
@@ -92,6 +102,8 @@ final readonly class Handler
      * @throws InvalidLinkException
      * @throws InvalidUrlException
      * @throws InvalidDocumentUrlException
+     * @throws InvalidColorException
+     * @throws InvalidRouteStopsException
      * @throws TooManyItemsException
      */
     private function checkList(ContentList $list): ContentList

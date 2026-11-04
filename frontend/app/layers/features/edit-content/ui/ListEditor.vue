@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { cleanItems, fieldTypes, moveItem, newItem, patchElement } from '@entities/page-content'
 import type { ListItem, ResolvedList, SavedElement } from '@entities/page-content'
+import { parseStops, stopsProblem, toRoutes } from '@entities/route-map'
 import FieldInput from './FieldInput.vue'
+import StopsEditor from './StopsEditor.vue'
 
 /**
  * Editor of a Content list: one card per Item. Adding, deleting and moving Items save at once;
@@ -36,6 +38,31 @@ const canAdd = computed(() => items.value.length < props.element.max)
 const canDelete = computed(() => items.value.length > props.element.min)
 const fields = computed(() => Object.entries(props.element.fields).filter(([, def]) => !def.hidden))
 
+/** `stops` fields are edited on a map; only one Item's map is open at a time. */
+const stopsFields = computed(() => fields.value.filter(([, def]) => def.type === 'stops').map(([name]) => name))
+const openMap = ref<string | null>(items.value[0]?.id ?? null)
+
+/** Routes of the other Items, drawn faint under the edited one. */
+function otherRoutes(item: ListItem) {
+  return toRoutes(items.value.filter(other => other.id !== item.id))
+}
+
+function stopsSummary(value: string | undefined): string {
+  const stops = parseStops(value) ?? []
+  return stops.length ? stops.map(stop => stop.label.split('\n')[0] || '…').join(' → ') : 'Точек нет'
+}
+
+/** Why the list cannot be saved yet (a Route's Stops are incomplete), in Russian. */
+const problem = computed(() => {
+  for (const [index, item] of items.value.entries()) {
+    for (const name of stopsFields.value) {
+      const issue = stopsProblem(parseStops(item[name]) ?? [])
+      if (issue) return `Пункт ${index + 1}: ${issue}`
+    }
+  }
+  return null
+})
+
 async function save(next: ListItem[] = items.value) {
   error.value = ''
   saving.value = true
@@ -55,7 +82,10 @@ async function save(next: ListItem[] = items.value) {
 }
 
 function add() {
-  if (canAdd.value) void save([...items.value, newItem(props.element.fields)])
+  if (!canAdd.value) return
+  const item = newItem(props.element.fields)
+  openMap.value = item.id
+  void save([...items.value, item])
 }
 
 function remove(index: number) {
@@ -113,7 +143,30 @@ function move(index: number, delta: number) {
         />
       </div>
       <UFormField v-for="[name, def] in fields" :key="name" :label="def.label ?? name">
+        <template v-if="def.type === 'stops'">
+          <StopsEditor
+            v-if="openMap === item.id"
+            :model-value="item[name] ?? ''"
+            :background="def.backgroundUrl ?? ''"
+            :color="item.color || '#3a7b34'"
+            :others="otherRoutes(item)"
+            @update:model-value="(v: string) => { item[name] = v }"
+          />
+          <div v-else class="flex items-center gap-2">
+            <span class="flex-1 truncate text-sm" data-testid="stops-summary">{{ stopsSummary(item[name]) }}</span>
+            <UButton
+              label="Изменить на карте"
+              icon="i-lucide-map"
+              color="neutral"
+              variant="subtle"
+              size="sm"
+              data-testid="stops-open"
+              @click="openMap = item.id"
+            />
+          </div>
+        </template>
         <FieldInput
+          v-else
           :model-value="item[name] ?? ''"
           :type="def.type"
           :data-field="name"
@@ -137,8 +190,10 @@ function move(index: number, delta: number) {
 
     <UAlert v-if="error" color="error" variant="subtle" :description="error" data-testid="editor-error" />
 
+    <p v-if="problem" class="text-sm text-warning" data-testid="list-problem">{{ problem }}</p>
+
     <div class="flex gap-2">
-      <UButton label="Сохранить" :loading="saving || uploading" :disabled="!dirty" data-testid="save-button" @click="save()" />
+      <UButton label="Сохранить" :loading="saving || uploading" :disabled="!dirty || !!problem" data-testid="save-button" @click="save()" />
       <UButton
         v-if="!isDefault"
         label="Вернуть исходное"

@@ -298,6 +298,36 @@ final class PageContentCest
         assertSame(400, $I->sendApiRequest('PATCH', '/api/v1/page-content/home', $payload('javascript:x'), $session)->getStatusCode());
     }
 
+    public function routeListStoresColorAndStopsCanonically(ApiTester $I): void
+    {
+        $session = $I->haveSessionFor('manager');
+        $payload = static fn(string $color, string $stops): array => [
+            'path' => 'routes.items',
+            'type' => 'list',
+            'fields' => ['name' => 'string', 'color' => 'color', 'stops' => 'stops'],
+            'value' => [['id' => 'r1', 'name' => 'Китай → Россия', 'color' => $color, 'stops' => $stops]],
+        ];
+        $stops = json_encode([
+            ['x' => 10.04, 'y' => 80, 'label' => 'Шанхай', 'side' => 'left', 'note' => 'x'],
+            ['x' => 70, 'y' => 20.5, 'label' => "Владивосток\nВМРП / ВМТП", 'side' => 'right'],
+        ], JSON_THROW_ON_ERROR);
+
+        $response = $I->sendApiRequest('PATCH', '/api/v1/page-content/home', $payload('#E4572E', $stops), $session);
+
+        assertSame(200, $response->getStatusCode(), (string) $response->getBody());
+        $item = $I->decode($I->sendApiRequest('GET', '/api/v1/page-content?keys=home'))['data']['home']['routes.items']['value'][0];
+        assertSame('#e4572e', $item['color']);
+        assertSame(
+            '[{"x":10.0,"y":80.0,"label":"Шанхай","side":"left"},{"x":70.0,"y":20.5,"label":"Владивосток\nВМРП / ВМТП","side":"right"}]',
+            $item['stops'],
+        );
+
+        $oneStop = json_encode([['x' => 1, 'y' => 1, 'label' => 'A', 'side' => 'top']], JSON_THROW_ON_ERROR);
+        foreach (['bad color' => $payload('red', $stops), 'one stop' => $payload('#000000', $oneStop), 'broken json' => $payload('#000000', '[')] as $name => $bad) {
+            assertSame(400, $I->sendApiRequest('PATCH', '/api/v1/page-content/home', $bad, $session)->getStatusCode(), $name);
+        }
+    }
+
     public function invalidPageKeyIsNotFound(ApiTester $I): void
     {
         $response = $I->sendApiRequest(

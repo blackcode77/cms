@@ -1,5 +1,5 @@
 /** Types a single value can have: a standalone Content element or a field of an Item. */
-export type FieldType = 'string' | 'text' | 'html' | 'image' | 'icon' | 'link' | 'url' | 'lines' | 'file'
+export type FieldType = 'string' | 'text' | 'html' | 'image' | 'icon' | 'link' | 'url' | 'lines' | 'file' | 'color' | 'stops'
 export type ContentType = FieldType | 'list'
 
 /** One Item of a Content list: a stable `id` plus string values of its fields (absent field = empty). */
@@ -14,6 +14,10 @@ export interface FieldDef {
   hidden?: boolean
   /** For a `file` field: the Item field that receives the uploaded file's size, e.g. «210 КБ». */
   sizeField?: string
+  /** For a `stops` field: path of the page's image element drawn under the Stops in the editor. */
+  background?: string
+  /** Filled when the list is resolved: the current URL of `background`. */
+  backgroundUrl?: string
 }
 
 /** Declaration of one Content element in code: its type and the default shown until an editor saves a value. */

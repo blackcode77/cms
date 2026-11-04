@@ -25,7 +25,7 @@ A signed-in User's authenticated state: a short-lived access token plus a longer
 A public site page identified by a stable page key (e.g. `home`, `contacts`). Its editable text and media are its Content elements. Not a database record of title/slug/body: the page layout itself is fixed, only its content is editable. The special page key `site` holds content shared by every public page (header, footer, call-to-action banner).
 
 **Content element**:
-One editable piece of a Page, addressed by a dotted path within the Page (e.g. `header.phone_number_one`). Has a type (string, text, html, image, icon, link, url, lines, file, list), can be switched off (disabled elements are hidden from visitors), and falls back to its default when no value has been saved.
+One editable piece of a Page, addressed by a dotted path within the Page (e.g. `header.phone_number_one`). Has a type (string, text, html, image, icon, link, url, lines, file, color, stops, list), can be switched off (disabled elements are hidden from visitors), and falls back to its default when no value has been saved.
 
 **Content list**:
 A Content element whose value is an ordered list of Items of the same shape. Editors add, delete, reorder and edit Items, but cannot change which fields an Item has. Once saved, the list fully replaces its default.
@@ -50,3 +50,12 @@ A switchable state of the public site, available only to a signed-in User whose 
 
 **Splash screen**:
 A brief dark translucent overlay with the white company emblem in the centre, shown for about one second when a visitor fully loads the public site. Not shown on navigation between pages or in the admin area.
+
+**Route map**:
+A block of a Page showing a schematic map with Routes drawn over it, which play as an animation when a visitor scrolls to it. Editors choose the background picture and place Routes by clicking on it. Not a geographic map: positions are relative to the picture, not coordinates on Earth.
+
+**Route**:
+An ordered chain of two or more Stops on a Route map, drawn as a dashed line of one colour running from the first Stop to the last. May have a name, shown in the map's legend. Routes do not share Stops: the same port in two Routes is two separate Stops.
+
+**Stop**:
+A labelled point of a Route, usually a port or terminal (e.g. «Владивосток (ВМРП / ВМТП)»). The editor chooses on which side of the point its label is shown.

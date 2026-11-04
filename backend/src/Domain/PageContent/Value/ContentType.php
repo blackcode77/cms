@@ -15,6 +15,8 @@ enum ContentType: string
     case Lines = 'lines';
     case Url = 'url';
     case File = 'file';
+    case Color = 'color';
+    case Stops = 'stops';
     case List = 'list';
 
     /**
@@ -34,6 +36,8 @@ enum ContentType: string
             self::Lines => 5_000,
             self::Url => ExternalUrl::LENGTH_LIMIT,
             self::File => 255,
+            self::Color => 7,
+            self::Stops => 5_000,
             self::List => 200_000,
         };
     }

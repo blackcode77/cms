@@ -3,6 +3,7 @@ import { documentFileName, formatFileSize, uploadDocument, uploadImage } from '@
 import type { FieldType } from '@entities/page-content'
 import { linkTargets } from '@shared/config'
 import IconPicker from './IconPicker.vue'
+import ColorInput from './ColorInput.vue'
 
 /** Input for one value of the given type: a standalone element's value or one field of an Item. */
 const props = defineProps<{ type: FieldType }>()
@@ -58,6 +59,7 @@ const toolbarItems = [
     <UEditorToolbar :editor="editor" :items="toolbarItems as never" />
   </UEditor>
   <IconPicker v-else-if="props.type === 'icon'" v-model="value" />
+  <ColorInput v-else-if="props.type === 'color'" v-model="value" />
   <div v-else-if="props.type === 'link'" class="flex flex-col gap-2" data-testid="link-input">
     <USelect
       :model-value="linkTargets.some(t => t.to === value) ? value : undefined"
@@ -92,7 +94,7 @@ const toolbarItems = [
     >
     <p class="text-xs text-muted">PDF, Excel или Word, до 20 МБ.</p>
   </div>
-  <div v-else class="flex flex-col gap-2" data-testid="image-input">
+  <div v-else-if="props.type === 'image'" class="flex flex-col gap-2" data-testid="image-input">
     <img v-if="value" :src="value" alt="" class="max-h-40 rounded-md border border-default object-contain">
     <p class="break-all text-xs text-muted">{{ value }}</p>
     <input type="file" accept="image/jpeg,image/png,image/webp" :disabled="uploading" data-testid="image-file" @change="onFile">

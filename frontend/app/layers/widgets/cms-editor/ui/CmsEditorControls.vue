@@ -16,6 +16,12 @@ const canEdit = computed(() => checked.value && can('edit_page'))
 const frame = ref<HTMLIFrameElement | null>(null)
 const frameReady = ref(false)
 const toast = ref(false)
+/** Routes are placed on a map, which needs a wider panel. */
+const wide = computed(() => {
+  const target = selected.value
+  const element = target ? resolveElement(target.page, target.path) : null
+  return element?.type === 'list' && Object.values(element.fields).some(field => field.type === 'stops')
+})
 let toastTimer: ReturnType<typeof setTimeout> | undefined
 
 onMounted(async () => {
@@ -86,7 +92,7 @@ function onKeydown(event: KeyboardEvent) {
       v-if="active"
       ref="frame"
       class="cms-controls__panel"
-      :class="{ 'is-open': selected }"
+      :class="{ 'is-open': selected, 'is-wide': wide }"
       :src="EDITOR_PATH"
       title="Редактор содержимого"
       data-testid="editor-frame"
