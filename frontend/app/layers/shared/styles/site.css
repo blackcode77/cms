@@ -285,10 +285,10 @@ input:focus,select:focus,textarea:focus{outline:3px solid #8cc084;border-color:v
 }
 
 /* Hero photo parallax: the image drifts slower than the page (CSS scroll-driven, no JS).
-   Static on mobile, with reduced motion, or where animation-timeline is unsupported. */
+   Static with reduced motion, or where animation-timeline is unsupported. */
 .site .hero,.site .page-hero{overflow:hidden}
 @keyframes hero-parallax{to{transform:translate3d(0,16%,0)}}
-@media (min-width:768px) and (prefers-reduced-motion:no-preference){
+@media (prefers-reduced-motion:no-preference){
   @supports (animation-timeline:scroll()){
     .site .hero .hero__bg,.site .page-hero .page-hero__bg{
       top:-20%;bottom:auto;height:140%;
