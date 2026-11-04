@@ -3,7 +3,6 @@ export type DocFilter = 'all' | DocCategory
 
 export interface DocItem { ext: string, title: string, note: string, size: string }
 export interface DocGroup { category: DocCategory, title: string, items: DocItem[] }
-export interface Step { title: string, text: string }
 
 export const docFilters: { value: DocFilter, label: string }[] = [
   { value: 'all', label: 'Все' },
@@ -49,12 +48,4 @@ export const docGroups: DocGroup[] = [
       { ext: 'PDF', title: 'Памятка по перевозке опасных грузов', note: '2026', size: '230 КБ' },
     ],
   },
-]
-
-export const bookingSteps: Step[] = [
-  { title: 'Регистрация', text: 'Свяжитесь с менеджером и передайте реквизиты для заключения договора.' },
-  { title: 'Выберите тариф', text: 'Найдите ставку на маршрут в разделе «Публичные тарифы».' },
-  { title: 'Заявка на букинг', text: 'Отправьте заявку: груз, количество и тип контейнеров, порты, даты.' },
-  { title: 'Подтверждение', text: 'Получите подтверждение, номер букинга и инструкции по подаче контейнера.' },
-  { title: 'Документы и отгрузка', text: 'Передайте документы на груз, отследите статус в личном ежедневном отчёте.' },
 ]

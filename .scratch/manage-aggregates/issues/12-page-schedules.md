@@ -1,4 +1,4 @@
-Status: ready-for-agent
+Status: resolved
 
 # 12: Make `/schedules` editable (page key `schedules`)
 
@@ -8,6 +8,6 @@ Lists: Booking steps and texts; document lists and filters stay in code (files: 
 
 **Blocked by:** 05
 
-- [ ] Page renders identically with empty `page_content`
-- [ ] Every text block and list editable in Edit mode
-- [ ] Constants moved out of `model/content.ts`; public page tests updated
+- [x] Page renders identically with empty `page_content`
+- [x] Every text block and list editable in Edit mode
+- [x] Constants moved out of `model/content.ts`; public page tests updated

@@ -1,17 +1,47 @@
 <script setup lang="ts">
 import { CtaBanner } from '@widgets/cta-banner'
 import { PageHero } from '@widgets/page-hero'
+import { CmsList, CmsText, defineContentSchema, useCmsElement } from '@entities/page-content'
 import { usePageSeo } from '@shared/seo'
 import { AppIcon } from '@shared/ui'
-import { bookingSteps, docFilters, docGroups } from '../model/content'
+import { docFilters, docGroups } from '../model/content'
 import type { DocFilter } from '../model/content'
 
-const title = 'Расписания и тарифы — Гарант Интермодал'
-const description = 'Расписания движения флота, публичные тарифы, локальные сборы в портах и инструкция по букингу для новых клиентов Гарант Интермодал.'
+const PAGE = 'schedules'
+
+defineContentSchema(PAGE, {
+  'seo.title': { type: 'string', default: 'Расписания и тарифы — Гарант Интермодал', label: 'SEO: заголовок страницы' },
+  'seo.description': { type: 'string', default: 'Расписания движения флота, публичные тарифы, локальные сборы в портах и инструкция по букингу для новых клиентов Гарант Интермодал.', label: 'SEO: описание' },
+  'hero.image': { type: 'image', default: '/img/ship-night.jpg', label: 'Первый экран: фон' },
+  'hero.title': { type: 'string', default: 'Расписания и тарифы', label: 'Первый экран: заголовок' },
+  'hero.lead': { type: 'string', default: 'Актуальные расписания, публичные тарифы и порядок бронирования.', label: 'Первый экран: текст' },
+  'notice.title': { type: 'string', default: 'Уведомление об изменении расписания', label: 'Уведомление: заголовок' },
+  'notice.text': { type: 'text', default: 'С 15.11.2026 заход судна HE XING 7 в порт Владивосток переносится на 2 дня. Подробности — в расписании.', label: 'Уведомление: текст (выключите, чтобы скрыть уведомление)' },
+  'docs.title': { type: 'string', default: 'Документы для скачивания', label: 'Документы: заголовок' },
+  'booking.title': { type: 'string', default: 'Как забронировать: инструкция для новых клиентов', label: 'Бронирование: заголовок' },
+  'booking.steps': {
+    type: 'list',
+    label: 'Бронирование: шаги',
+    fields: { title: { type: 'string', label: 'Шаг' }, text: { type: 'text', label: 'Текст' } },
+    default: [
+      { title: 'Регистрация', text: 'Свяжитесь с менеджером и передайте реквизиты для заключения договора.' },
+      { title: 'Выберите тариф', text: 'Найдите ставку на маршрут в разделе «Публичные тарифы».' },
+      { title: 'Заявка на букинг', text: 'Отправьте заявку: груз, количество и тип контейнеров, порты, даты.' },
+      { title: 'Подтверждение', text: 'Получите подтверждение, номер букинга и инструкции по подаче контейнера.' },
+      { title: 'Документы и отгрузка', text: 'Передайте документы на груз, отследите статус в личном ежедневном отчёте.' },
+    ],
+  },
+  'booking.button': { type: 'string', default: 'Отправить заявку', label: 'Бронирование: кнопка' },
+})
+
+const seoTitle = useCmsElement(() => PAGE, () => 'seo.title')
+const seoDescription = useCmsElement(() => PAGE, () => 'seo.description')
+// The notice block exists only while its text is switched on (or in Edit mode, dimmed).
+const notice = useCmsElement(() => PAGE, () => 'notice.text')
 
 usePageSeo({
-  title,
-  description,
+  title: () => seoTitle.element.value?.value ?? '',
+  description: () => seoDescription.element.value?.value ?? '',
   path: '/schedules',
   image: '/img/ship-night.jpg',
   jsonLd: {
@@ -38,18 +68,16 @@ const activeFilter = ref<DocFilter>('all')
 <template>
   <div>
     <PageHero
-      title="Расписания и тарифы"
-      lead="Актуальные расписания, публичные тарифы и порядок бронирования."
-      image="/img/ship-night.jpg"
+      :cms-page="PAGE"
       :crumbs="[{ label: 'Главная', to: '/' }, { label: 'Расписания и тарифы' }]"
     />
     <section>
       <div class="container">
-        <div class="alert" role="status">
+        <div v-if="notice.visible.value" class="alert" role="status">
           <span class="icon" aria-hidden="true"><AppIcon name="bell" /></span>
-          <div><b>Уведомление об изменении расписания</b>С 15.11.2026 заход судна HE XING 7 в порт Владивосток переносится на 2 дня. Подробности — в расписании.</div>
+          <div><CmsText as="b" :page="PAGE" path="notice.title" /><CmsText :page="PAGE" path="notice.text" /></div>
         </div>
-        <div class="section-head"><h2>Документы для скачивания</h2></div>
+        <div class="section-head"><CmsText as="h2" :page="PAGE" path="docs.title" /></div>
         <div class="filters" role="group" aria-label="Фильтр документов">
           <button
             v-for="filter in docFilters"
@@ -80,11 +108,11 @@ const activeFilter = ref<DocFilter>('all')
     </section>
     <section id="booking" class="section--tint">
       <div class="container">
-        <div class="section-head"><h2>Как забронировать: инструкция для новых клиентов</h2></div>
-        <ol class="steps">
-          <li v-for="step in bookingSteps" :key="step.title"><b>{{ step.title }}</b><p>{{ step.text }}</p></li>
-        </ol>
-        <p style="margin-top:20px"><NuxtLink class="btn" to="/contacts#request">Отправить заявку</NuxtLink></p>
+        <div class="section-head"><CmsText as="h2" :page="PAGE" path="booking.title" /></div>
+        <CmsList v-slot="{ item }" as="ol" class="steps" :page="PAGE" path="booking.steps">
+          <li><b>{{ item.title }}</b><p>{{ item.text }}</p></li>
+        </CmsList>
+        <p style="margin-top:20px"><NuxtLink class="btn" to="/contacts#request"><CmsText :page="PAGE" path="booking.button" /></NuxtLink></p>
       </div>
     </section>
     <CtaBanner />

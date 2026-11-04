@@ -99,6 +99,23 @@ describe('editable content on public pages', () => {
     expect(group.findAll('.checklist li').map(li => li.text())).toEqual(['Владивосток', 'Находка'])
   })
 
+  it('schedules notice disappears when its text is switched off', async () => {
+    expect((await mountSuspended(SchedulesPage)).find('.alert').exists()).toBe(true)
+
+    usePageContent().apply('schedules', 'notice.text', { enabled: false })
+
+    expect((await mountSuspended(SchedulesPage)).find('.alert').exists()).toBe(false)
+  })
+
+  it('fleet vessel specs and the dangerous goods table come from Page content', async () => {
+    const content = usePageContent()
+    content.apply('fleet', 'vessel.sokol.specs', { type: 'list', value: [{ id: 's', label: 'Дедвейт', value: '5000 т' }] })
+    content.apply('dangerous-goods', 'classes.items', { type: 'list', value: [{ id: 'c', code: '9', name: 'Прочие' }] })
+
+    expect((await mountSuspended(FleetPage)).find('table.spec').text()).toContain('5000 т')
+    expect((await mountSuspended(DangerousGoodsPage)).findAll('tbody tr')).toHaveLength(1)
+  })
+
   it('contacts hero and the shared header phone follow saved content', async () => {
     const content = usePageContent()
     content.apply('contacts', 'hero.title', { type: 'string', value: 'Edited contacts' })

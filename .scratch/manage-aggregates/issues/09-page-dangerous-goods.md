@@ -1,4 +1,4 @@
-Status: ready-for-agent
+Status: resolved
 
 # 09: Make `/dangerous-goods` editable (page key `dangerous-goods`)
 
@@ -8,6 +8,6 @@ Lists: Acceptance steps, hazard classes (code, name), forbidden cargo checklist.
 
 **Blocked by:** 05
 
-- [ ] Page renders identically with empty `page_content`
-- [ ] Every text block and list editable in Edit mode
-- [ ] Constants moved out of `model/content.ts`; public page tests updated
+- [x] Page renders identically with empty `page_content`
+- [x] Every text block and list editable in Edit mode
+- [x] Constants moved out of `model/content.ts`; public page tests updated

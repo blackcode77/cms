@@ -1,4 +1,4 @@
-Status: ready-for-agent
+Status: resolved
 
 # 11: Make `/fleet` editable (page key `fleet`)
 
@@ -8,6 +8,6 @@ Lists: Vessel texts and spec rows editable; route coordinates and the route draw
 
 **Blocked by:** 05
 
-- [ ] Page renders identically with empty `page_content`
-- [ ] Every text block and list editable in Edit mode
-- [ ] Constants moved out of `model/content.ts`; public page tests updated
+- [x] Page renders identically with empty `page_content`
+- [x] Every text block and list editable in Edit mode
+- [x] Constants moved out of `model/content.ts`; public page tests updated
