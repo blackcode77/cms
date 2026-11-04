@@ -47,3 +47,6 @@ The saved values of a Page's Content elements. Only values that differ from the 
 
 **Edit mode**:
 A switchable state of the public site, available only to a signed-in User whose Role holds the `edit_page` Permission, in which Content elements are highlighted and can be edited in place; each change is saved immediately.
+
+**Splash screen**:
+A brief dark translucent overlay with the white company emblem in the centre, shown for about one second when a visitor fully loads the public site. Not shown on navigation between pages or in the admin area.

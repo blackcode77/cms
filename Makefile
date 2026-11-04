@@ -93,12 +93,20 @@ lint: ## psalm + php-cs-fixer (check) + eslint + steiger
 cs-fix: ## Fix PHP code style
 	$(PHP) composer cs-fix
 
-deploy-prod: ## Deploy to production: sync code, restart stack (build=1 rebuilds images), migrate, seed, smoke-check
+# Production images are built here, not on the server (it has ~1 GB RAM: `nuxt build` runs out of memory there).
+# Names must match `image:` in compose.prod.yaml.
+ship-images:
+	docker build -f docker/php/Dockerfile --target prod -t cms-prod-php .
+	docker build -f docker/node/Dockerfile --target prod -t cms-prod-node .
+	docker save cms-prod-php cms-prod-node | gzip | $(DEPLOY_SSH) $(DEPLOY_HOST) 'gunzip | docker load'
+
+deploy-prod: ## Deploy to production: sync code, restart stack (build=1 builds images locally and ships them), migrate, seed, smoke-check
 	@test -n "$(DEPLOY_HOST)" || { echo "Set DEPLOY_HOST in deploy.env (see deploy.env.example)"; exit 1; }
 	rsync -az --delete --no-owner --no-group $(foreach p,$(DEPLOY_EXCLUDES),--exclude=$(p)) \
 		-e "$(DEPLOY_SSH)" ./ $(DEPLOY_HOST):$(DEPLOY_PATH)/
+	$(if $(build),$(MAKE) --no-print-directory ship-images)
 	$(DEPLOY_SSH) $(DEPLOY_HOST) 'cd $(DEPLOY_PATH) && set -e && \
-		docker compose -f compose.prod.yaml up -d $(if $(build),--build) --remove-orphans && \
+		docker compose -f compose.prod.yaml up -d --no-build --remove-orphans && \
 		docker compose -f compose.prod.yaml exec -T php php yii migrate:up --no-interaction && \
 		docker compose -f compose.prod.yaml exec -T php php yii app:seed && \
 		docker compose -f compose.prod.yaml ps'
