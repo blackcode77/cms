@@ -93,12 +93,12 @@ lint: ## psalm + php-cs-fixer (check) + eslint + steiger
 cs-fix: ## Fix PHP code style
 	$(PHP) composer cs-fix
 
-deploy-prod: ## Deploy to production: sync code, rebuild stack, migrate, seed, smoke-check
+deploy-prod: ## Deploy to production: sync code, restart stack (build=1 rebuilds images), migrate, seed, smoke-check
 	@test -n "$(DEPLOY_HOST)" || { echo "Set DEPLOY_HOST in deploy.env (see deploy.env.example)"; exit 1; }
 	rsync -az --delete --no-owner --no-group $(foreach p,$(DEPLOY_EXCLUDES),--exclude=$(p)) \
 		-e "$(DEPLOY_SSH)" ./ $(DEPLOY_HOST):$(DEPLOY_PATH)/
 	$(DEPLOY_SSH) $(DEPLOY_HOST) 'cd $(DEPLOY_PATH) && set -e && \
-		docker compose -f compose.prod.yaml up -d --build --remove-orphans && \
+		docker compose -f compose.prod.yaml up -d $(if $(build),--build) --remove-orphans && \
 		docker compose -f compose.prod.yaml exec -T php php yii migrate:up --no-interaction && \
 		docker compose -f compose.prod.yaml exec -T php php yii app:seed && \
 		docker compose -f compose.prod.yaml ps'
