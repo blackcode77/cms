@@ -17,7 +17,7 @@ async function onSignOut() {
 <template>
   <UDashboardSidebar>
     <template #header>
-      <span class="font-semibold">CMS admin</span>
+      <span class="font-semibold">Администрирование</span>
     </template>
     <UNavigationMenu orientation="vertical" :items="items" />
     <template #footer>
@@ -27,7 +27,7 @@ async function onSignOut() {
           icon="i-lucide-log-out"
           color="neutral"
           variant="ghost"
-          label="Sign out"
+          label="Выйти"
           data-testid="sign-out"
           @click="onSignOut"
         />

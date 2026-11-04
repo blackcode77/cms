@@ -5,7 +5,7 @@ import { HealthStatusCard } from '@widgets/health-status'
 <template>
   <UDashboardPanel id="dashboard">
     <template #header>
-      <UDashboardNavbar title="Dashboard" />
+      <UDashboardNavbar title="Главная" />
     </template>
     <template #body>
       <HealthStatusCard />

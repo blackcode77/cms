@@ -29,8 +29,8 @@ async function save() {
   catch (e) {
     const err = e as { statusCode?: number, data?: { error_message?: string } }
     error.value = err.statusCode === 422
-      ? 'Enter a valid email, a name and choose a role.'
-      : err.data?.error_message ?? 'Could not save the user.'
+      ? 'Укажите корректную эл. почту и имя, выберите роль.'
+      : err.data?.error_message ?? 'Не удалось сохранить пользователя.'
   }
   finally {
     pending.value = false
@@ -44,20 +44,20 @@ async function save() {
     color="neutral"
     variant="outline"
     size="xs"
-    label="Edit"
+    label="Изменить"
     data-testid="user-edit"
     @click="show"
   />
-  <UModal v-model:open="open" title="Edit user">
+  <UModal v-model:open="open" title="Изменить пользователя">
     <template #body>
       <form class="space-y-4" data-testid="edit-user-form" @submit.prevent="save">
-        <UFormField label="Email">
+        <UFormField label="Эл. почта">
           <UInput v-model="state.email" type="email" class="w-full" data-testid="edit-user-email" />
         </UFormField>
-        <UFormField label="Name">
+        <UFormField label="Имя">
           <UInput v-model="state.name" class="w-full" data-testid="edit-user-name" />
         </UFormField>
-        <UFormField label="Role">
+        <UFormField label="Роль">
           <USelect
             v-model="state.role_id"
             :items="roles.map(r => ({ label: r.name, value: r.id }))"
@@ -66,8 +66,8 @@ async function save() {
         </UFormField>
         <p v-if="error" class="text-sm text-error" data-testid="edit-user-error">{{ error }}</p>
         <div class="flex justify-end gap-2">
-          <UButton color="neutral" variant="ghost" label="Cancel" @click="open = false" />
-          <UButton type="submit" label="Save" :loading="pending" data-testid="edit-user-save" />
+          <UButton color="neutral" variant="ghost" label="Отмена" @click="open = false" />
+          <UButton type="submit" label="Сохранить" :loading="pending" data-testid="edit-user-save" />
         </div>
       </form>
     </template>

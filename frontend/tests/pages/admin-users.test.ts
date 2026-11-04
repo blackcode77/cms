@@ -82,11 +82,11 @@ describe('AdminUsersPage', () => {
       expect(el).not.toBeNull()
       return el!
     })
-    expect(document.body.textContent).toContain('stops working')
-    expect(document.body.textContent).toContain('sessions are signed out')
+    expect(document.body.textContent).toContain('перестанет работать')
+    expect(document.body.textContent).toContain('все его сеансы будут завершены')
     confirm.click()
     await vi.waitFor(() => expect(calls).toBe(1))
-    await vi.waitFor(() => expect(wrapper.find('[data-testid="create-user-notice"]').text()).toContain('could not be sent'))
+    await vi.waitFor(() => expect(wrapper.find('[data-testid="create-user-notice"]').text()).toContain('не удалось отправить'))
   })
 
   it('offers no password reset for the current user own row', async () => {

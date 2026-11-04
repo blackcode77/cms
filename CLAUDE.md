@@ -2,6 +2,8 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+Language: the user interface (admin and public site) is in Russian. All user-facing text (labels, messages, titles, placeholders) must be Russian; code, identifiers, comments and docs stay in English.
+
 Monorepo: `backend/` (Yii3 API, PHP 8.5), `frontend/` (Nuxt 4 SSR + Nuxt UI), `docker/` (nginx, php, node, postgres). Everything runs in Docker via `make`; do not run `php`/`composer`/`npm` on the host.
 
 ## Commands

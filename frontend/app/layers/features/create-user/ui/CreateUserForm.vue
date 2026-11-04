@@ -11,8 +11,8 @@ const pending = ref(false)
 
 function messageFor(e: unknown): string {
   const err = e as { statusCode?: number, data?: { error_message?: string } }
-  if (err.statusCode === 422) return 'Enter a valid email, a name and choose a role.'
-  return err.data?.error_message ?? 'Could not create the user. Try again later.'
+  if (err.statusCode === 422) return 'Укажите корректную эл. почту и имя, выберите роль.'
+  return err.data?.error_message ?? 'Не удалось создать пользователя. Попробуйте позже.'
 }
 
 async function onSubmit() {
@@ -37,20 +37,20 @@ async function onSubmit() {
 <template>
   <UForm :state="state" class="space-y-4" data-testid="create-user-form" @submit="onSubmit">
     <UAlert v-if="error" color="error" variant="subtle" :description="error" data-testid="create-user-error" />
-    <UFormField label="Email" name="email">
+    <UFormField label="Эл. почта" name="email">
       <UInput v-model="state.email" type="email" class="w-full" />
     </UFormField>
-    <UFormField label="Name" name="name">
+    <UFormField label="Имя" name="name">
       <UInput v-model="state.name" class="w-full" />
     </UFormField>
-    <UFormField label="Role" name="role_id">
+    <UFormField label="Роль" name="role_id">
       <USelect
         v-model="state.role_id"
         :items="roles.map(r => ({ label: r.name, value: r.id }))"
-        placeholder="Choose a role"
+        placeholder="Выберите роль"
         class="w-full"
       />
     </UFormField>
-    <UButton type="submit" :loading="pending" label="Create user" />
+    <UButton type="submit" :loading="pending" label="Создать пользователя" />
   </UForm>
 </template>

@@ -9,8 +9,8 @@ const pending = ref(false)
 
 function messageFor(e: unknown): string {
   const err = e as { statusCode?: number, data?: { error_message?: string } }
-  if (err.statusCode === 422) return 'Enter your email and password.'
-  return err.data?.error_message ?? 'Sign-in failed. Try again later.'
+  if (err.statusCode === 422) return 'Введите эл. почту и пароль.'
+  return err.data?.error_message ?? 'Не удалось войти. Попробуйте позже.'
 }
 
 async function onSubmit() {
@@ -33,7 +33,7 @@ async function onSubmit() {
   <div class="flex min-h-screen items-center justify-center p-4">
     <UCard class="w-full max-w-sm">
       <template #header>
-        <h1 class="text-lg font-semibold">Sign in</h1>
+        <h1 class="text-lg font-semibold">Вход</h1>
       </template>
       <UForm :state="state" class="space-y-4" @submit="onSubmit">
         <UAlert
@@ -43,13 +43,13 @@ async function onSubmit() {
           :description="error"
           data-testid="login-error"
         />
-        <UFormField label="Email" name="email">
+        <UFormField label="Эл. почта" name="email">
           <UInput v-model="state.email" type="email" autocomplete="username" class="w-full" />
         </UFormField>
-        <UFormField label="Password" name="password">
+        <UFormField label="Пароль" name="password">
           <UInput v-model="state.password" type="password" autocomplete="current-password" class="w-full" />
         </UFormField>
-        <UButton type="submit" block :loading="pending" label="Sign in" />
+        <UButton type="submit" block :loading="pending" label="Войти" />
       </UForm>
     </UCard>
   </div>

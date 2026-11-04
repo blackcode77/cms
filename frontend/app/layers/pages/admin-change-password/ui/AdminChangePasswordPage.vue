@@ -18,19 +18,19 @@ async function onSignOut() {
   <div class="flex min-h-screen items-center justify-center p-4">
     <UCard class="w-full max-w-sm">
       <template #header>
-        <h1 class="text-lg font-semibold">Change password</h1>
+        <h1 class="text-lg font-semibold">Смена пароля</h1>
       </template>
       <UAlert
         v-if="mustChangePassword"
         color="warning"
         variant="subtle"
         class="mb-4"
-        description="You must choose a new password before you can continue."
+        description="Чтобы продолжить, задайте новый пароль."
         data-testid="forced-change-notice"
       />
       <ChangePasswordForm @changed="onChanged" />
       <template #footer>
-        <UButton variant="link" label="Sign out" data-testid="change-password-sign-out" @click="onSignOut" />
+        <UButton variant="link" label="Выйти" data-testid="change-password-sign-out" @click="onSignOut" />
       </template>
     </UCard>
   </div>

@@ -21,7 +21,7 @@ async function confirm() {
     emit('deleted')
   }
   catch (e) {
-    error.value = (e as { data?: { error_message?: string } }).data?.error_message ?? 'Could not delete the user.'
+    error.value = (e as { data?: { error_message?: string } }).data?.error_message ?? 'Не удалось удалить пользователя.'
   }
 }
 </script>
@@ -32,17 +32,17 @@ async function confirm() {
     color="error"
     variant="outline"
     size="xs"
-    label="Delete"
+    label="Удалить"
     data-testid="user-delete"
     @click="ask"
   />
-  <UModal v-model:open="open" title="Delete user">
+  <UModal v-model:open="open" title="Удаление пользователя">
     <template #body>
-      <p>Delete {{ user.email }}? Their sessions will end. This cannot be undone.</p>
+      <p>Удалить {{ user.email }}? Все его сеансы будут завершены. Это нельзя отменить.</p>
       <p v-if="error" class="mt-3 text-sm text-error" data-testid="delete-user-error">{{ error }}</p>
       <div class="mt-4 flex justify-end gap-2">
-        <UButton color="neutral" variant="ghost" label="Cancel" @click="open = false" />
-        <UButton color="error" label="Delete" data-testid="user-delete-confirm" @click="confirm" />
+        <UButton color="neutral" variant="ghost" label="Отмена" @click="open = false" />
+        <UButton color="error" label="Удалить" data-testid="user-delete-confirm" @click="confirm" />
       </div>
     </template>
   </UModal>

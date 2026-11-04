@@ -15,7 +15,7 @@ describe('HealthStatusCard', () => {
     const wrapper = await mountSuspended(HealthStatusCard)
 
     expect(wrapper.find('[data-testid="health-ok"]').exists()).toBe(true)
-    expect(wrapper.text()).toContain('Database')
+    expect(wrapper.text()).toContain('База данных')
   })
 
   it('shows an error when the API fails', async () => {

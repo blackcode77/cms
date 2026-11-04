@@ -14,7 +14,7 @@ async function confirm() {
     emit('done', await resetUserPassword(props.user.id))
   }
   catch (e) {
-    emit('failed', (e as { data?: { error_message?: string } }).data?.error_message ?? 'Could not reset the password.')
+    emit('failed', (e as { data?: { error_message?: string } }).data?.error_message ?? 'Не удалось сбросить пароль.')
   }
   finally {
     busy.value = false
@@ -27,21 +27,21 @@ async function confirm() {
   <UButton
     size="xs"
     variant="outline"
-    label="Send password again"
+    label="Отправить пароль заново"
     :data-testid="`reset-password-${user.id}`"
     @click="open = true"
   />
-  <UModal v-model:open="open" title="Send a new password">
+  <UModal v-model:open="open" title="Новый пароль">
     <template #body>
       <p>
-        Generate a new password for {{ user.email }} and email it to them? Their current password stops working
-        immediately and all their sessions are signed out. They must change the new password on next sign-in.
+        Создать новый пароль для {{ user.email }} и отправить его на почту? Текущий пароль перестанет работать сразу,
+        все его сеансы будут завершены. При следующем входе он должен будет сменить пароль.
       </p>
       <div class="mt-4 flex justify-end gap-2">
-        <UButton color="neutral" variant="ghost" label="Cancel" @click="open = false" />
+        <UButton color="neutral" variant="ghost" label="Отмена" @click="open = false" />
         <UButton
           color="warning"
-          label="Reset password"
+          label="Сбросить пароль"
           :loading="busy"
           data-testid="reset-password-confirm"
           @click="confirm"

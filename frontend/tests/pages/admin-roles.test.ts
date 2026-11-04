@@ -31,8 +31,8 @@ describe('Roles admin section', () => {
     const labels = (permissions: string[]) =>
       visibleMenuItems(adminMenuItems, p => permissions.includes(p)).map(i => i.label)
 
-    expect(labels(['view_dashboard'])).not.toContain('Roles')
-    expect(labels(['view_dashboard', 'view_roles'])).toContain('Roles')
+    expect(labels(['view_dashboard'])).not.toContain('Роли')
+    expect(labels(['view_dashboard', 'view_roles'])).toContain('Роли')
   })
 
   it('lists roles and disables editing and deleting of the Admin role', async () => {

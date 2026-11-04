@@ -16,36 +16,36 @@ const notice = ref<{ color: 'success' | 'warning', text: string } | null>(null)
 
 async function onCreated(result: CreateUserResult, email: string) {
   notice.value = result.mail_sent
-    ? { color: 'success', text: `User ${email} created. Login and password were emailed.` }
+    ? { color: 'success', text: `Пользователь ${email} создан. Логин и пароль отправлены на почту.` }
     : {
         color: 'warning',
-        text: `User ${email} created, but the email could not be sent. Their password must be reset to deliver it.`,
+        text: `Пользователь ${email} создан, но письмо не удалось отправить. Чтобы передать пароль, сбросьте его.`,
       }
   await refresh()
 }
 
 function onPasswordReset(user: UserListItem, result: ResetPasswordResult) {
   notice.value = result.mail_sent
-    ? { color: 'success', text: `A new password was emailed to ${user.email}.` }
+    ? { color: 'success', text: `Новый пароль отправлен на ${user.email}.` }
     : {
         color: 'warning',
-        text: `A new password was set for ${user.email}, but the email could not be sent. Send it again.`,
+        text: `Новый пароль для ${user.email} задан, но письмо не удалось отправить. Отправьте его ещё раз.`,
       }
 }
 
 const columns = [
-  { accessorKey: 'name', header: 'Name' },
-  { accessorKey: 'email', header: 'Email' },
-  { accessorKey: 'role.name', header: 'Role' },
+  { accessorKey: 'name', header: 'Имя' },
+  { accessorKey: 'email', header: 'Эл. почта' },
+  { accessorKey: 'role.name', header: 'Роль' },
   { id: 'actions', header: '' },
-  { id: 'password', header: 'Password' },
+  { id: 'password', header: 'Пароль' },
 ]
 </script>
 
 <template>
   <UDashboardPanel id="users">
     <template #header>
-      <UDashboardNavbar title="Users" />
+      <UDashboardNavbar title="Пользователи" />
     </template>
     <template #body>
       <UAlert

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { createRole, deleteRole, fetchPermissionCatalog, fetchRoles, updateRole } from '@entities/role'
 import type { Role } from '@entities/role'
-import { useCurrentUser } from '@entities/session'
+import { permissionLabel, useCurrentUser } from '@entities/session'
 import type { Permission } from '@entities/session'
 
 const { can } = useCurrentUser()
@@ -25,7 +25,7 @@ const deleteError = ref('')
 
 function messageOf(error: unknown): string {
   const e = error as { data?: { error_message?: string }, message?: string } | null
-  return e?.data?.error_message ?? e?.message ?? 'Something went wrong.'
+  return e?.data?.error_message ?? e?.message ?? 'Что-то пошло не так.'
 }
 
 function openCreate() {
@@ -91,12 +91,12 @@ async function confirmDelete() {
 <template>
   <UDashboardPanel id="roles">
     <template #header>
-      <UDashboardNavbar title="Roles">
+      <UDashboardNavbar title="Роли">
         <template #right>
           <UButton
             v-if="canManage"
             icon="i-lucide-plus"
-            label="New role"
+            label="Новая роль"
             data-testid="role-create"
             @click="openCreate"
           />
@@ -115,8 +115,8 @@ async function confirmDelete() {
           <div class="min-w-0">
             <div class="flex items-center gap-2">
               <span class="font-medium">{{ role.name }}</span>
-              <UBadge v-if="role.read_only" color="neutral" variant="subtle" label="Read-only" />
-              <span class="text-sm text-muted">{{ role.users_count }} user(s)</span>
+              <UBadge v-if="role.read_only" color="neutral" variant="subtle" label="Только чтение" />
+              <span class="text-sm text-muted">Пользователей: {{ role.users_count }}</span>
             </div>
             <div class="mt-2 flex flex-wrap gap-1">
               <UBadge
@@ -124,9 +124,9 @@ async function confirmDelete() {
                 :key="permission"
                 color="primary"
                 variant="subtle"
-                :label="permission"
+                :label="permissionLabel(permission)"
               />
-              <span v-if="!role.permissions.length" class="text-sm text-muted">No permissions</span>
+              <span v-if="!role.permissions.length" class="text-sm text-muted">Нет прав</span>
             </div>
           </div>
           <div v-if="canManage" class="flex gap-2">
@@ -134,7 +134,7 @@ async function confirmDelete() {
               icon="i-lucide-pencil"
               color="neutral"
               variant="outline"
-              label="Edit"
+              label="Изменить"
               :disabled="role.read_only"
               data-testid="role-edit"
               @click="openEdit(role)"
@@ -143,7 +143,7 @@ async function confirmDelete() {
               icon="i-lucide-trash-2"
               color="error"
               variant="outline"
-              label="Delete"
+              label="Удалить"
               :disabled="role.read_only || role.name === 'visiter'"
               data-testid="role-delete"
               @click="askDelete(role)"
@@ -152,10 +152,10 @@ async function confirmDelete() {
         </li>
       </ul>
 
-      <UModal v-model:open="formOpen" :title="editing ? 'Edit role' : 'New role'">
+      <UModal v-model:open="formOpen" :title="editing ? 'Изменить роль' : 'Новая роль'">
         <template #body>
           <form class="space-y-4" @submit.prevent="save">
-            <UFormField label="Name">
+            <UFormField label="Название">
               <UInput
                 v-model="name"
                 class="w-full"
@@ -164,11 +164,11 @@ async function confirmDelete() {
               />
             </UFormField>
             <fieldset class="space-y-2">
-              <legend class="text-sm font-medium">Permissions</legend>
+              <legend class="text-sm font-medium">Права</legend>
               <UCheckbox
                 v-for="permission in catalog"
                 :key="permission"
-                :label="permission"
+                :label="permissionLabel(permission)"
                 :model-value="permissions.includes(permission)"
                 :data-testid="`permission-${permission}`"
                 @update:model-value="toggle(permission, $event)"
@@ -176,20 +176,20 @@ async function confirmDelete() {
             </fieldset>
             <p v-if="formError" class="text-sm text-error" data-testid="role-form-error">{{ formError }}</p>
             <div class="flex justify-end gap-2">
-              <UButton color="neutral" variant="ghost" label="Cancel" @click="formOpen = false" />
-              <UButton type="submit" label="Save" :loading="saving" data-testid="role-save" />
+              <UButton color="neutral" variant="ghost" label="Отмена" @click="formOpen = false" />
+              <UButton type="submit" label="Сохранить" :loading="saving" data-testid="role-save" />
             </div>
           </form>
         </template>
       </UModal>
 
-      <UModal v-model:open="deleteOpen" title="Delete role">
+      <UModal v-model:open="deleteOpen" title="Удаление роли">
         <template #body>
-          <p>Delete the role "{{ deleting?.name }}"? This cannot be undone.</p>
+          <p>Удалить роль «{{ deleting?.name }}»? Это нельзя отменить.</p>
           <p v-if="deleteError" class="mt-3 text-sm text-error" data-testid="role-delete-error">{{ deleteError }}</p>
           <div class="mt-4 flex justify-end gap-2">
-            <UButton color="neutral" variant="ghost" label="Cancel" @click="deleteOpen = false" />
-            <UButton color="error" label="Delete" data-testid="role-delete-confirm" @click="confirmDelete" />
+            <UButton color="neutral" variant="ghost" label="Отмена" @click="deleteOpen = false" />
+            <UButton color="error" label="Удалить" data-testid="role-delete-confirm" @click="confirmDelete" />
           </div>
         </template>
       </UModal>

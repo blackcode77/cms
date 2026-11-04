@@ -8,15 +8,15 @@ const { data, error } = await useAsyncData('health', () => fetchHealth())
 <template>
   <UCard>
     <template #header>
-      <h2 class="font-semibold">Backend status</h2>
+      <h2 class="font-semibold">Состояние сервера</h2>
     </template>
     <p v-if="error" data-testid="health-error" class="text-error">
-      API unavailable: {{ error.message }}
+      API недоступен: {{ error.message }}
     </p>
     <dl v-else-if="data" data-testid="health-ok" class="grid grid-cols-2 gap-2">
-      <dt>App</dt>
+      <dt>Приложение</dt>
       <dd>{{ data.app }}</dd>
-      <dt>Database</dt>
+      <dt>База данных</dt>
       <dd>{{ data.database }}</dd>
     </dl>
   </UCard>
