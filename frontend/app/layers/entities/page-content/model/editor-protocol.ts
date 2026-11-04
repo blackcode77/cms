@@ -1,4 +1,4 @@
-import type { ContentType, SavedElement } from './types'
+import type { ResolvedElement, SavedElement } from './types'
 
 /**
  * `postMessage` protocol between the public page (host) and the editor panel iframe (`/admin/cms-editor`).
@@ -9,7 +9,8 @@ export interface OpenMessage {
   type: 'open'
   page: string
   path: string
-  element: { type: ContentType, value: string, default: string, label: string, enabled: boolean }
+  /** Plain data (no reactive proxies), since it goes through `postMessage`. */
+  element: ResolvedElement
 }
 
 export type HostMessage = OpenMessage

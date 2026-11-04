@@ -1,6 +1,7 @@
 import { fetchPageContent } from '../api/page-content-api'
 import { getElementDef } from './schema'
-import type { ResolvedElement, SavedElement, SavedPages } from './types'
+import { withDefaultIds } from './list-items'
+import type { ResolvedElement, ResolvedList, ResolvedValue, SavedElement, SavedPages } from './types'
 
 /**
  * Saved Content element values of the visited pages, shared between SSR and the browser (`useState`).
@@ -10,17 +11,35 @@ export function usePageContent() {
   const content = useState<SavedPages>('cms-content', () => ({}))
   const loadedPages = useState<string[]>('cms-content-loaded', () => [])
 
-  function resolve(page: string, path: string): ResolvedElement | null {
+  /** Any Content element (single value or list); `null` if the page does not declare the path. */
+  function resolveElement(page: string, path: string): ResolvedElement | null {
     const def = getElementDef(page, path)
     if (!def) return null
     const saved = content.value[page]?.[path]
-    return {
-      type: def.type,
-      value: saved?.value ?? def.default,
-      default: def.default,
-      label: def.label ?? path,
-      enabled: saved?.enabled ?? true,
+    const enabled = saved?.enabled ?? true
+    const label = def.label ?? path
+
+    if (def.type === 'list') {
+      const defaults = withDefaultIds(def.default)
+      // A value saved under another type (the schema changed since) is ignored, like an orphan.
+      const value = saved?.type === 'list' && Array.isArray(saved.value) ? saved.value : defaults
+      return { type: 'list', value, default: defaults, label, enabled, fields: def.fields, min: def.min ?? 0, max: def.max ?? 100 }
     }
+
+    const value = typeof saved?.value === 'string' ? saved.value : def.default
+    return { type: def.type, value, default: def.default, label, enabled }
+  }
+
+  /** A single-value Content element; `null` if not declared or declared as a list. */
+  function resolve(page: string, path: string): ResolvedValue | null {
+    const element = resolveElement(page, path)
+    return element && element.type !== 'list' ? element : null
+  }
+
+  /** A Content list; `null` if not declared or not a list. */
+  function resolveList(page: string, path: string): ResolvedList | null {
+    const element = resolveElement(page, path)
+    return element?.type === 'list' ? element : null
   }
 
   /** Loads pages not loaded yet. A backend failure is swallowed: the site must render with defaults. */
@@ -43,5 +62,5 @@ export function usePageContent() {
     content.value = { ...content.value, [page]: { ...pageContent, [path]: { ...pageContent[path], ...patch } } }
   }
 
-  return { content, resolve, ensureLoaded, apply }
+  return { content, resolve, resolveList, resolveElement, ensureLoaded, apply }
 }

@@ -48,6 +48,102 @@ describe('editable content on public pages', () => {
     expect(wrapper.text()).not.toContain('Кратчайший путь вашего груза')
   })
 
+  it('home lists render their defaults', async () => {
+    const wrapper = await mountSuspended(HomePage)
+
+    expect(wrapper.findAll('.stats li')).toHaveLength(5)
+    expect(wrapper.findAll('article.adv')).toHaveLength(6)
+    expect(wrapper.findAll('ul.checklist')).toHaveLength(2)
+    expect(wrapper.findAll('.gallery img')).toHaveLength(4)
+    expect(wrapper.findAll('ul.partners li').map(li => li.text())).toContain('ISACO')
+  })
+
+  it('home lists follow saved content, and an emptied list disappears', async () => {
+    const content = usePageContent()
+    content.apply('site', 'partners.items', { type: 'list', value: [{ id: 'x', name: 'New Partner' }] })
+    content.apply('home', 'geo.checklist', { type: 'list', value: [] })
+    content.apply('home', 'projects.gallery', { type: 'list', value: [{ id: 'u', image: '/uploads/a.webp', alt: 'Uploaded' }] })
+
+    const wrapper = await mountSuspended(HomePage)
+
+    expect(wrapper.findAll('ul.partners li').map(li => li.text())).toEqual(['New Partner'])
+    expect(wrapper.findAll('ul.checklist')).toHaveLength(1)
+    expect(wrapper.get('.gallery img').attributes()).toMatchObject({ src: '/uploads/a.webp', alt: 'Uploaded' })
+  })
+
+  it('home service cards link where saved, and a card without a link is a plain block', async () => {
+    usePageContent().apply('home', 'services.cards', {
+      type: 'list',
+      value: [{ id: 'a', title: 'Linked', link: '/fleet' }, { id: 'b', title: 'Plain' }],
+    })
+
+    const wrapper = await mountSuspended(HomePage)
+    const cards = wrapper.findAll('.grid--4 .card')
+
+    expect(cards[0]!.element.tagName).toBe('A')
+    expect(cards[0]!.attributes('href')).toBe('/fleet')
+    expect(cards[1]!.element.tagName).toBe('DIV')
+    expect(cards[1]!.text()).not.toContain('Подробнее')
+  })
+
+  it('services geography groups render one list entry per saved line', async () => {
+    usePageContent().apply('services', 'geo.groups', {
+      type: 'list',
+      value: [{ id: 'g', title: 'Порты', items: 'Владивосток\n\n Находка ' }],
+    })
+
+    const wrapper = await mountSuspended(ServicesPage)
+    const group = wrapper.get('#geography')
+
+    expect(group.get('h4').text()).toBe('Порты')
+    expect(group.findAll('.checklist li').map(li => li.text())).toEqual(['Владивосток', 'Находка'])
+  })
+
+  it('schedules notice disappears when its text is switched off', async () => {
+    expect((await mountSuspended(SchedulesPage)).find('.alert').exists()).toBe(true)
+
+    usePageContent().apply('schedules', 'notice.text', { enabled: false })
+
+    expect((await mountSuspended(SchedulesPage)).find('.alert').exists()).toBe(false)
+  })
+
+  it('fleet vessel specs and the dangerous goods table come from Page content', async () => {
+    const content = usePageContent()
+    content.apply('fleet', 'vessel.sokol.specs', { type: 'list', value: [{ id: 's', label: 'Дедвейт', value: '5000 т' }] })
+    content.apply('dangerous-goods', 'classes.items', { type: 'list', value: [{ id: 'c', code: '9', name: 'Прочие' }] })
+
+    expect((await mountSuspended(FleetPage)).find('table.spec').text()).toContain('5000 т')
+    expect((await mountSuspended(DangerousGoodsPage)).findAll('tbody tr')).toHaveLength(1)
+  })
+
+  it('about: the first company is highlighted, only companies with a website get a link, photos replace the icon', async () => {
+    const content = usePageContent()
+    content.apply('about', 'group.companies', {
+      type: 'list',
+      value: [
+        { id: 'a', name: 'Head', url: 'https://example.com', url_label: 'example.com →' },
+        { id: 'b', name: 'Other' },
+      ],
+    })
+    content.apply('about', 'management.people', { type: 'list', value: [{ id: 'p', name: 'Иванов', role: 'CEO', photo: '/uploads/p.webp' }] })
+
+    const wrapper = await mountSuspended(AboutPage)
+    const companies = wrapper.findAll('.org article')
+
+    expect(companies[0]!.classes()).toContain('main')
+    expect(companies[1]!.classes()).not.toContain('main')
+    expect(companies[0]!.get('a').attributes()).toMatchObject({ href: 'https://example.com', target: '_blank', rel: 'noopener' })
+    expect(companies[1]!.find('a').exists()).toBe(false)
+    expect(wrapper.get('.person .ph img').attributes()).toMatchObject({ src: '/uploads/p.webp', alt: 'Иванов' })
+  })
+
+  it('partners are one shared list on home and about', async () => {
+    usePageContent().apply('site', 'partners.items', { type: 'list', value: [{ id: 'x', name: 'Shared' }] })
+
+    expect((await mountSuspended(HomePage)).findAll('ul.partners li').map(li => li.text())).toEqual(['Shared'])
+    expect((await mountSuspended(AboutPage)).findAll('ul.partners li').map(li => li.text())).toEqual(['Shared'])
+  })
+
   it('contacts hero and the shared header phone follow saved content', async () => {
     const content = usePageContent()
     content.apply('contacts', 'hero.title', { type: 'string', value: 'Edited contacts' })

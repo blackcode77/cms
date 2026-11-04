@@ -1,15 +1,71 @@
 <script setup lang="ts">
 import { CtaBanner } from '@widgets/cta-banner'
 import { PageHero } from '@widgets/page-hero'
+import { CmsList, CmsText, defineContentSchema, useCmsElement } from '@entities/page-content'
 import { usePageSeo } from '@shared/seo'
-import { acceptanceSteps, forbiddenCargo, hazardClasses } from '../model/content'
 
-const title = 'Перевозка опасных грузов — Гарант Интермодал'
-const description = 'Порядок приёма, классы опасности и список запрещённых к приёму опасных грузов. Гарант Интермодал.'
+const PAGE = 'dangerous-goods'
+
+defineContentSchema(PAGE, {
+  'seo.title': { type: 'string', default: 'Перевозка опасных грузов — Гарант Интермодал', label: 'SEO: заголовок страницы' },
+  'seo.description': { type: 'string', default: 'Порядок приёма, классы опасности и список запрещённых к приёму опасных грузов. Гарант Интермодал.', label: 'SEO: описание' },
+  'hero.image': { type: 'image', default: '/img/p-tank.jpg', label: 'Первый экран: фон' },
+  'hero.title': { type: 'string', default: 'Перевозка опасных грузов', label: 'Первый экран: заголовок' },
+  'hero.lead': { type: 'string', default: 'Принимаем опасные грузы в контейнерах и тарных местах по правилам МОПОГ/IMDG и требованиям перевозчиков.', label: 'Первый экран: текст' },
+  'steps.title': { type: 'string', default: 'Порядок приёма', label: 'Порядок приёма: заголовок' },
+  'steps.items': {
+    type: 'list',
+    label: 'Порядок приёма: шаги',
+    fields: { title: { type: 'string', label: 'Шаг' }, text: { type: 'text', label: 'Текст' } },
+    default: [
+      { title: 'Запрос', text: 'Наименование, номер ООН, класс, масса, упаковка.' },
+      { title: 'Согласование', text: 'Проверяем допуск груза на линии и в портах.' },
+      { title: 'Документы', text: 'Паспорт безопасности, декларация, сертификат упаковки.' },
+      { title: 'Букинг', text: 'Подтверждение ставки и условий.' },
+    ],
+  },
+  'classes.title': { type: 'string', default: 'Классы опасности', label: 'Классы опасности: заголовок' },
+  'classes.items': {
+    type: 'list',
+    label: 'Классы опасности: таблица',
+    fields: { code: { type: 'string', label: 'Класс' }, name: { type: 'string', label: 'Название' } },
+    default: [
+      { code: '1', name: 'Взрывчатые вещества' },
+      { code: '2', name: 'Газы' },
+      { code: '3', name: 'Легковоспламеняющиеся жидкости' },
+      { code: '4', name: 'Легковоспламеняющиеся твёрдые вещества' },
+      { code: '5', name: 'Окисляющие вещества и органические пероксиды' },
+      { code: '6', name: 'Токсичные и инфекционные вещества' },
+      { code: '7', name: 'Радиоактивные материалы' },
+      { code: '8', name: 'Коррозионные вещества' },
+      { code: '9', name: 'Прочие опасные вещества' },
+    ],
+  },
+  'forbidden.title': { type: 'string', default: 'Запрещены к приёму', label: 'Запрещённые грузы: заголовок' },
+  'forbidden.items': {
+    type: 'list',
+    label: 'Запрещённые грузы: список',
+    fields: { text: { type: 'string', label: 'Пункт' } },
+    default: [
+      { text: 'Взрывчатые вещества класса 1' },
+      { text: 'Радиоактивные материалы класса 7' },
+      { text: 'Инфекционные вещества категории А' },
+      { text: 'Грузы без паспорта безопасности и маркировки' },
+      { text: 'Грузы в повреждённой или неутверждённой таре' },
+    ],
+  },
+  'forbidden.note': { type: 'string', default: 'Полный список запрещённых грузов будет загружен документом.', label: 'Запрещённые грузы: примечание' },
+  'aside.title': { type: 'string', default: 'Консультация по грузу', label: 'Боковая колонка: заголовок' },
+  'aside.text': { type: 'text', default: 'Опишите груз — подскажем, возможна ли перевозка, и рассчитаем стоимость.', label: 'Боковая колонка: текст' },
+  'aside.button': { type: 'string', default: 'Задать вопрос', label: 'Боковая колонка: кнопка' },
+})
+
+const seoTitle = useCmsElement(() => PAGE, () => 'seo.title')
+const seoDescription = useCmsElement(() => PAGE, () => 'seo.description')
 
 usePageSeo({
-  title,
-  description,
+  title: () => seoTitle.element.value?.value ?? '',
+  description: () => seoDescription.element.value?.value ?? '',
   path: '/dangerous-goods',
   image: '/img/p-tank.jpg',
   jsonLd: {
@@ -33,42 +89,37 @@ usePageSeo({
 
 <template>
   <div>
-    <PageHero
-      title="Перевозка опасных грузов"
-      lead="Принимаем опасные грузы в контейнерах и тарных местах по правилам МОПОГ/IMDG и требованиям перевозчиков."
-      image="/img/p-tank.jpg"
-      :crumbs="[{ label: 'Главная', to: '/' }, { label: 'Опасные грузы' }]"
-    />
+    <PageHero :cms-page="PAGE" :crumbs="[{ label: 'Главная', to: '/' }, { label: 'Опасные грузы' }]" />
     <section>
       <div class="container">
         <div class="layout">
           <article class="prose">
-            <h2>Порядок приёма</h2>
-            <ol class="steps" style="grid-template-columns:1fr 1fr">
-              <li v-for="step in acceptanceSteps" :key="step.title"><b>{{ step.title }}</b><p>{{ step.text }}</p></li>
-            </ol>
-            <h2>Классы опасности</h2>
+            <CmsText as="h2" :page="PAGE" path="steps.title" />
+            <CmsList v-slot="{ item }" as="ol" class="steps" style="grid-template-columns:1fr 1fr" :page="PAGE" path="steps.items">
+              <li><b>{{ item.title }}</b><p>{{ item.text }}</p></li>
+            </CmsList>
+            <CmsText as="h2" :page="PAGE" path="classes.title" />
             <div class="table-wrap">
               <table>
                 <thead><tr><th>Класс</th><th>Название</th></tr></thead>
-                <tbody>
-                  <tr v-for="item in hazardClasses" :key="item.code">
+                <CmsList v-slot="{ item }" as="tbody" :page="PAGE" path="classes.items">
+                  <tr>
                     <td><b>{{ item.code }}</b></td>
                     <td>{{ item.name }}</td>
                   </tr>
-                </tbody>
+                </CmsList>
               </table>
             </div>
-            <h2 id="forbidden">Запрещены к приёму</h2>
-            <ul class="checklist checklist--no">
-              <li v-for="item in forbiddenCargo" :key="item">{{ item }}</li>
-            </ul>
-            <p style="color:var(--grey)">Полный список запрещённых грузов будет загружен документом.</p>
+            <CmsText id="forbidden" as="h2" :page="PAGE" path="forbidden.title" />
+            <CmsList v-slot="{ item }" as="ul" class="checklist checklist--no" :page="PAGE" path="forbidden.items">
+              <li>{{ item.text }}</li>
+            </CmsList>
+            <CmsText as="p" style="color:var(--grey)" :page="PAGE" path="forbidden.note" />
           </article>
           <aside class="aside-box">
-            <h3>Консультация по грузу</h3>
-            <p>Опишите груз — подскажем, возможна ли перевозка, и рассчитаем стоимость.</p>
-            <NuxtLink class="btn" to="/contacts#request">Задать вопрос</NuxtLink>
+            <CmsText as="h3" :page="PAGE" path="aside.title" />
+            <CmsText as="p" :page="PAGE" path="aside.text" />
+            <NuxtLink class="btn" to="/contacts#request"><CmsText :page="PAGE" path="aside.button" /></NuxtLink>
             <hr style="border:0;border-top:1px solid var(--line);margin:20px 0">
             <p><b>Документы</b></p>
             <ul class="docs">

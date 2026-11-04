@@ -18,7 +18,7 @@ final readonly class PageContentReader
      * Saved element values per requested page key; a page with no edits maps to an empty array.
      *
      * @param list<PageKey> $keys
-     * @return array<string, array<string, array{type?: string, value?: string, enabled?: bool}>>
+     * @return array<string, array<string, array{type?: string, value?: string|list<array<string, string>>, enabled?: bool}>>
      */
     public function find(array $keys): array
     {
@@ -36,7 +36,7 @@ final readonly class PageContentReader
             ->all();
 
         foreach ($rows as $row) {
-            /** @var array<string, array{type?: string, value?: string, enabled?: bool}> $content */
+            /** @var array<string, array{type?: string, value?: string|list<array<string, string>>, enabled?: bool}> $content */
             $content = json_decode($row['content'], true, flags: JSON_THROW_ON_ERROR);
             $result[$row['page_key']] = $content;
         }

@@ -5,12 +5,19 @@ declare(strict_types=1);
 namespace App\Application\PageContent\UpdateElement;
 
 use App\Application\PageContent\Exception\ContentValueTooLongException;
+use App\Application\PageContent\Exception\InvalidIconNameException;
 use App\Application\PageContent\Exception\InvalidImageUrlException;
+use App\Application\PageContent\Exception\InvalidLinkException;
+use App\Application\PageContent\Exception\InvalidUrlException;
+use App\Application\PageContent\Exception\TooManyItemsException;
 use App\Application\Shared\HtmlSanitizerInterface;
 use App\Domain\PageContent\Repository\PageContentRepositoryInterface;
+use App\Domain\PageContent\Value\ContentList;
 use App\Domain\PageContent\Value\ContentType;
-use App\Domain\PageContent\Value\ElementPatch;
+use App\Domain\PageContent\Value\ExternalUrl;
+use App\Domain\PageContent\Value\IconName;
 use App\Domain\PageContent\Value\ImageUrl;
+use App\Domain\PageContent\Value\LinkPath;
 use DateTimeImmutable;
 use Psr\Clock\ClockInterface;
 
@@ -25,21 +32,19 @@ final readonly class Handler
     /**
      * @throws ContentValueTooLongException
      * @throws InvalidImageUrlException
+     * @throws InvalidIconNameException
+     * @throws InvalidLinkException
+     * @throws InvalidUrlException
+     * @throws TooManyItemsException
      */
     public function handle(Command $command): void
     {
         $patch = $command->patch;
 
-        if ($patch->type !== null && $patch->value !== null) {
-            if (mb_strlen($patch->value) > $patch->type->maxLength()) {
-                throw ContentValueTooLongException::forType($patch->type);
-            }
-            if ($patch->type === ContentType::Image && !ImageUrl::isValid($patch->value)) {
-                throw InvalidImageUrlException::create();
-            }
-            if ($patch->type === ContentType::Html) {
-                $patch = new ElementPatch($patch->type, $this->htmlSanitizer->sanitize($patch->value), $patch->enabled);
-            }
+        if ($patch->type !== null && $patch->value instanceof ContentList) {
+            $patch = $patch->withValue($this->checkList($patch->value));
+        } elseif ($patch->type !== null && $patch->value !== null) {
+            $patch = $patch->withValue($this->checkValue($patch->type, $patch->value));
         }
 
         $this->repository->patchElement(
@@ -48,5 +53,54 @@ final readonly class Handler
             $patch,
             DateTimeImmutable::createFromInterface($this->clock->now()),
         );
+    }
+
+    /**
+     * Applies the type's rules to one value and returns what is stored (sanitized for `html`).
+     *
+     * @throws ContentValueTooLongException
+     * @throws InvalidImageUrlException
+     * @throws InvalidIconNameException
+     * @throws InvalidLinkException
+     * @throws InvalidUrlException
+     */
+    private function checkValue(ContentType $type, string $value): string
+    {
+        if (mb_strlen($value) > $type->maxLength()) {
+            throw ContentValueTooLongException::forType($type);
+        }
+
+        return match ($type) {
+            ContentType::Image => ImageUrl::isValid($value) ? $value : throw InvalidImageUrlException::create(),
+            ContentType::Icon => IconName::isValid($value) ? $value : throw InvalidIconNameException::create(),
+            ContentType::Link => LinkPath::isValid($value) ? $value : throw InvalidLinkException::create(),
+            ContentType::Url => ExternalUrl::isValid($value) ? $value : throw InvalidUrlException::create(),
+            ContentType::Html => $this->htmlSanitizer->sanitize($value),
+            default => $value,
+        };
+    }
+
+    /**
+     * @throws ContentValueTooLongException
+     * @throws InvalidImageUrlException
+     * @throws InvalidIconNameException
+     * @throws InvalidLinkException
+     * @throws InvalidUrlException
+     * @throws TooManyItemsException
+     */
+    private function checkList(ContentList $list): ContentList
+    {
+        if (count($list->items) > ContentList::MAX_ITEMS) {
+            throw TooManyItemsException::create();
+        }
+
+        $list = $list->mapValues(fn(ContentType $type, string $value): string => $this->checkValue($type, $value));
+
+        $encoded = json_encode($list->items, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE);
+        if (mb_strlen($encoded) > ContentType::List->maxLength()) {
+            throw ContentValueTooLongException::forType(ContentType::List);
+        }
+
+        return $list;
     }
 }

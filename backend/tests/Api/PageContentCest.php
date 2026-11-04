@@ -41,7 +41,7 @@ final class PageContentCest
             'value' => '+7 (423) 000-00-00',
         ], $session);
 
-        assertSame(200, $response->getStatusCode());
+        assertSame(200, $response->getStatusCode(), (string) $response->getBody());
         $data = $I->decode($I->sendApiRequest('GET', '/api/v1/page-content?keys=home,contacts'))['data'];
         assertSame(
             ['type' => 'string', 'value' => '+7 (423) 000-00-00'],
@@ -134,6 +134,168 @@ final class PageContentCest
         assertSame(400, $response->getStatusCode());
         assertSame('failed', $I->decode($response)['status']);
         assertSame(0, $I->countRows('page_content'));
+    }
+
+    public function iconIsStoredAndBadNameRejected(ApiTester $I): void
+    {
+        $session = $I->haveSessionFor('manager');
+
+        $ok = $I->sendApiRequest('PATCH', '/api/v1/page-content/home', ['path' => 'a', 'type' => 'icon', 'value' => 'map-pin'], $session);
+        $bad = $I->sendApiRequest('PATCH', '/api/v1/page-content/home', ['path' => 'b', 'type' => 'icon', 'value' => '<svg>'], $session);
+
+        assertSame(200, $ok->getStatusCode());
+        assertSame(400, $bad->getStatusCode());
+        $home = $I->decode($I->sendApiRequest('GET', '/api/v1/page-content?keys=home'))['data']['home'];
+        assertSame(['type' => 'icon', 'value' => 'map-pin'], $home['a']);
+        assertSame(false, isset($home['b']));
+    }
+
+    public function listIsStoredInOrderAndHtmlFieldsSanitized(ApiTester $I): void
+    {
+        $session = $I->haveSessionFor('manager');
+        $items = [
+            ['id' => 'b2', 'icon' => 'truck', 'title' => '<b>Fleet</b>', 'text' => '<p>Own <b>ships</b></p><script>alert(1)</script>', 'image' => '/img/a.jpg'],
+            ['id' => 'a1', 'icon' => 'globe', 'title' => 'Agents', 'text' => ''],
+        ];
+
+        $response = $I->sendApiRequest('PATCH', '/api/v1/page-content/home', [
+            'path' => 'why.items',
+            'type' => 'list',
+            'fields' => ['icon' => 'icon', 'title' => 'string', 'text' => 'html', 'image' => 'image'],
+            'value' => $items,
+        ], $session);
+
+        assertSame(200, $response->getStatusCode());
+        $stored = $I->decode($I->sendApiRequest('GET', '/api/v1/page-content?keys=home'))['data']['home']['why.items'];
+        assertSame('list', $stored['type']);
+        assertSame(['b2', 'a1'], array_column($stored['value'], 'id'));
+        assertSame('<b>Fleet</b>', $stored['value'][0]['title']);
+        assertStringContainsString('<b>ships</b>', $stored['value'][0]['text']);
+        assertStringNotContainsString('<script', $stored['value'][0]['text']);
+        assertSame('/img/a.jpg', $stored['value'][0]['image']);
+    }
+
+    public function emptyListIsStored(ApiTester $I): void
+    {
+        $response = $I->sendApiRequest('PATCH', '/api/v1/page-content/home', [
+            'path' => 'about.checklist',
+            'type' => 'list',
+            'fields' => ['text' => 'string'],
+            'value' => [],
+        ], $I->haveSessionFor('manager'));
+
+        assertSame(200, $response->getStatusCode());
+        $stored = $I->decode($I->sendApiRequest('GET', '/api/v1/page-content?keys=home'))['data']['home']['about.checklist'];
+        assertSame(['type' => 'list', 'value' => []], $stored);
+    }
+
+    public function rejectsMalformedList(ApiTester $I): void
+    {
+        $session = $I->haveSessionFor('manager');
+        $fields = ['title' => 'string'];
+        $cases = [
+            'no fields' => ['value' => [['id' => 'a', 'title' => 'x']]],
+            'string value' => ['fields' => $fields, 'value' => 'x'],
+            'fields for scalar type' => ['type' => 'string', 'fields' => $fields, 'value' => 'x'],
+            'unknown field type' => ['fields' => ['title' => 'video'], 'value' => []],
+            'nested list field' => ['fields' => ['title' => 'list'], 'value' => []],
+            'field named id' => ['fields' => ['id' => 'string'], 'value' => []],
+            'undeclared field' => ['fields' => $fields, 'value' => [['id' => 'a', 'other' => 'x']]],
+            'missing id' => ['fields' => $fields, 'value' => [['title' => 'x']]],
+            'duplicate id' => ['fields' => $fields, 'value' => [['id' => 'a'], ['id' => 'a']]],
+            'non-string field' => ['fields' => $fields, 'value' => [['id' => 'a', 'title' => ['x']]]],
+            'item is not an object' => ['fields' => $fields, 'value' => ['x']],
+        ];
+
+        foreach ($cases as $name => $payload) {
+            $response = $I->sendApiRequest(
+                'PATCH',
+                '/api/v1/page-content/home',
+                ['path' => 'l', 'type' => 'list'] + $payload,
+                $session,
+            );
+            assertSame(422, $response->getStatusCode(), $name);
+        }
+        assertSame(0, $I->countRows('page_content'));
+    }
+
+    public function rejectsListBreakingFieldRules(ApiTester $I): void
+    {
+        $session = $I->haveSessionFor('manager');
+        $fields = ['title' => 'string', 'image' => 'image', 'icon' => 'icon'];
+        $cases = [
+            'too many items' => array_map(static fn(int $i): array => ['id' => "i$i"], range(1, 101)),
+            'oversized field' => [['id' => 'a', 'title' => str_repeat('x', 256)]],
+            'bad image' => [['id' => 'a', 'image' => 'https://evil.example/x.jpg']],
+            'bad icon' => [['id' => 'a', 'icon' => 'Bad Icon']],
+        ];
+
+        foreach ($cases as $name => $value) {
+            $response = $I->sendApiRequest(
+                'PATCH',
+                '/api/v1/page-content/home',
+                ['path' => 'l', 'type' => 'list', 'fields' => $fields, 'value' => $value],
+                $session,
+            );
+            assertSame(400, $response->getStatusCode(), $name);
+        }
+        assertSame(0, $I->countRows('page_content'));
+    }
+
+    public function linkAndLinesAreStoredAndBadLinksRejected(ApiTester $I): void
+    {
+        $session = $I->haveSessionFor('manager');
+        $send = static fn(string $path, string $type, string $value) => $I->sendApiRequest(
+            'PATCH',
+            '/api/v1/page-content/home',
+            ['path' => $path, 'type' => $type, 'value' => $value],
+            $session,
+        );
+
+        assertSame(200, $send('a', 'link', '/services#agent')->getStatusCode());
+        assertSame(200, $send('b', 'link', '')->getStatusCode());
+        assertSame(200, $send('c', 'lines', "one\ntwo")->getStatusCode());
+        foreach (['javascript:alert(1)', 'https://evil.example', '//evil.example', 'services', '/a b', '/x#', str_repeat('/a', 200)] as $bad) {
+            assertSame(400, $send('d', 'link', $bad)->getStatusCode(), $bad);
+        }
+
+        $home = $I->decode($I->sendApiRequest('GET', '/api/v1/page-content?keys=home'))['data']['home'];
+        assertSame('/services#agent', $home['a']['value']);
+        assertSame('', $home['b']['value']);
+        assertSame("one\ntwo", $home['c']['value']);
+        assertSame(false, isset($home['d']));
+    }
+
+    public function urlAcceptsOnlyHttpsAddresses(ApiTester $I): void
+    {
+        $session = $I->haveSessionFor('manager');
+        $send = static fn(string $value) => $I->sendApiRequest(
+            'PATCH',
+            '/api/v1/page-content/about',
+            ['path' => 'company.url', 'type' => 'url', 'value' => $value],
+            $session,
+        );
+
+        foreach (['', 'https://garant-intermodal.com', 'https://sub.example.ru/path?q=1#x'] as $ok) {
+            assertSame(200, $send($ok)->getStatusCode(), $ok);
+        }
+        foreach (['http://example.com', 'javascript:alert(1)', 'https://', 'https://localhost', '//example.com', '/about', 'https://ex ample.com', 'https://example.com/"onmouseover="x'] as $bad) {
+            assertSame(400, $send($bad)->getStatusCode(), $bad);
+        }
+    }
+
+    public function listLinkFieldsAreValidated(ApiTester $I): void
+    {
+        $session = $I->haveSessionFor('manager');
+        $payload = static fn(string $link): array => [
+            'path' => 'services.cards',
+            'type' => 'list',
+            'fields' => ['title' => 'string', 'link' => 'link', 'points' => 'lines'],
+            'value' => [['id' => 'a', 'title' => 'A', 'link' => $link, 'points' => "x\ny"]],
+        ];
+
+        assertSame(200, $I->sendApiRequest('PATCH', '/api/v1/page-content/home', $payload('/fleet'), $session)->getStatusCode());
+        assertSame(400, $I->sendApiRequest('PATCH', '/api/v1/page-content/home', $payload('javascript:x'), $session)->getStatusCode());
     }
 
     public function invalidPageKeyIsNotFound(ApiTester $I): void

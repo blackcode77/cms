@@ -1,31 +1,36 @@
 <script setup lang="ts">
-import { patchElement, uploadImage } from '@entities/page-content'
-import type { OpenMessage, SavedElement } from '@entities/page-content'
+import { patchElement } from '@entities/page-content'
+import type { ResolvedElement, ResolvedValue, SavedElement } from '@entities/page-content'
+import FieldInput from './FieldInput.vue'
+import ListEditor from './ListEditor.vue'
 
 const props = defineProps<{
   page: string
   path: string
-  element: OpenMessage['element']
+  element: ResolvedElement
 }>()
 
 const emit = defineEmits<{
   saved: [patch: SavedElement]
 }>()
 
-const value = ref(props.element.value)
+/** The single-value element, or `null` for a list (edited by `ListEditor`). */
+const single = computed<ResolvedValue | null>(() => props.element.type === 'list' ? null : props.element)
+
+const value = ref(single.value?.value ?? '')
 const enabled = ref(props.element.enabled)
 const saving = ref(false)
 const uploading = ref(false)
 const error = ref('')
 
 // A different element (or a fresh value after saving) resets the form.
-watch(() => [props.page, props.path, props.element.value, props.element.enabled] as const, () => {
-  value.value = props.element.value
+watch(() => [props.page, props.path, single.value?.value, props.element.enabled] as const, () => {
+  value.value = single.value?.value ?? ''
   enabled.value = props.element.enabled
   error.value = ''
 })
 
-const dirty = computed(() => value.value !== props.element.value)
+const dirty = computed(() => single.value !== null && value.value !== single.value.value)
 
 function messageOf(e: unknown): string {
   const data = (e as { data?: { error_message?: string } } | null)?.data
@@ -47,9 +52,11 @@ async function run(action: () => Promise<void>) {
 }
 
 function save() {
+  const element = single.value
+  if (!element) return
   return run(async () => {
-    await patchElement(props.page, props.path, { type: props.element.type, value: value.value })
-    emit('saved', { type: props.element.type, value: value.value })
+    await patchElement(props.page, props.path, { type: element.type, value: value.value })
+    emit('saved', { type: element.type, value: value.value })
   })
 }
 
@@ -66,27 +73,6 @@ function toggleEnabled(next: boolean) {
     emit('saved', { enabled: next })
   })
 }
-
-async function onFile(event: Event) {
-  const file = (event.target as HTMLInputElement).files?.[0]
-  if (!file) return
-  error.value = ''
-  uploading.value = true
-  try {
-    value.value = await uploadImage(file)
-  }
-  catch (e) {
-    error.value = messageOf(e)
-  }
-  finally {
-    uploading.value = false
-  }
-}
-
-const toolbarItems = [
-  [{ kind: 'mark', mark: 'bold', icon: 'i-lucide-bold' }, { kind: 'mark', mark: 'italic', icon: 'i-lucide-italic' }, { kind: 'link', icon: 'i-lucide-link' }],
-  [{ kind: 'bulletList', icon: 'i-lucide-list' }, { kind: 'orderedList', icon: 'i-lucide-list-ordered' }],
-] as const
 </script>
 
 <template>
@@ -104,36 +90,31 @@ const toolbarItems = [
       @update:model-value="(next: boolean) => { enabled = next; toggleEnabled(next) }"
     />
 
-    <UInput v-if="element.type === 'string'" v-model="value" data-testid="string-input" />
-    <UTextarea v-else-if="element.type === 'text'" v-model="value" :rows="6" autoresize data-testid="text-input" />
-    <UEditor
-      v-else-if="element.type === 'html'"
-      v-slot="{ editor }"
-      v-model="value"
-      content-type="html"
-      class="min-h-40 rounded-md border border-default p-2"
-      data-testid="html-input"
-    >
-      <UEditorToolbar :editor="editor" :items="toolbarItems as never" />
-    </UEditor>
-    <div v-else class="flex flex-col gap-2" data-testid="image-input">
-      <img v-if="value" :src="value" alt="" class="max-h-40 rounded-md border border-default object-contain">
-      <p class="break-all text-xs text-muted">{{ value }}</p>
-      <input type="file" accept="image/jpeg,image/png,image/webp" :disabled="uploading" data-testid="image-file" @change="onFile">
-    </div>
+    <ListEditor
+      v-if="element.type === 'list'"
+      :page="page"
+      :path="path"
+      :element="element"
+      @saved="(patch: SavedElement) => emit('saved', patch)"
+    />
 
-    <UAlert v-if="error" color="error" variant="subtle" :description="error" data-testid="editor-error" />
+    <template v-else-if="single">
+      <FieldInput v-model="value" v-model:uploading="uploading" :type="single.type" @error="(m: string) => { error = m }" />
 
-    <div class="flex gap-2">
-      <UButton label="Сохранить" :loading="saving || uploading" :disabled="!dirty" data-testid="save-button" @click="save" />
-      <UButton
-        v-if="value !== element.default"
-        label="Вернуть исходное"
-        color="neutral"
-        variant="subtle"
-        data-testid="reset-button"
-        @click="value = element.default"
-      />
-    </div>
+      <UAlert v-if="error" color="error" variant="subtle" :description="error" data-testid="editor-error" />
+
+      <div class="flex gap-2">
+        <UButton label="Сохранить" :loading="saving || uploading" :disabled="!dirty" data-testid="save-button" @click="save" />
+        <UButton
+          v-if="value !== single.default"
+          label="Вернуть исходное"
+          color="neutral"
+          variant="subtle"
+          data-testid="reset-button"
+          @click="value = single.default"
+        />
+      </div>
+    </template>
+    <UAlert v-if="error && element.type === 'list'" color="error" variant="subtle" :description="error" data-testid="editor-error" />
   </div>
 </template>

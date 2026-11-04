@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { isHostMessage } from '@entities/page-content'
-import type { EditorMessage, OpenMessage, SavedElement } from '@entities/page-content'
+import type { EditorMessage, OpenMessage, ResolvedElement, SavedElement } from '@entities/page-content'
 import { ElementEditor } from '@features/edit-content'
 
 /**
@@ -21,7 +21,8 @@ function onMessage(event: MessageEvent) {
 function onSaved(patch: SavedElement) {
   if (!current.value) return
   const { page, path } = current.value
-  current.value = { ...current.value, element: { ...current.value.element, ...patch } }
+  // A patch never changes the element's type, so the merged element keeps its shape.
+  current.value = { ...current.value, element: { ...current.value.element, ...patch } as ResolvedElement }
   post({ source: 'cms-editor', type: 'saved', page, path, patch })
 }
 

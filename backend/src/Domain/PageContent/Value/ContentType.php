@@ -10,8 +10,15 @@ enum ContentType: string
     case Text = 'text';
     case Html = 'html';
     case Image = 'image';
+    case Icon = 'icon';
+    case Link = 'link';
+    case Lines = 'lines';
+    case Url = 'url';
+    case List = 'list';
 
     /**
+     * Max characters of a value; for `list`, of the whole JSON-encoded list (each Item field also obeys its own type's limit).
+     *
      * @return positive-int
      */
     public function maxLength(): int
@@ -21,6 +28,19 @@ enum ContentType: string
             self::Text => 5_000,
             self::Html => 50_000,
             self::Image => 255,
+            self::Icon => IconName::LENGTH_LIMIT,
+            self::Link => LinkPath::LENGTH_LIMIT,
+            self::Lines => 5_000,
+            self::Url => ExternalUrl::LENGTH_LIMIT,
+            self::List => 200_000,
         };
+    }
+
+    /**
+     * Whether an Item field of a Content list may have this type.
+     */
+    public function isItemFieldType(): bool
+    {
+        return $this !== self::List;
     }
 }
