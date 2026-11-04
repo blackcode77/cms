@@ -283,3 +283,19 @@ input:focus,select:focus,textarea:focus{outline:3px solid #8cc084;border-color:v
   .stats li:nth-child(4){border-right:1px solid rgba(255,255,255,.2)}
 }
 }
+
+/* Hero photo parallax: the image drifts slower than the page (CSS scroll-driven, no JS).
+   Static on mobile, with reduced motion, or where animation-timeline is unsupported. */
+.site .hero,.site .page-hero{overflow:hidden}
+@keyframes hero-parallax{to{transform:translate3d(0,16%,0)}}
+@media (min-width:768px) and (prefers-reduced-motion:no-preference){
+  @supports (animation-timeline:scroll()){
+    .site .hero .hero__bg,.site .page-hero .page-hero__bg{
+      top:-20%;bottom:auto;height:140%;
+      will-change:transform;
+      animation:hero-parallax linear both;
+      animation-timeline:scroll(root block);
+      animation-range:0 600px;
+    }
+  }
+}
