@@ -5,6 +5,11 @@ export type Permission =
   | 'manage_users'
   | 'view_roles'
   | 'manage_roles'
+  | 'view_orders'
+  | 'manage_orders'
+  | 'handle_orders'
+  | 'view_clients'
+  | 'manage_clients'
 
 /** Payload of `GET /auth/me`. */
 export interface Session {

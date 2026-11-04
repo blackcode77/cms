@@ -38,10 +38,16 @@ final class SeedCest
              WHERE r.name = '$role' ORDER BY permission",
         )->fetchAll(PDO::FETCH_COLUMN);
         $I->assertSame(
-            ['edit_page', 'manage_roles', 'manage_users', 'view_dashboard', 'view_roles', 'view_users'],
+            [
+                'edit_page', 'handle_orders', 'manage_clients', 'manage_orders', 'manage_roles', 'manage_users',
+                'view_clients', 'view_dashboard', 'view_orders', 'view_roles', 'view_users',
+            ],
             $perms('admin'),
         );
-        $I->assertSame(['edit_page', 'view_dashboard'], $perms('manager'));
+        $I->assertSame(
+            ['edit_page', 'handle_orders', 'manage_clients', 'manage_orders', 'view_clients', 'view_dashboard', 'view_orders'],
+            $perms('manager'),
+        );
         $I->assertSame([], $perms('visiter'));
 
         $user = $pdo->query(
@@ -65,7 +71,7 @@ final class SeedCest
 
         $pdo = $this->pdo();
         $I->assertSame(3, (int) $pdo->query('SELECT COUNT(*) FROM roles')->fetchColumn());
-        $I->assertSame(8, (int) $pdo->query('SELECT COUNT(*) FROM role_permissions')->fetchColumn());
+        $I->assertSame(18, (int) $pdo->query('SELECT COUNT(*) FROM role_permissions')->fetchColumn());
         $I->assertSame(1, (int) $pdo->query('SELECT COUNT(*) FROM users')->fetchColumn());
         $I->assertSame($hash, $pdo->query('SELECT password_hash FROM users')->fetchColumn());
     }

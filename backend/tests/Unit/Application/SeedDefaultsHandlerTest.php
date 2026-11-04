@@ -33,9 +33,17 @@ final class SeedDefaultsHandlerTest extends Unit
         $handler->handle(new Command(new UserEmail('Admin@Example.com'), 'secret-pass'));
 
         assertCount(3, $roles->roles);
-        assertCount(6, $roles->roles['admin']->permissions);
+        assertCount(count(Permission::cases()), $roles->roles['admin']->permissions);
         assertSame(
-            [Permission::ViewDashboard, Permission::EditPage],
+            [
+                Permission::ViewDashboard,
+                Permission::EditPage,
+                Permission::ViewOrders,
+                Permission::ManageOrders,
+                Permission::HandleOrders,
+                Permission::ViewClients,
+                Permission::ManageClients,
+            ],
             $roles->roles['manager']->permissions,
         );
         assertSame([], $roles->roles['visiter']->permissions);

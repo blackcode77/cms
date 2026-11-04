@@ -25,6 +25,17 @@ class ApiTester extends \Codeception\Actor
 {
     use _generated\ApiTesterActions;
 
+    private const array ORDER_PERMISSIONS = ['view_orders', 'manage_orders', 'handle_orders', 'view_clients', 'manage_clients'];
+
+    /** Permissions of the seeded Roles, as granted by SeedDefaults. */
+    private const array DEFAULT_PERMISSIONS = [
+        'admin' => [
+            'view_dashboard', 'edit_page', 'view_users', 'manage_users', 'view_roles', 'manage_roles',
+            ...self::ORDER_PERMISSIONS,
+        ],
+        'manager' => ['view_dashboard', 'edit_page', ...self::ORDER_PERMISSIONS],
+    ];
+
     /**
      * @param array<string, string> $cookies
      * @param array<string, string> $serverParams e.g. ['REMOTE_ADDR' => '10.0.0.1']
@@ -120,7 +131,8 @@ class ApiTester extends \Codeception\Actor
         InMemoryMailer::reset();
         self::removeContents(dirname(__DIR__, 2) . '/runtime/test-uploads');
         $this->pdo()->exec(
-            'TRUNCATE TABLE page_content, refresh_tokens, login_attempts, users, role_permissions, roles CASCADE',
+            'TRUNCATE TABLE page_content, refresh_tokens, login_attempts, rate_limit_hits, order_request_log, orders, clients, '
+            . 'users, role_permissions, roles CASCADE',
         );
     }
 
@@ -159,10 +171,7 @@ class ApiTester extends \Codeception\Actor
         string $role = 'manager',
         bool $mustChangePassword = false,
     ): void {
-        $permissions = [
-            'admin' => ['view_dashboard', 'edit_page', 'view_users', 'manage_users', 'view_roles', 'manage_roles'],
-            'manager' => ['view_dashboard', 'edit_page'],
-        ][$role] ?? [];
+        $permissions = self::DEFAULT_PERMISSIONS[$role] ?? [];
 
         $pdo = $this->pdo();
         $roleId = $pdo->query("SELECT id FROM roles WHERE name = '$role'")->fetchColumn();
@@ -247,10 +256,7 @@ class ApiTester extends \Codeception\Actor
      */
     public function haveRole(string $name): string
     {
-        $permissions = [
-            'admin' => ['view_dashboard', 'edit_page', 'view_users', 'manage_users', 'view_roles', 'manage_roles'],
-            'manager' => ['view_dashboard', 'edit_page'],
-        ][$name] ?? [];
+        $permissions = self::DEFAULT_PERMISSIONS[$name] ?? [];
 
         $pdo = $this->pdo();
         $stmt = $pdo->prepare('SELECT id FROM roles WHERE name = ?');
@@ -305,6 +311,26 @@ class ApiTester extends \Codeception\Actor
             $pdo->prepare('INSERT INTO role_permissions (role_id, permission) VALUES (?, ?)')
                 ->execute([$roleId, $permission]);
         }
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function fetchRow(string $sql): array
+    {
+        /** @var array<string, mixed>|false $row */
+        $row = $this->pdo()->query($sql)->fetch(PDO::FETCH_ASSOC);
+
+        return $row === false ? [] : $row;
+    }
+
+    /**
+     * @return list<mixed>
+     */
+    public function fetchColumn(string $sql): array
+    {
+        /** @var list<mixed> */
+        return $this->pdo()->query($sql)->fetchAll(PDO::FETCH_COLUMN);
     }
 
     public function countRows(string $table): int

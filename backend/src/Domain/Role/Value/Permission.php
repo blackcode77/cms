@@ -15,4 +15,10 @@ enum Permission: string
     case ManageUsers = 'manage_users';
     case ViewRoles = 'view_roles';
     case ManageRoles = 'manage_roles';
+    case ViewOrders = 'view_orders';
+    case ManageOrders = 'manage_orders';
+    /** Makes the User eligible to be the Manager of an Order. */
+    case HandleOrders = 'handle_orders';
+    case ViewClients = 'view_clients';
+    case ManageClients = 'manage_clients';
 }

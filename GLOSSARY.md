@@ -59,3 +59,23 @@ An ordered chain of two or more Stops on a Route map, drawn as a dashed line of 
 
 **Stop**:
 A labelled point of a Route, usually a port or terminal (e.g. «Владивосток (ВМРП / ВМТП)»). The editor chooses on which side of the point its label is shown.
+
+**Order**:
+A request from a Client to calculate or carry out a shipment, received from the public site's request form or entered by a User in the admin area. Belongs to exactly one Client, has an Order status, an Order number, optional cargo details (from, to, cargo type, weight), the Client's own message, an internal comment and optionally a Manager.
+_Avoid_: Заявка as a separate entity (Заявка is a status of an Order), lead, ticket
+
+**Order status**:
+The processing stage of an Order: «Заявка» (just received, not yet taken), «В обработке», «Обработана». Users may move an Order to any status, in any direction.
+
+**Order number**:
+A short sequential number of an Order, at least four digits (starting at 1000), used to refer to it in conversation with the Client.
+
+**Order request**:
+The submission of the public request form («Запросить расчёт») by a visitor; it creates an Order with status «Заявка». Only the phone number is required. The number of Order requests from the same address or phone is limited to stop spam.
+
+**Client**:
+A person who places Orders, identified by their phone number: the same phone always means the same Client. Has a first name, last name, middle name, email and a comment. An Order request never overwrites what is already known about a Client, it only fills in what is missing. Deleting a Client deletes all their Orders.
+_Avoid_: Customer, contact, lead
+
+**Manager**:
+A User assigned to handle an Order; any User whose Role holds the `handle_orders` Permission can be one. Not the same as the seeded `manager` Role, although that Role grants it.

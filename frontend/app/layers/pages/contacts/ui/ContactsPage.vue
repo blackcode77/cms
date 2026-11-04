@@ -4,7 +4,8 @@ import { CmsText, defineContentSchema, useCmsElement, usePageContent } from '@en
 import { offices, officeElements, telHref } from '@shared/config'
 import { organizationJsonLd, usePageSeo } from '@shared/seo'
 import { AppIcon } from '@shared/ui'
-import { cargoTypes, requestBenefits } from '../model/content'
+import { OrderRequestForm } from '@features/submit-order-request'
+import { requestBenefits } from '../model/content'
 
 defineContentSchema('site', officeElements)
 defineContentSchema('contacts', {
@@ -13,6 +14,8 @@ defineContentSchema('contacts', {
   'hero.image': { type: 'image', default: '/img/ship-closeup.jpg', label: 'Первый экран: фон' },
   'hero.title': { type: 'string', default: 'Контакты', label: 'Первый экран: заголовок' },
   'hero.lead': { type: 'string', default: 'Свяжитесь с нами по телефону, почте или оставьте заявку.', label: 'Первый экран: текст' },
+  'request.success_title': { type: 'string', default: 'Спасибо!', label: 'Форма запроса: заголовок после отправки' },
+  'request.success_text': { type: 'text', default: 'Ваш запрос в обработке, мы скоро с вами свяжемся.', label: 'Форма запроса: сообщение после отправки' },
 })
 
 const seoTitle = useCmsElement(() => 'contacts', () => 'seo.title')
@@ -75,28 +78,7 @@ const officeValue = (id: string, field: string) => resolve('site', `office.${id}
             <li v-for="benefit in requestBenefits" :key="benefit">{{ benefit }}</li>
           </ul>
         </div>
-        <form class="form" @submit.prevent>
-          <div class="row">
-            <label>Откуда<input name="from" placeholder="Например, Шанхай"></label>
-            <label>Куда<input name="to" placeholder="Например, Москва"></label>
-          </div>
-          <div class="row">
-            <label>
-              Тип груза
-              <select name="cargo">
-                <option v-for="cargo in cargoTypes" :key="cargo">{{ cargo }}</option>
-              </select>
-            </label>
-            <label>Масса, т<input name="weight" inputmode="decimal"></label>
-          </div>
-          <div class="row">
-            <label>Имя<input name="name" autocomplete="name" required></label>
-            <label>Телефон<input name="phone" type="tel" autocomplete="tel" required></label>
-          </div>
-          <label>Email<input name="email" type="email" autocomplete="email"></label>
-          <label>Комментарий<textarea name="msg" rows="3" /></label>
-          <button class="btn" type="submit">Отправить заявку</button>
-        </form>
+        <OrderRequestForm cms-page="contacts" />
       </div>
     </div>
   </section>

@@ -8,9 +8,13 @@ use App\Application\Shared\HtmlSanitizerInterface;
 use App\Application\Shared\DocumentStorageInterface;
 use App\Application\Shared\ImageStorageInterface;
 use App\Application\Shared\PasswordHasherInterface;
+use App\Application\Shared\RateLimiterInterface;
 use App\Application\Auth\TokenIssuerInterface;
 use App\Domain\Auth\Repository\LoginAttemptRepositoryInterface;
 use App\Domain\Auth\Repository\RefreshTokenRepositoryInterface;
+use App\Domain\Client\Repository\ClientRepositoryInterface;
+use App\Domain\Order\Repository\OrderRepositoryInterface;
+use App\Domain\Order\Repository\OrderRequestLogInterface;
 use App\Domain\PageContent\Repository\PageContentRepositoryInterface;
 use App\Domain\Role\Repository\RoleRepositoryInterface;
 use App\Domain\User\Repository\UserRepositoryInterface;
@@ -19,7 +23,10 @@ use App\Infrastructure\DataMapper\EntityHydratorInterface;
 use App\Infrastructure\DataMapper\PropertyReaderInterface;
 use App\Infrastructure\DataMapper\ReflectionPropertyReader;
 use App\Infrastructure\DataMapper\YiiHydratorEntityHydrator;
+use App\Infrastructure\Repository\DbClientRepository;
 use App\Infrastructure\Repository\DbLoginAttemptRepository;
+use App\Infrastructure\Repository\DbOrderRepository;
+use App\Infrastructure\Repository\DbOrderRequestLog;
 use App\Infrastructure\Repository\DbPageContentRepository;
 use App\Infrastructure\Repository\DbRefreshTokenRepository;
 use App\Infrastructure\Repository\DbRoleRepository;
@@ -45,6 +52,10 @@ final readonly class ServiceProvider implements ServiceProviderInterface
             UserRepositoryInterface::class => DbUserRepository::class,
             RefreshTokenRepositoryInterface::class => DbRefreshTokenRepository::class,
             LoginAttemptRepositoryInterface::class => DbLoginAttemptRepository::class,
+            ClientRepositoryInterface::class => DbClientRepository::class,
+            OrderRepositoryInterface::class => DbOrderRepository::class,
+            OrderRequestLogInterface::class => DbOrderRequestLog::class,
+            RateLimiterInterface::class => DbRateLimiter::class,
             HtmlSanitizerInterface::class => SymfonyHtmlSanitizer::class,
             ImageStorageInterface::class => static fn(Aliases $aliases) => new LocalImageStorage(self::uploadDir($aliases)),
             DocumentStorageInterface::class => static fn(Aliases $aliases) => new LocalDocumentStorage(self::uploadDir($aliases)),

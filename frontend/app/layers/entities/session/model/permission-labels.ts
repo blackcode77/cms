@@ -7,6 +7,11 @@ const labels: Record<Permission, string> = {
   manage_users: 'Управление пользователями',
   view_roles: 'Просмотр ролей',
   manage_roles: 'Управление ролями',
+  view_orders: 'Просмотр заказов',
+  manage_orders: 'Управление заказами',
+  handle_orders: 'Может быть менеджером заказа',
+  view_clients: 'Просмотр клиентов',
+  manage_clients: 'Управление клиентами',
 }
 
 /** Russian name of a Permission; unknown keys (e.g. added on the backend) fall back to the key. */

@@ -50,7 +50,10 @@ final class RoleCest
 
         assertSame(200, $response->getStatusCode());
         assertSame(
-            ['view_dashboard', 'edit_page', 'view_users', 'manage_users', 'view_roles', 'manage_roles'],
+            [
+                'view_dashboard', 'edit_page', 'view_users', 'manage_users', 'view_roles', 'manage_roles',
+                'view_orders', 'manage_orders', 'handle_orders', 'view_clients', 'manage_clients',
+            ],
             $I->decode($response)['data'],
         );
     }
@@ -66,9 +69,12 @@ final class RoleCest
         $byName = array_column($data, null, 'name');
         assertSame(['admin', 'manager'], array_keys($byName));
         assertSame(2, $byName['manager']['users_count']);
-        assertSame(['view_dashboard', 'edit_page'], $byName['manager']['permissions']);
+        assertSame(
+            ['view_dashboard', 'edit_page', 'view_orders', 'manage_orders', 'handle_orders', 'view_clients', 'manage_clients'],
+            $byName['manager']['permissions'],
+        );
         assertSame(1, $byName['admin']['users_count']);
-        assertCount(6, $byName['admin']['permissions']);
+        assertCount(11, $byName['admin']['permissions']);
         assertSame(true, $byName['admin']['read_only']);
         assertSame(false, $byName['manager']['read_only']);
     }
@@ -184,7 +190,7 @@ final class RoleCest
         assertSame('The Admin Role is read-only.', $I->decode($update)['error_message']);
         assertSame(400, $delete->getStatusCode());
         assertSame('The Admin Role is read-only.', $I->decode($delete)['error_message']);
-        assertSame(6, $I->countRows('role_permissions'));
+        assertSame(11, $I->countRows('role_permissions'));
     }
 
     public function visiterPermissionsCanBeEditedButItCannotBeDeletedOrRenamed(ApiTester $I): void
@@ -230,7 +236,7 @@ final class RoleCest
 
         assertSame(200, $response->getStatusCode());
         assertSame(1, $I->countRows('roles'));
-        assertSame(6, $I->countRows('role_permissions'));
+        assertSame(11, $I->countRows('role_permissions'));
     }
 
     public function permissionChangesApplyToTheNextRequestOfUsersWithThatRole(ApiTester $I): void

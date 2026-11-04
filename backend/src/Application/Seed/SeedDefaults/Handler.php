@@ -76,7 +76,15 @@ final readonly class Handler
     {
         return [
             RoleName::ADMIN => Permission::cases(),
-            RoleName::MANAGER => [Permission::ViewDashboard, Permission::EditPage],
+            RoleName::MANAGER => [
+                Permission::ViewDashboard,
+                Permission::EditPage,
+                Permission::ViewOrders,
+                Permission::ManageOrders,
+                Permission::HandleOrders,
+                Permission::ViewClients,
+                Permission::ManageClients,
+            ],
             RoleName::VISITER => [],
         ];
     }

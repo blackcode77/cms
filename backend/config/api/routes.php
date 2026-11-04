@@ -6,11 +6,15 @@ use App\Domain\Role\Value\Permission;
 use App\Presentation\Api;
 use App\Presentation\Api\Auth\Shared\Authenticate;
 use App\Presentation\Api\Auth\Shared\RequirePermission;
+use App\Presentation\Api\Shared\RateLimit\RateLimit;
 use Yiisoft\Router\Route;
 
 return [
     Route::get('/health')->action(Api\Health\Action::class),
     Route::get('/page-content')->action(Api\PageContent\Read\Action::class),
+    Route::post('/orders/request')
+        ->middleware(RateLimit::perMinute(10))
+        ->action(Api\Order\Request\Action::class),
     Route::post('/auth/login')->action(Api\Auth\Login\Action::class),
     Route::post('/auth/refresh')->action(Api\Auth\Refresh\Action::class),
     Route::post('/auth/logout')->action(Api\Auth\Logout\Action::class),
@@ -60,4 +64,40 @@ return [
     Route::delete('/roles/{id}')
         ->middleware(Authenticate::class, RequirePermission::for(Permission::ManageRoles))
         ->action(Api\Role\Delete\Action::class),
+    Route::get('/orders')
+        ->middleware(Authenticate::class, RequirePermission::for(Permission::ViewOrders))
+        ->action(Api\Order\List\Action::class),
+    Route::get('/orders/managers')
+        ->middleware(Authenticate::class, RequirePermission::for(Permission::ViewOrders))
+        ->action(Api\Order\Managers\Action::class),
+    Route::get('/orders/{id}')
+        ->middleware(Authenticate::class, RequirePermission::for(Permission::ViewOrders))
+        ->action(Api\Order\View\Action::class),
+    Route::post('/orders')
+        ->middleware(Authenticate::class, RequirePermission::for(Permission::ManageOrders))
+        ->action(Api\Order\Create\Action::class),
+    Route::put('/orders/{id}')
+        ->middleware(Authenticate::class, RequirePermission::for(Permission::ManageOrders))
+        ->action(Api\Order\Update\Action::class),
+    Route::delete('/orders/{id}')
+        ->middleware(Authenticate::class, RequirePermission::for(Permission::ManageOrders))
+        ->action(Api\Order\Delete\Action::class),
+    Route::get('/clients')
+        ->middleware(Authenticate::class, RequirePermission::for(Permission::ViewClients))
+        ->action(Api\Client\List\Action::class),
+    Route::get('/clients/by-phone')
+        ->middleware(Authenticate::class, RequirePermission::for(Permission::ViewClients))
+        ->action(Api\Client\ByPhone\Action::class),
+    Route::get('/clients/{id}')
+        ->middleware(Authenticate::class, RequirePermission::for(Permission::ViewClients))
+        ->action(Api\Client\View\Action::class),
+    Route::post('/clients')
+        ->middleware(Authenticate::class, RequirePermission::for(Permission::ManageClients))
+        ->action(Api\Client\Create\Action::class),
+    Route::put('/clients/{id}')
+        ->middleware(Authenticate::class, RequirePermission::for(Permission::ManageClients))
+        ->action(Api\Client\Update\Action::class),
+    Route::delete('/clients/{id}')
+        ->middleware(Authenticate::class, RequirePermission::for(Permission::ManageClients))
+        ->action(Api\Client\Delete\Action::class),
 ];

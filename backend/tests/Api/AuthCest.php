@@ -50,7 +50,10 @@ final class AuthCest
         assertSame('manager@example.com', $data['user']['email']);
         assertSame('Test User', $data['user']['name']);
         assertSame('manager', $data['role']['name']);
-        assertSame(['edit_page', 'view_dashboard'], $this->sorted($data['permissions']));
+        assertSame(
+            ['edit_page', 'handle_orders', 'manage_clients', 'manage_orders', 'view_clients', 'view_dashboard', 'view_orders'],
+            $this->sorted($data['permissions']),
+        );
         assertSame(false, $data['must_change_password']);
         assertArrayNotHasKey('password_hash', $data['user']);
     }

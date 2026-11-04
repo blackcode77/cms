@@ -21,7 +21,10 @@ final class RoleTest extends Unit
     public function testPermissionCatalogIsFixed(): void
     {
         assertSame(
-            ['view_dashboard', 'edit_page', 'view_users', 'manage_users', 'view_roles', 'manage_roles'],
+            [
+                'view_dashboard', 'edit_page', 'view_users', 'manage_users', 'view_roles', 'manage_roles',
+                'view_orders', 'manage_orders', 'handle_orders', 'view_clients', 'manage_clients',
+            ],
             array_map(static fn(Permission $p) => $p->value, Permission::cases()),
         );
     }
@@ -31,7 +34,7 @@ final class RoleTest extends Unit
         $role = new Role(new RoleId(Uuid::uuid7()), new RoleName(RoleName::ADMIN), []);
 
         assertTrue($role->isAdmin());
-        assertCount(6, $role->permissions);
+        assertCount(count(Permission::cases()), $role->permissions);
         foreach (Permission::cases() as $permission) {
             assertTrue($role->has($permission));
         }
