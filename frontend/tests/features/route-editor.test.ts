@@ -29,7 +29,7 @@ function routes(items = [{ id: 'r1', name: 'Китай → Россия', color:
     fields: {
       name: { type: 'string' },
       color: { type: 'color', default: '#3a7b34' },
-      stops: { type: 'stops', background: 'routes.map', backgroundUrl: '/img/map-east-asia.svg' },
+      stops: { type: 'stops', background: 'routes.map', backgroundUrl: '/img/map-russia-routes.svg' },
     },
     min: 0,
     max: 10,

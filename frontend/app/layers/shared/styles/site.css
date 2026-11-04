@@ -137,11 +137,16 @@ figcaption{font-size:.85rem;color:var(--grey);margin-top:6px}
 .map .route--sea{stroke:#2C7DA0}
 .map .pt{fill:var(--green);stroke:#fff;stroke-width:3}
 .map .pt--hub{fill:var(--black)}
-/* Route map */
-.shipping{display:grid;grid-template-columns:1fr 1.7fr;gap:40px;align-items:center}
-.shipping__scroll{position:relative;overflow-x:auto;border:1px solid var(--line);border-radius:var(--radius);background:#fff}
-.shipping__map{min-width:640px}
-.shipping__legend{list-style:none;padding:0;margin:18px 0 0;display:flex;flex-direction:column;gap:8px;font-size:.92rem}
+/* Route map: the whole block is the map, the text sits on it */
+section.shipping{position:relative;padding:0;background:#EAF2F6;border-block:1px solid var(--line)}
+.shipping__viewport{position:relative;height:600px;overflow:hidden}
+.shipping__map{position:absolute;top:0;left:0}
+@media (prefers-reduced-motion:no-preference){.shipping__map.is-settled{transition:width .6s ease,transform .6s ease}}
+/* Soft picture edges, for when the whole map is narrower than the block */
+.shipping__map{-webkit-mask-image:linear-gradient(90deg,transparent,#000 48px,#000 calc(100% - 48px),transparent),linear-gradient(transparent,#000 32px,#000 calc(100% - 32px),transparent);-webkit-mask-composite:source-in;mask-image:linear-gradient(90deg,transparent,#000 48px,#000 calc(100% - 48px),transparent),linear-gradient(transparent,#000 32px,#000 calc(100% - 32px),transparent);mask-composite:intersect}
+.shipping__card{position:absolute;left:max(20px,calc((100% - var(--maxw)) / 2 + 20px));bottom:7%;width:min(400px,34%);padding:26px 28px;background:rgba(255,255,255,.92);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);backdrop-filter:blur(2px)}
+.shipping__card .section-head{margin-bottom:0}
+.shipping__legend{list-style:none;padding:0;margin:16px 0 0;display:flex;flex-direction:column;gap:8px;font-size:.92rem}
 .shipping__legend i{display:inline-block;width:30px;height:0;border-top:4px dashed var(--green);vertical-align:middle;margin-right:10px}
 .shipping__bg-edit{position:absolute;top:10px;left:10px;padding:4px 10px;border:1px solid var(--line);border-radius:var(--radius);background:#fff;font:600 .8rem var(--font-body);cursor:pointer}
 .legend{display:flex;gap:18px;flex-wrap:wrap;font-size:.85rem;margin-top:10px}
@@ -233,7 +238,9 @@ input:focus,select:focus,textarea:focus{outline:3px solid #8cc084;border-color:v
   .grid--3{grid-template-columns:repeat(2,1fr)}
   .partners{grid-template-columns:repeat(4,1fr)}
   .footer-grid{grid-template-columns:1fr 1fr}
-  .layout,.geo,.split,.shipping{grid-template-columns:1fr}
+  .layout,.geo,.split{grid-template-columns:1fr}
+  section.shipping{display:flex;flex-direction:column-reverse;padding:0}
+  .shipping__card{position:static;width:auto;margin:0;border:0;border-radius:0;box-shadow:none;background:var(--green-tint);padding:40px 20px 24px}
   .aside-box{position:static}
   .nav a{padding:10px 8px;font-size:.88rem}
 }

@@ -12,7 +12,7 @@ const stops = serializeStops([
 defineContentSchema('sm', {
   'routes.title': { type: 'string', default: 'Схема маршрутов' },
   'routes.lead': { type: 'text', default: 'Порты' },
-  'routes.map': { type: 'image', default: '/img/map-east-asia.svg' },
+  'routes.map': { type: 'image', default: '/img/map-russia-routes.svg' },
   'routes.items': {
     type: 'list',
     fields: { name: { type: 'string' }, color: { type: 'color' }, stops: { type: 'stops', background: 'routes.map' } },
@@ -39,7 +39,7 @@ describe('ShippingMap', () => {
     expect(wrapper.text()).toContain('Владивосток\nВМРП')
     const legend = wrapper.find('[data-testid="route-legend"]')
     expect(legend.text()).toBe('Китай → Россия')
-    expect(wrapper.find('img').attributes('src')).toBe('/img/map-east-asia.svg')
+    expect(wrapper.find('img').attributes('src')).toBe('/img/map-russia-routes.svg')
   })
 
   it('renders nothing for visitors when the Routes list is switched off', async () => {

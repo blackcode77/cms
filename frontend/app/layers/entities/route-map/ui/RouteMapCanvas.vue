@@ -15,7 +15,9 @@ const props = withDefaults(defineProps<{
   flowing?: boolean
   /** Routes drawn faint, e.g. the ones not being edited. */
   faded?: string[]
-}>(), { phase: 'static', flowing: false, faded: () => [] })
+  /** CSS pixels per drawing unit when the picture is zoomed: keeps lines as thick on screen at any zoom. */
+  scale?: number
+}>(), { phase: 'static', flowing: false, faded: () => [], scale: undefined })
 
 const STOP_APPEAR = 0.35
 const LINE_SPEED = 700
@@ -46,7 +48,7 @@ const s = (value: number) => `${value.toFixed(2)}s`
 </script>
 
 <template>
-  <div class="route-map-canvas" :class="[`is-${phase}`, { 'is-flowing': flowing }]">
+  <div class="route-map-canvas" :class="[`is-${phase}`, { 'is-flowing': flowing }]" :style="{ 'aspectRatio': `${MAP_WIDTH} / ${MAP_HEIGHT}`, '--u': scale ? (1 / scale).toFixed(3) : 1 }">
     <img class="route-map-canvas__bg" :src="background" alt="" draggable="false">
     <svg :viewBox="`0 0 ${MAP_WIDTH} ${MAP_HEIGHT}`" aria-hidden="true">
       <g v-for="item in drawn" :key="item.route.id" :class="{ 'is-faded': item.faded }" data-testid="route-line">
@@ -83,7 +85,6 @@ const s = (value: number) => `${value.toFixed(2)}s`
 <style scoped>
 .route-map-canvas {
   position: relative;
-  aspect-ratio: 1440 / 1099;
   overflow: hidden;
   user-select: none;
 }
@@ -103,16 +104,16 @@ const s = (value: number) => `${value.toFixed(2)}s`
 .reveal {
   fill: none;
   stroke: #fff;
-  stroke-width: 40;
+  stroke-width: calc(40px * var(--u));
   stroke-dasharray: 1 1;
   stroke-dashoffset: 0;
 }
 
 .line {
   fill: none;
-  stroke-width: 4;
+  stroke-width: calc(3.5px * var(--u));
   stroke-linecap: round;
-  stroke-dasharray: 14 10;
+  stroke-dasharray: calc(12px * var(--u)) calc(9px * var(--u));
 }
 
 .is-flowing .line {
@@ -196,6 +197,6 @@ const s = (value: number) => `${value.toFixed(2)}s`
 }
 
 @keyframes route-flow {
-  to { stroke-dashoffset: -24; }
+  to { stroke-dashoffset: calc(-21px * var(--u)); }
 }
 </style>

@@ -13,3 +13,5 @@ export {
 } from './model/stops'
 export type { LabelSide, Route, Stop } from './model/stops'
 export { MAP_HEIGHT, MAP_WIDTH, routeSegments } from './model/geometry'
+export { fitCamera, FOCUS } from './model/camera'
+export type { Camera, Viewport } from './model/camera'

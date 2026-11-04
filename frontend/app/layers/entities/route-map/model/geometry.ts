@@ -1,8 +1,8 @@
 import type { Stop } from './stops'
 
-/** Drawing units of the Route map; the picture keeps this aspect ratio (`/img/map-east-asia.svg`). */
-export const MAP_WIDTH = 1440
-export const MAP_HEIGHT = 1099
+/** Drawing units of the Route map; the picture keeps this aspect ratio (`/img/map-russia-routes.svg`). */
+export const MAP_WIDTH = 2400
+export const MAP_HEIGHT = 1525
 
 interface Point { x: number, y: number }
 
