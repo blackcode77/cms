@@ -57,7 +57,20 @@ final readonly class SessionCookies
             $name,
             $value,
             $maxAge,
-            Environment::isDev() ? '' : '; Secure',
+            self::secure() ? '; Secure' : '',
         );
+    }
+
+    /**
+     * Secure outside dev. COOKIE_SECURE=false (prod .env) drops it while the site is served over plain HTTP,
+     * because browsers discard Secure cookies received over HTTP. Restore it once HTTPS is in place.
+     */
+    private static function secure(): bool
+    {
+        if (Environment::isDev()) {
+            return false;
+        }
+
+        return getenv('COOKIE_SECURE') !== 'false';
     }
 }

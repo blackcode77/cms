@@ -107,7 +107,7 @@ deploy-prod: ## Deploy to production: sync code, restart stack (build=1 builds i
 	$(if $(build),$(MAKE) --no-print-directory ship-images)
 	$(DEPLOY_SSH) $(DEPLOY_HOST) 'cd $(DEPLOY_PATH) && set -e && \
 		docker compose -f compose.prod.yaml up -d --no-build --remove-orphans && \
-		docker compose -f compose.prod.yaml exec -T php php yii migrate:up --no-interaction && \
-		docker compose -f compose.prod.yaml exec -T php php yii app:seed && \
+		docker compose -f compose.prod.yaml exec -T -u www-data php php yii migrate:up --no-interaction && \
+		docker compose -f compose.prod.yaml exec -T -u www-data php php yii app:seed && \
 		docker compose -f compose.prod.yaml ps'
 	@test -z "$(DEPLOY_URL)" || curl -fsS -o /dev/null -w "smoke check $(DEPLOY_URL): HTTP %{http_code}\n" $(DEPLOY_URL)

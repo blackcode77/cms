@@ -39,6 +39,7 @@ services:
       JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env}
       MAILER_DSN: ${MAILER_DSN:-null://null}
       MAIL_FROM: ${MAIL_FROM:-cms@localhost}
+      COOKIE_SECURE: ${COOKIE_SECURE:-true}
     volumes:
       - uploads:/app/storage/uploads
       - runtime:/app/runtime
