@@ -347,3 +347,21 @@ usePageSeo({
     <CtaBanner />
   </div>
 </template>
+
+<style>
+/* Hero photo drifts slower than the page while scrolling (CSS scroll-driven, no JS). Static on mobile,
+   with reduced motion, or where animation-timeline is unsupported. */
+.site .hero{overflow:hidden}
+@keyframes hero-parallax{to{transform:translate3d(0,10%,0)}}
+@media (min-width:768px) and (prefers-reduced-motion:no-preference){
+  @supports (animation-timeline:scroll()){
+    .site .hero .hero__bg{
+      top:-12%;bottom:auto;height:124%;
+      will-change:transform;
+      animation:hero-parallax linear both;
+      animation-timeline:scroll(root block);
+      animation-range:0 700px;
+    }
+  }
+}
+</style>
