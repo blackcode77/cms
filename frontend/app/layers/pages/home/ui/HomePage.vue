@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { CtaBanner } from '@widgets/cta-banner'
-import { CmsImage, CmsText, defineContentSchema, useCmsElement } from '@entities/page-content'
+import { CmsImage, CmsList, CmsText, defineContentSchema, useCmsElement } from '@entities/page-content'
 import { imageSizes, officeElements } from '@shared/config'
 import { organizationJsonLd, usePageSeo } from '@shared/seo'
-import { SvgIcon } from '@shared/ui'
-import { advantages, partners, projectGallery, serviceCards, stats } from '../model/content'
+import { AppIcon, SvgIcon } from '@shared/ui'
+import { partners, projectGallery, serviceCards, stats } from '../model/content'
 import { RouteMap } from '@widgets/route-map'
 
 defineContentSchema('site', officeElements)
@@ -23,6 +23,23 @@ defineContentSchema('home', {
   'about.image': { type: 'image', default: '/img/ship-closeup.jpg', label: 'О нас: картинка' },
   'why.title': { type: 'string', default: 'Почему выбирают Гарант Интермодал', label: 'Преимущества: заголовок' },
   'why.lead': { type: 'string', default: 'Шесть причин, по которым клиенты остаются с нами годами.', label: 'Преимущества: подзаголовок' },
+  'why.items': {
+    type: 'list',
+    label: 'Преимущества: карточки',
+    fields: {
+      icon: { type: 'icon', label: 'Иконка', default: 'circle-check' },
+      title: { type: 'string', label: 'Заголовок' },
+      text: { type: 'text', label: 'Текст' },
+    },
+    default: [
+      { icon: 'users', title: 'Опыт 25+ лет', text: 'Каждый специалист команды — минимум 15 лет в отрасли. Знаем, как решить нестандартную задачу.' },
+      { icon: 'train-front', title: 'Прямые договоры с РЖД', text: 'Договоры с РЖД и железными дорогами СНГ — гибкие тарифы и предсказуемые сроки.' },
+      { icon: 'ship', title: 'Собственный флот', text: 'Два МПП типа «Сокол» и контейнеровоз «Гарант Нагаево» для каботажных линий.' },
+      { icon: 'truck', title: 'Свой автопарк и площадка', text: 'Тягачи Scania, собственная площадка хранения порожних контейнеров.' },
+      { icon: 'globe', title: 'Сеть агентов', text: 'Агенты в России, СНГ и Юго-Восточной Азии для сквозной организации перевозки.' },
+      { icon: 'map-pin', title: 'Отслеживание груза', text: 'Ежедневные обновления статуса: вы всегда знаете, где находится груз.' },
+    ],
+  },
   'services.title': { type: 'string', default: 'Услуги', label: 'Услуги: заголовок' },
   'services.lead': { type: 'string', default: 'Основные направления. Полный перечень и подробности — на странице услуг.', label: 'Услуги: подзаголовок' },
   'geo.title': { type: 'string', default: 'География сервисов', label: 'География: заголовок' },
@@ -131,13 +148,13 @@ usePageSeo({
           <CmsText id="why" as="h2" page="home" path="why.title" />
           <CmsText as="p" page="home" path="why.lead" />
         </div>
-        <div class="grid grid--3">
-          <article v-for="item in advantages" :key="item.title" class="adv">
-            <span class="icon" aria-hidden="true"><SvgIcon :inner="item.icon" /></span>
+        <CmsList v-slot="{ item }" class="grid grid--3" page="home" path="why.items">
+          <article class="adv">
+            <span class="icon" aria-hidden="true"><AppIcon v-if="item.icon" :name="item.icon" /></span>
             <h3>{{ item.title }}</h3>
             <p>{{ item.text }}</p>
           </article>
-        </div>
+        </CmsList>
       </div>
     </section>
 

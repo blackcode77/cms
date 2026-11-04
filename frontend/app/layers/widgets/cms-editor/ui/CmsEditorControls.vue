@@ -9,7 +9,7 @@ import { useCurrentUser } from '@entities/session'
  */
 const { can, load } = useCurrentUser()
 const { active, selected, toggle, deselect } = useEditMode()
-const { resolve, apply } = usePageContent()
+const { resolveElement, apply } = usePageContent()
 
 const checked = ref(false)
 const canEdit = computed(() => checked.value && can('edit_page'))
@@ -37,9 +37,11 @@ onBeforeUnmount(() => {
 
 function sendSelection() {
   const target = selected.value
-  const element = target ? resolve(target.page, target.path) : null
+  const element = target ? resolveElement(target.page, target.path) : null
   if (!target || !element || !frameReady.value || !frame.value?.contentWindow) return
-  const message: HostMessage = { source: 'cms-host', type: 'open', page: target.page, path: target.path, element }
+  // Saved list Items are reactive proxies, which postMessage cannot clone.
+  const plain = JSON.parse(JSON.stringify(element)) as typeof element
+  const message: HostMessage = { source: 'cms-host', type: 'open', page: target.page, path: target.path, element: plain }
   frame.value.contentWindow.postMessage(message, window.location.origin)
 }
 

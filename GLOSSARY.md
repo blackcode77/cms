@@ -27,6 +27,15 @@ A public site page identified by a stable page key (e.g. `home`, `contacts`). It
 **Content element**:
 One editable piece of a Page, addressed by a dotted path within the Page (e.g. `header.phone_number_one`). Has a type (string, text, html, image), can be switched off (disabled elements are hidden from visitors), and falls back to its default when no value has been saved.
 
+**Content list**:
+A Content element whose value is an ordered list of Items of the same shape. Editors add, delete, reorder and edit Items, but cannot change which fields an Item has. Once saved, the list fully replaces its default.
+
+**Item**:
+One entry of a Content list: a fixed set of named fields (e.g. icon, title, text), each with its own type.
+
+**Icon**:
+A Content element type whose value names a pictogram from the site's single icon collection; editors pick it from that collection instead of supplying drawings.
+
 **Page content**:
 The saved values of a Page's Content elements. Only values that differ from the defaults are stored.
 

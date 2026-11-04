@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Presentation\Api\PageContent\Update;
 
+use App\Domain\PageContent\Value\ContentList;
 use App\Domain\PageContent\Value\ContentPath;
 use App\Domain\PageContent\Value\ContentType;
+use InvalidArgumentException;
 use Yiisoft\Input\Http\AbstractInput;
 use Yiisoft\Input\Http\Attribute\Data\FromBody;
 use Yiisoft\Validator\Rule\Callback;
@@ -15,7 +17,8 @@ use Yiisoft\Validator\Rule\Required;
 use Yiisoft\Validator\Result;
 
 /**
- * `{path, type?, value?, enabled?}`: either a new value (with its type), a new `enabled` flag, or both.
+ * `{path, type?, value?, enabled?, fields?}`: either a new value (with its type), a new `enabled` flag, or both.
+ * For `type: list` the value is an array of Items and `fields` maps each Item field to its type (ADR 0005).
  */
 #[FromBody]
 final class Input extends AbstractInput
@@ -29,7 +32,9 @@ final class Input extends AbstractInput
     public ?string $type = null;
 
     #[Callback(method: 'validateValue')]
-    public ?string $value = null;
+    public string|array|null $value = null;
+
+    public ?array $fields = null;
 
     public ?bool $enabled = null;
 
@@ -49,7 +54,18 @@ final class Input extends AbstractInput
     {
         $result = new Result();
         if ($value === null && $this->enabled === null) {
-            $result->addError('Pass a value, "enabled", or both.');
+            return $result->addError('Pass a value, "enabled", or both.');
+        }
+        if ($this->type === ContentType::List->value) {
+            try {
+                ContentList::fromArray($this->fields, $value);
+            } catch (InvalidArgumentException $e) {
+                $result->addError($e->getMessage());
+            }
+        } elseif ($this->fields !== null) {
+            $result->addError('Only a list has fields.');
+        } elseif ($value !== null && !is_string($value)) {
+            $result->addError('Value must be a string.');
         }
 
         return $result;
@@ -58,5 +74,18 @@ final class Input extends AbstractInput
     public function contentType(): ?ContentType
     {
         return $this->type === null ? null : ContentType::from($this->type);
+    }
+
+    public function contentValue(): string|ContentList|null
+    {
+        if ($this->value === null) {
+            return null;
+        }
+        if ($this->type === ContentType::List->value) {
+            return ContentList::fromArray($this->fields, $this->value);
+        }
+
+        /** @var string */
+        return $this->value;
     }
 }

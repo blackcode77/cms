@@ -43,7 +43,7 @@ final readonly class Action
             new Command(
                 $key,
                 new ContentPath($input->path),
-                new ElementPatch($input->contentType(), $input->value, $input->enabled),
+                new ElementPatch($input->contentType(), $input->contentValue(), $input->enabled),
             ),
         );
 

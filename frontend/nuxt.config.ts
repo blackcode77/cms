@@ -22,6 +22,15 @@ export default defineNuxtConfig({
   // Nuxt UI would download web fonts from external CDNs at dev/build time; use system fonts instead.
   ui: { fonts: false },
 
+  // Icons come only from the locally installed Lucide collection (no Iconify CDN, same reason as fonts).
+  // The endpoint moves out of /api, which nginx sends to PHP. Inline SVG, so the public site needs no icon CSS.
+  icon: {
+    mode: 'svg',
+    serverBundle: { collections: ['lucide'] },
+    localApiEndpoint: '/_nuxt_icon',
+    fallbackToApi: false,
+  },
+
   // Admin is dark-only (Nuxt UI dashboard look); the public site has its own stylesheet.
   colorMode: { preference: 'dark', fallback: 'dark', storageKey: 'cms-color-mode' },
 

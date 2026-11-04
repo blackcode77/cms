@@ -69,3 +69,13 @@
     right: 16px;
   }
 }
+
+.cms-list-empty {
+  padding: 16px;
+  border: 1px dashed rgba(58, 123, 52, 0.7);
+  border-radius: 8px;
+  color: #3a7b34;
+  font-size: 14px;
+  text-align: center;
+  list-style: none;
+}
