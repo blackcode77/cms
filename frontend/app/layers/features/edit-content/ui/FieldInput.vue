@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { uploadImage } from '@entities/page-content'
+import { documentFileName, formatFileSize, uploadDocument, uploadImage } from '@entities/page-content'
 import type { FieldType } from '@entities/page-content'
 import { linkTargets } from '@shared/config'
 import IconPicker from './IconPicker.vue'
@@ -7,7 +7,11 @@ import IconPicker from './IconPicker.vue'
 /** Input for one value of the given type: a standalone element's value or one field of an Item. */
 const props = defineProps<{ type: FieldType }>()
 const value = defineModel<string>({ required: true })
-const emit = defineEmits<{ error: [message: string] }>()
+const emit = defineEmits<{
+  error: [message: string]
+  /** A Document was uploaded; its size, formatted («210 КБ»). */
+  uploaded: [size: string]
+}>()
 
 const uploading = defineModel<boolean>('uploading', { default: false })
 
@@ -16,7 +20,14 @@ async function onFile(event: Event) {
   if (!file) return
   uploading.value = true
   try {
-    value.value = await uploadImage(file)
+    if (props.type === 'file') {
+      const uploaded = await uploadDocument(file)
+      value.value = uploaded.url
+      emit('uploaded', formatFileSize(uploaded.size))
+    }
+    else {
+      value.value = await uploadImage(file)
+    }
   }
   catch (e) {
     const data = (e as { data?: { error_message?: string } } | null)?.data
@@ -69,6 +80,17 @@ const toolbarItems = [
   <div v-else-if="props.type === 'lines'" class="flex flex-col gap-1">
     <UTextarea v-model="value" class="w-full" :rows="4" autoresize data-testid="lines-input" />
     <p class="text-xs text-muted">Каждая строка — отдельный пункт.</p>
+  </div>
+  <div v-else-if="props.type === 'file'" class="flex flex-col gap-2" data-testid="file-input">
+    <p class="break-all text-xs" :class="value ? '' : 'text-muted'">{{ value ? documentFileName(value) : 'Файл не загружен' }}</p>
+    <input
+      type="file"
+      accept=".pdf,.xlsx,.xls,.docx,.doc,application/pdf"
+      :disabled="uploading"
+      data-testid="document-file"
+      @change="onFile"
+    >
+    <p class="text-xs text-muted">PDF, Excel или Word, до 20 МБ.</p>
   </div>
   <div v-else class="flex flex-col gap-2" data-testid="image-input">
     <img v-if="value" :src="value" alt="" class="max-h-40 rounded-md border border-default object-contain">

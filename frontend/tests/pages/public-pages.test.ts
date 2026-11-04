@@ -144,6 +144,23 @@ describe('editable content on public pages', () => {
     expect((await mountSuspended(AboutPage)).findAll('ul.partners li').map(li => li.text())).toEqual(['Shared'])
   })
 
+  it('schedules documents: a download button only for documents with a file, format and size shown', async () => {
+    usePageContent().apply('schedules', 'docs.tariff.items', {
+      type: 'list',
+      value: [
+        { id: 'a', title: 'С файлом', note: '2026', file: '/uploads/files/0193a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b/tarify.xlsx', size: '210 КБ' },
+        { id: 'b', title: 'Без файла', note: '2026' },
+      ],
+    })
+
+    const rows = (await mountSuspended(SchedulesPage)).findAll('ul.docs li').filter(li => li.text().includes('файл'))
+
+    expect(rows[0]!.get('.ext').text()).toBe('XLSX')
+    expect(rows[0]!.get('.size').text()).toBe('210 КБ')
+    expect(rows[0]!.get('a').attributes()).toMatchObject({ href: '/uploads/files/0193a1b2-c3d4-7e5f-8a9b-0c1d2e3f4a5b/tarify.xlsx', download: '' })
+    expect(rows[1]!.find('a').exists()).toBe(false)
+  })
+
   it('contacts hero and the shared header phone follow saved content', async () => {
     const content = usePageContent()
     content.apply('contacts', 'hero.title', { type: 'string', value: 'Edited contacts' })

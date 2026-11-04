@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Infrastructure;
 
 use App\Application\Shared\HtmlSanitizerInterface;
+use App\Application\Shared\DocumentStorageInterface;
 use App\Application\Shared\ImageStorageInterface;
 use App\Application\Shared\PasswordHasherInterface;
 use App\Application\Auth\TokenIssuerInterface;
@@ -45,11 +46,8 @@ final readonly class ServiceProvider implements ServiceProviderInterface
             RefreshTokenRepositoryInterface::class => DbRefreshTokenRepository::class,
             LoginAttemptRepositoryInterface::class => DbLoginAttemptRepository::class,
             HtmlSanitizerInterface::class => SymfonyHtmlSanitizer::class,
-            ImageStorageInterface::class => static fn(Aliases $aliases) => new LocalImageStorage(
-                Environment::isTest()
-                    ? $aliases->get('@runtime/test-uploads')
-                    : self::env('UPLOAD_DIR', $aliases->get('@root/storage/uploads')),
-            ),
+            ImageStorageInterface::class => static fn(Aliases $aliases) => new LocalImageStorage(self::uploadDir($aliases)),
+            DocumentStorageInterface::class => static fn(Aliases $aliases) => new LocalDocumentStorage(self::uploadDir($aliases)),
             PasswordHasherInterface::class => Argon2idPasswordHasher::class,
             TokenIssuerInterface::class => static fn() => new JwtTokenIssuer(self::env('JWT_SECRET', '')),
 
@@ -84,6 +82,16 @@ final readonly class ServiceProvider implements ServiceProviderInterface
     public function getExtensions(): array
     {
         return [];
+    }
+
+    /**
+     * Directory nginx serves at `/uploads/` (images at its top level, Documents under `files/`).
+     */
+    private static function uploadDir(Aliases $aliases): string
+    {
+        return Environment::isTest()
+            ? $aliases->get('@runtime/test-uploads')
+            : self::env('UPLOAD_DIR', $aliases->get('@root/storage/uploads'));
     }
 
     private static function env(string $name, string $default): string

@@ -29,7 +29,8 @@ class ApiTester extends \Codeception\Actor
      * @param array<string, string> $cookies
      * @param array<string, string> $serverParams e.g. ['REMOTE_ADDR' => '10.0.0.1']
      * @param array<string, string> $headers e.g. ['X-Real-IP' => '10.0.0.1']
-     * @param array<string, string> $files multipart field => file content, e.g. ['file' => $pngBytes]
+     * @param array<string, string|array{string, string}> $files multipart field => file content, or [content, client file name],
+     *        e.g. ['file' => $pngBytes] or ['file' => [$pdfBytes, 'Тарифы.pdf']]
      */
     public function sendApiRequest(
         string $method,
@@ -47,13 +48,14 @@ class ApiTester extends \Codeception\Actor
         }
         if ($files !== []) {
             $uploaded = [];
-            foreach ($files as $field => $content) {
+            foreach ($files as $field => $file) {
+                [$content, $name] = is_array($file) ? $file : [$file, 'client-name.jpg'];
                 $uploaded[$field] = new UploadedFile(
                     new StreamFactory()->createStream($content),
                     strlen($content),
                     UPLOAD_ERR_OK,
-                    'client-name.jpg',
-                    'image/jpeg',
+                    $name,
+                    'application/octet-stream',
                 );
             }
             $request = $request->withUploadedFiles($uploaded);
@@ -97,11 +99,26 @@ class ApiTester extends \Codeception\Actor
         return json_decode((string) $response->getBody(), true, flags: JSON_THROW_ON_ERROR);
     }
 
+    /**
+     * Deletes everything inside the directory (uploaded images and document folders), keeping the directory.
+     */
+    private static function removeContents(string $directory): void
+    {
+        foreach (glob($directory . '/*') ?: [] as $path) {
+            if (is_dir($path)) {
+                self::removeContents($path);
+                rmdir($path);
+            } else {
+                unlink($path);
+            }
+        }
+    }
+
     public function cleanDatabase(): void
     {
         ShiftableClock::reset();
         InMemoryMailer::reset();
-        array_map(unlink(...), glob(dirname(__DIR__, 2) . '/runtime/test-uploads/*') ?: []);
+        self::removeContents(dirname(__DIR__, 2) . '/runtime/test-uploads');
         $this->pdo()->exec(
             'TRUNCATE TABLE page_content, refresh_tokens, login_attempts, users, role_permissions, roles CASCADE',
         );

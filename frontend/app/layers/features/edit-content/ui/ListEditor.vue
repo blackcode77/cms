@@ -34,7 +34,7 @@ const dirty = computed(() => serialize(items.value) !== serialize(props.element.
 const isDefault = computed(() => serialize(items.value) === serialize(props.element.default))
 const canAdd = computed(() => items.value.length < props.element.max)
 const canDelete = computed(() => items.value.length > props.element.min)
-const fields = computed(() => Object.entries(props.element.fields))
+const fields = computed(() => Object.entries(props.element.fields).filter(([, def]) => !def.hidden))
 
 async function save(next: ListItem[] = items.value) {
   error.value = ''
@@ -120,6 +120,7 @@ function move(index: number, delta: number) {
           @update:model-value="(v: string) => { item[name] = v }"
           @update:uploading="(v: boolean) => { uploading = v }"
           @error="(m: string) => { error = m }"
+          @uploaded="(size: string) => { if (def.sizeField) item[def.sizeField] = size }"
         />
       </UFormField>
     </div>

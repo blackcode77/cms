@@ -1,13 +1,21 @@
 <script setup lang="ts">
 import { CtaBanner } from '@widgets/cta-banner'
 import { PageHero } from '@widgets/page-hero'
-import { CmsList, CmsText, defineContentSchema, useCmsElement } from '@entities/page-content'
+import { CmsList, CmsText, defineContentSchema, documentFormat, useCmsElement } from '@entities/page-content'
 import { usePageSeo } from '@shared/seo'
 import { AppIcon } from '@shared/ui'
-import { docFilters, docGroups } from '../model/content'
+import { docCategories, docFilters } from '../model/content'
 import type { DocFilter } from '../model/content'
 
 const PAGE = 'schedules'
+
+/** A Document: the size is filled in by the panel on upload, the format comes from the file name. */
+const documentFields = {
+  title: { type: 'string', label: 'Название' },
+  note: { type: 'string', label: 'Примечание' },
+  file: { type: 'file', label: 'Файл', sizeField: 'size' },
+  size: { type: 'string', hidden: true },
+} as const
 
 defineContentSchema(PAGE, {
   'seo.title': { type: 'string', default: 'Расписания и тарифы — Гарант Интермодал', label: 'SEO: заголовок страницы' },
@@ -18,6 +26,49 @@ defineContentSchema(PAGE, {
   'notice.title': { type: 'string', default: 'Уведомление об изменении расписания', label: 'Уведомление: заголовок' },
   'notice.text': { type: 'text', default: 'С 15.11.2026 заход судна HE XING 7 в порт Владивосток переносится на 2 дня. Подробности — в расписании.', label: 'Уведомление: текст (выключите, чтобы скрыть уведомление)' },
   'docs.title': { type: 'string', default: 'Документы для скачивания', label: 'Документы: заголовок' },
+  'docs.sched.title': { type: 'string', default: 'Расписания движения флота', label: 'Документы, Расписания движения флота: заголовок' },
+  'docs.sched.items': {
+    type: 'list',
+    label: 'Документы, Расписания движения флота: список',
+    fields: documentFields,
+    default: [
+      { title: 'Расписание NEWSTRIVER · UNITY LINE', note: 'Ноябрь 2026' },
+      { title: 'Расписание HE XING 7 · UNITY LINE', note: 'Ноябрь 2026' },
+      { title: 'Каботажные линии: Владивосток — Магадан / Корсаков', note: 'IV квартал 2026' },
+    ],
+  },
+  'docs.tariff.title': { type: 'string', default: 'Публичные тарифы', label: 'Документы, Публичные тарифы: заголовок' },
+  'docs.tariff.items': {
+    type: 'list',
+    label: 'Документы, Публичные тарифы: список',
+    fields: documentFields,
+    default: [
+      { title: 'SOC-тарифы: Тайцан, Нинбо, Шанхай (местная доставка)', note: 'Действует с 01.11.2026' },
+      { title: 'SOC-ставки на импорт', note: 'Действует с 01.11.2026' },
+      { title: 'SOC: Китай → станции Врангель', note: 'Действует с 01.11.2026' },
+      { title: 'Каботаж: тарифы на контейнерные перевозки', note: '2026' },
+    ],
+  },
+  'docs.local.title': { type: 'string', default: 'Локальные сборы в портах погрузки', label: 'Документы, Локальные сборы в портах погрузки: заголовок' },
+  'docs.local.items': {
+    type: 'list',
+    label: 'Документы, Локальные сборы в портах погрузки: список',
+    fields: documentFields,
+    default: [
+      { title: 'Локальные сборы: порты Китая', note: 'Актуально на 01.11.2026' },
+      { title: 'Локальные сборы: порты Кореи и Японии', note: 'Актуально на 01.11.2026' },
+    ],
+  },
+  'docs.guide.title': { type: 'string', default: 'Инструкции', label: 'Документы, Инструкции: заголовок' },
+  'docs.guide.items': {
+    type: 'list',
+    label: 'Документы, Инструкции: список',
+    fields: documentFields,
+    default: [
+      { title: 'Contact Guide', note: 'Контакты подразделений' },
+      { title: 'Памятка по перевозке опасных грузов', note: '2026' },
+    ],
+  },
   'booking.title': { type: 'string', default: 'Как забронировать: инструкция для новых клиентов', label: 'Бронирование: заголовок' },
   'booking.steps': {
     type: 'list',
@@ -90,19 +141,19 @@ const activeFilter = ref<DocFilter>('all')
           </button>
         </div>
         <div
-          v-for="group in docGroups"
-          v-show="activeFilter === 'all' || activeFilter === group.category"
-          :key="group.category"
+          v-for="category in docCategories"
+          v-show="activeFilter === 'all' || activeFilter === category"
+          :key="category"
         >
-          <h3 style="margin-top:32px">{{ group.title }}</h3>
-          <ul class="docs">
-            <li v-for="doc in group.items" :key="doc.title">
-              <span class="ext">{{ doc.ext }}</span>
-              <div><b>{{ doc.title }}</b><small>{{ doc.note }}</small></div>
-              <span class="size">{{ doc.size }}</span>
-              <a class="btn btn--ghost" href="#" style="padding:10px 16px">Скачать</a>
+          <CmsText as="h3" style="margin-top:32px" :page="PAGE" :path="`docs.${category}.title`" />
+          <CmsList v-slot="{ item }" as="ul" class="docs" :page="PAGE" :path="`docs.${category}.items`">
+            <li>
+              <span class="ext">{{ documentFormat(item.file) }}</span>
+              <div><b>{{ item.title }}</b><small>{{ item.note }}</small></div>
+              <span class="size">{{ item.file ? item.size : '' }}</span>
+              <a v-if="item.file" class="btn btn--ghost" :href="item.file" download style="padding:10px 16px">Скачать</a>
             </li>
-          </ul>
+          </CmsList>
         </div>
       </div>
     </section>

@@ -14,6 +14,7 @@ enum ContentType: string
     case Link = 'link';
     case Lines = 'lines';
     case Url = 'url';
+    case File = 'file';
     case List = 'list';
 
     /**
@@ -32,6 +33,7 @@ enum ContentType: string
             self::Link => LinkPath::LENGTH_LIMIT,
             self::Lines => 5_000,
             self::Url => ExternalUrl::LENGTH_LIMIT,
+            self::File => 255,
             self::List => 200_000,
         };
     }

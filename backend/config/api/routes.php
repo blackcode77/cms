@@ -24,6 +24,9 @@ return [
     Route::post('/uploads/image')
         ->middleware(Authenticate::class, RequirePermission::for(Permission::EditPage))
         ->action(Api\PageContent\UploadImage\Action::class),
+    Route::post('/uploads/file')
+        ->middleware(Authenticate::class, RequirePermission::for(Permission::EditPage))
+        ->action(Api\PageContent\UploadDocument\Action::class),
     Route::get('/users')
         ->middleware(Authenticate::class, RequirePermission::for(Permission::ViewUsers))
         ->action(Api\User\List\Action::class),

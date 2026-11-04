@@ -19,3 +19,11 @@ export async function uploadImage(file: File): Promise<string> {
   body.append('file', file)
   return unwrap(await api<ApiSuccess<{ url: string }>>('/v1/uploads/image', { method: 'POST', body })).url
 }
+
+/** Uploads a Document (PDF, Excel, Word) and returns its public path and size in bytes. */
+export async function uploadDocument(file: File): Promise<{ url: string, size: number }> {
+  const api = useApi()
+  const body = new FormData()
+  body.append('file', file)
+  return unwrap(await api<ApiSuccess<{ url: string, size: number }>>('/v1/uploads/file', { method: 'POST', body }))
+}

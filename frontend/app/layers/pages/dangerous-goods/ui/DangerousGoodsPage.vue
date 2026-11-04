@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { CtaBanner } from '@widgets/cta-banner'
 import { PageHero } from '@widgets/page-hero'
-import { CmsList, CmsText, defineContentSchema, useCmsElement } from '@entities/page-content'
+import { CmsList, CmsText, defineContentSchema, documentFormat, useCmsElement } from '@entities/page-content'
 import { usePageSeo } from '@shared/seo'
 
 const PAGE = 'dangerous-goods'
@@ -58,6 +58,17 @@ defineContentSchema(PAGE, {
   'aside.title': { type: 'string', default: 'Консультация по грузу', label: 'Боковая колонка: заголовок' },
   'aside.text': { type: 'text', default: 'Опишите груз — подскажем, возможна ли перевозка, и рассчитаем стоимость.', label: 'Боковая колонка: текст' },
   'aside.button': { type: 'string', default: 'Задать вопрос', label: 'Боковая колонка: кнопка' },
+  'aside.docs.title': { type: 'string', default: 'Документы', label: 'Документы: заголовок' },
+  'aside.docs': {
+    type: 'list',
+    label: 'Документы: список',
+    fields: {
+      title: { type: 'string', label: 'Название' },
+      file: { type: 'file', label: 'Файл', sizeField: 'size' },
+      size: { type: 'string', hidden: true },
+    },
+    default: [{ title: 'Памятка по ОГ' }],
+  },
 })
 
 const seoTitle = useCmsElement(() => PAGE, () => 'seo.title')
@@ -121,13 +132,17 @@ usePageSeo({
             <CmsText as="p" :page="PAGE" path="aside.text" />
             <NuxtLink class="btn" to="/contacts#request"><CmsText :page="PAGE" path="aside.button" /></NuxtLink>
             <hr style="border:0;border-top:1px solid var(--line);margin:20px 0">
-            <p><b>Документы</b></p>
-            <ul class="docs">
+            <p><CmsText as="b" :page="PAGE" path="aside.docs.title" /></p>
+            <CmsList v-slot="{ item }" as="ul" class="docs" :page="PAGE" path="aside.docs">
               <li style="grid-template-columns:44px 1fr">
-                <span class="ext">PDF</span>
-                <div><b>Памятка по ОГ</b></div>
+                <span class="ext">{{ documentFormat(item.file) }}</span>
+                <div>
+                  <a v-if="item.file" :href="item.file" download><b>{{ item.title }}</b></a>
+                  <b v-else>{{ item.title }}</b>
+                  <small v-if="item.file && item.size">{{ item.size }}</small>
+                </div>
               </li>
-            </ul>
+            </CmsList>
           </aside>
         </div>
       </div>

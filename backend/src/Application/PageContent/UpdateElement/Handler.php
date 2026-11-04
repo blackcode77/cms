@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Application\PageContent\UpdateElement;
 
 use App\Application\PageContent\Exception\ContentValueTooLongException;
+use App\Application\PageContent\Exception\InvalidDocumentUrlException;
 use App\Application\PageContent\Exception\InvalidIconNameException;
 use App\Application\PageContent\Exception\InvalidImageUrlException;
 use App\Application\PageContent\Exception\InvalidLinkException;
@@ -14,6 +15,7 @@ use App\Application\Shared\HtmlSanitizerInterface;
 use App\Domain\PageContent\Repository\PageContentRepositoryInterface;
 use App\Domain\PageContent\Value\ContentList;
 use App\Domain\PageContent\Value\ContentType;
+use App\Domain\PageContent\Value\DocumentUrl;
 use App\Domain\PageContent\Value\ExternalUrl;
 use App\Domain\PageContent\Value\IconName;
 use App\Domain\PageContent\Value\ImageUrl;
@@ -35,6 +37,7 @@ final readonly class Handler
      * @throws InvalidIconNameException
      * @throws InvalidLinkException
      * @throws InvalidUrlException
+     * @throws InvalidDocumentUrlException
      * @throws TooManyItemsException
      */
     public function handle(Command $command): void
@@ -63,6 +66,7 @@ final readonly class Handler
      * @throws InvalidIconNameException
      * @throws InvalidLinkException
      * @throws InvalidUrlException
+     * @throws InvalidDocumentUrlException
      */
     private function checkValue(ContentType $type, string $value): string
     {
@@ -75,6 +79,7 @@ final readonly class Handler
             ContentType::Icon => IconName::isValid($value) ? $value : throw InvalidIconNameException::create(),
             ContentType::Link => LinkPath::isValid($value) ? $value : throw InvalidLinkException::create(),
             ContentType::Url => ExternalUrl::isValid($value) ? $value : throw InvalidUrlException::create(),
+            ContentType::File => DocumentUrl::isValid($value) ? $value : throw InvalidDocumentUrlException::create(),
             ContentType::Html => $this->htmlSanitizer->sanitize($value),
             default => $value,
         };
@@ -86,6 +91,7 @@ final readonly class Handler
      * @throws InvalidIconNameException
      * @throws InvalidLinkException
      * @throws InvalidUrlException
+     * @throws InvalidDocumentUrlException
      * @throws TooManyItemsException
      */
     private function checkList(ContentList $list): ContentList
