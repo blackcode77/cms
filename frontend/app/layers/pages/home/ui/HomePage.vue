@@ -206,8 +206,6 @@ usePageSeo({
       </div>
     </div>
 
-    <ShippingMap page="home" />
-
     <section>
       <div class="container">
         <div class="split">
@@ -373,6 +371,8 @@ usePageSeo({
         <PartnersList />
       </div>
     </section>
+
+    <ShippingMap page="home" />
 
     <CtaBanner />
   </div>
