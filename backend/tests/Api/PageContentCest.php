@@ -242,6 +242,44 @@ final class PageContentCest
         assertSame(0, $I->countRows('page_content'));
     }
 
+    public function linkAndLinesAreStoredAndBadLinksRejected(ApiTester $I): void
+    {
+        $session = $I->haveSessionFor('manager');
+        $send = static fn(string $path, string $type, string $value) => $I->sendApiRequest(
+            'PATCH',
+            '/api/v1/page-content/home',
+            ['path' => $path, 'type' => $type, 'value' => $value],
+            $session,
+        );
+
+        assertSame(200, $send('a', 'link', '/services#agent')->getStatusCode());
+        assertSame(200, $send('b', 'link', '')->getStatusCode());
+        assertSame(200, $send('c', 'lines', "one\ntwo")->getStatusCode());
+        foreach (['javascript:alert(1)', 'https://evil.example', '//evil.example', 'services', '/a b', '/x#', str_repeat('/a', 200)] as $bad) {
+            assertSame(400, $send('d', 'link', $bad)->getStatusCode(), $bad);
+        }
+
+        $home = $I->decode($I->sendApiRequest('GET', '/api/v1/page-content?keys=home'))['data']['home'];
+        assertSame('/services#agent', $home['a']['value']);
+        assertSame('', $home['b']['value']);
+        assertSame("one\ntwo", $home['c']['value']);
+        assertSame(false, isset($home['d']));
+    }
+
+    public function listLinkFieldsAreValidated(ApiTester $I): void
+    {
+        $session = $I->haveSessionFor('manager');
+        $payload = static fn(string $link): array => [
+            'path' => 'services.cards',
+            'type' => 'list',
+            'fields' => ['title' => 'string', 'link' => 'link', 'points' => 'lines'],
+            'value' => [['id' => 'a', 'title' => 'A', 'link' => $link, 'points' => "x\ny"]],
+        ];
+
+        assertSame(200, $I->sendApiRequest('PATCH', '/api/v1/page-content/home', $payload('/fleet'), $session)->getStatusCode());
+        assertSame(400, $I->sendApiRequest('PATCH', '/api/v1/page-content/home', $payload('javascript:x'), $session)->getStatusCode());
+    }
+
     public function invalidPageKeyIsNotFound(ApiTester $I): void
     {
         $response = $I->sendApiRequest(

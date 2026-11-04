@@ -19,6 +19,13 @@ export const navigation: NavItem[] = [
 /** Pages that exist but are not in the main menu. Used by the sitemap. */
 export const extraRoutes: string[] = ['/project-cargo', '/services/multimodal']
 
+/** Pages offered in the editor's Link dropdown: the menu plus the pages outside it. */
+export const linkTargets: NavItem[] = [
+  ...navigation,
+  { label: 'Проектные перевозки', to: '/project-cargo' },
+  { label: 'Мультимодальные перевозки', to: '/services/multimodal' },
+]
+
 export interface Office {
   /** Stable id used in Content element paths, e.g. `office.vladivostok.phone`. */
   id: string

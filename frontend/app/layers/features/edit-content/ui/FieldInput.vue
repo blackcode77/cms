@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { uploadImage } from '@entities/page-content'
 import type { FieldType } from '@entities/page-content'
+import { linkTargets } from '@shared/config'
 import IconPicker from './IconPicker.vue'
 
 /** Input for one value of the given type: a standalone element's value or one field of an Item. */
@@ -46,6 +47,21 @@ const toolbarItems = [
     <UEditorToolbar :editor="editor" :items="toolbarItems as never" />
   </UEditor>
   <IconPicker v-else-if="props.type === 'icon'" v-model="value" />
+  <div v-else-if="props.type === 'link'" class="flex flex-col gap-2" data-testid="link-input">
+    <USelect
+      :model-value="linkTargets.some(t => t.to === value) ? value : undefined"
+      :items="linkTargets.map(t => ({ label: `${t.label} (${t.to})`, value: t.to }))"
+      placeholder="Страница сайта"
+      class="w-full"
+      data-testid="link-select"
+      @update:model-value="(v: string) => { value = v }"
+    />
+    <UInput v-model="value" placeholder="/services#agent — пусто, если ссылка не нужна" class="w-full" data-testid="link-path" />
+  </div>
+  <div v-else-if="props.type === 'lines'" class="flex flex-col gap-1">
+    <UTextarea v-model="value" class="w-full" :rows="4" autoresize data-testid="lines-input" />
+    <p class="text-xs text-muted">Каждая строка — отдельный пункт.</p>
+  </div>
   <div v-else class="flex flex-col gap-2" data-testid="image-input">
     <img v-if="value" :src="value" alt="" class="max-h-40 rounded-md border border-default object-contain">
     <p class="break-all text-xs text-muted">{{ value }}</p>

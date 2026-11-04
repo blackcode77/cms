@@ -8,6 +8,7 @@ import {
   defineContentSchema,
   moveItem,
   newItem,
+  splitLines,
   useEditMode,
   usePageContent,
 } from '@entities/page-content'
@@ -141,5 +142,12 @@ describe('list Item helpers', () => {
     expect(moveItem([1, 2, 3], 2, -1)).toEqual([1, 3, 2])
     expect(moveItem([1, 2, 3], 0, -1)).toEqual([1, 2, 3])
     expect(moveItem([1, 2, 3], 2, 1)).toEqual([1, 2, 3])
+  })
+})
+
+describe('splitLines', () => {
+  it('gives one trimmed entry per non-empty line', () => {
+    expect(splitLines(' one \n\n two\r\n')).toEqual(['one', 'two'])
+    expect(splitLines(undefined)).toEqual([])
   })
 })

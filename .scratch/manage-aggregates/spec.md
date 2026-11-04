@@ -21,12 +21,12 @@ Terms per `GLOSSARY.md` (**Content list**, **Item**, **Icon**); architecture per
 
 ## Scope of this spec
 
-Home: advantages, stats, both checklists (about, geo), project gallery (image + alt), partners.
+Home: advantages, stats, both checklists, project gallery, partners, service cards (`link`). Every other public page (issues 06–12), with types `link` and `lines`.
 
 ## Out of Scope
 
-- Home service cards and a `link` field type (issue 05).
-- Lists on other pages (issue 06).
+- File lists on /schedules (issue 13); vessel route geometry and schedule filters stay in code.
+- Navigation (header, footer, subnav) is not editable.
 - Drafts, history, concurrent-edit merging of lists.
 
 ## Delivery

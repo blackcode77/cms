@@ -103,3 +103,18 @@ describe('ElementEditor for a Content list', () => {
     expect(atMax.get('[data-testid="item-add"]').attributes('disabled')).toBeDefined()
   })
 })
+
+describe('link field', () => {
+  it('a typed path with an anchor ends up in the saved Item with the link type', async () => {
+    const wrapper = await mountEditor(list({
+      value: [{ id: 'a', title: 'A' }],
+      fields: { title: { type: 'string' }, link: { type: 'link' } },
+    }))
+
+    await wrapper.get('[data-testid="link-path"] input, input[data-testid="link-path"]').setValue('/services#agent')
+    await wrapper.get('[data-testid="save-button"]').trigger('click')
+
+    expect((await lastSaved(wrapper))?.value).toEqual([{ id: 'a', title: 'A', link: '/services#agent' }])
+    expect((await lastSaved(wrapper))?.fields).toEqual({ title: 'string', link: 'link' })
+  })
+})

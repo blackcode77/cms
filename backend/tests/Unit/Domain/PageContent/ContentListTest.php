@@ -8,6 +8,7 @@ use App\Domain\PageContent\Value\ContentList;
 use App\Domain\PageContent\Value\ContentType;
 use App\Domain\PageContent\Value\ElementPatch;
 use App\Domain\PageContent\Value\IconName;
+use App\Domain\PageContent\Value\LinkPath;
 use Codeception\Test\Unit;
 use InvalidArgumentException;
 
@@ -87,5 +88,15 @@ final class ContentListTest extends Unit
         assertFalse(IconName::isValid('i-lucide:map'));
         assertFalse(IconName::isValid('-x'));
         assertFalse(IconName::isValid(str_repeat('a', 65)));
+    }
+
+    public function testLinkPath(): void
+    {
+        foreach (['', '/', '/services', '/services/multimodal', '/services#agent', '/contacts#request'] as $ok) {
+            assertTrue(LinkPath::isValid($ok), $ok);
+        }
+        foreach (['services', '//evil.example', 'https://evil.example', 'javascript:alert(1)', '/a b', '/x#', '#agent', '/A'] as $bad) {
+            assertFalse(LinkPath::isValid($bad), $bad);
+        }
     }
 }

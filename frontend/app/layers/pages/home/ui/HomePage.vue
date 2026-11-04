@@ -4,7 +4,7 @@ import { CmsImage, CmsList, CmsText, ContentImage, defineContentSchema, useCmsEl
 import { imageSizes, officeElements } from '@shared/config'
 import { organizationJsonLd, usePageSeo } from '@shared/seo'
 import { AppIcon } from '@shared/ui'
-import { serviceCards } from '../model/content'
+import { NuxtLink } from '#components'
 import { RouteMap } from '@widgets/route-map'
 
 defineContentSchema('site', officeElements)
@@ -68,6 +68,22 @@ defineContentSchema('home', {
   },
   'services.title': { type: 'string', default: 'Услуги', label: 'Услуги: заголовок' },
   'services.lead': { type: 'string', default: 'Основные направления. Полный перечень и подробности — на странице услуг.', label: 'Услуги: подзаголовок' },
+  'services.cards': {
+    type: 'list',
+    label: 'Услуги: карточки',
+    fields: {
+      image: { type: 'image', label: 'Картинка' },
+      title: { type: 'string', label: 'Заголовок' },
+      text: { type: 'text', label: 'Текст' },
+      link: { type: 'link', label: 'Ссылка «Подробнее»' },
+    },
+    default: [
+      { title: 'Мультимодальные перевозки', text: 'Море, железная дорога и авто под одним договором или отдельными звеньями.', image: '/img/train.jpg', link: '/services/multimodal' },
+      { title: 'Каботажные перевозки', text: 'Владивосток — Магадан, Корсаков, Петропавловск-Камчатский, Анадырь.', image: '/img/cabotage.jpg', link: '/services/multimodal' },
+      { title: 'Проектные перевозки', text: 'Негабарит, тяжеловесы, целые заводы и объекты нефтегаза.', image: '/img/p-pipe.jpg', link: '/services/multimodal' },
+      { title: 'Агентирование', text: 'Судовое и грузовое агентирование в портах Дальнего Востока.', image: '/img/port.jpg', link: '/services/multimodal' },
+    ],
+  },
   'geo.title': { type: 'string', default: 'География сервисов', label: 'География: заголовок' },
   'geo.text': { type: 'text', default: 'Порты Владивостока, Восточный (терминал ВСК) и Находка (терминал НМРП) — наши основные узлы. Отсюда идут морские каботажные линии на север и Сахалин, а контейнерные поезда — в Москву, Новосибирск и Екатеринбург.', label: 'География: текст' },
   'geo.checklist': {
@@ -218,17 +234,17 @@ usePageSeo({
           <CmsText id="svc" as="h2" page="home" path="services.title" />
           <CmsText as="p" page="home" path="services.lead" />
         </div>
-        <div class="grid grid--4">
-          <NuxtLink
-            v-for="card in serviceCards"
-            :key="card.title"
+        <CmsList v-slot="{ item }" class="grid grid--4" page="home" path="services.cards">
+          <component
+            :is="item.link ? NuxtLink : 'div'"
             class="card"
-            :to="card.to"
+            :to="item.link || undefined"
             style="color:inherit;text-decoration:none"
           >
-            <NuxtImg
+            <ContentImage
+              v-if="item.image"
               class="card__img"
-              :src="card.image"
+              :src="item.image"
               alt=""
               width="600"
               height="375"
@@ -237,12 +253,12 @@ usePageSeo({
               loading="lazy"
             />
             <div class="card__body">
-              <h3>{{ card.title }}</h3>
-              <p>{{ card.text }}</p>
-              <span class="card__more">Подробнее</span>
+              <h3>{{ item.title }}</h3>
+              <p>{{ item.text }}</p>
+              <span v-if="item.link" class="card__more">Подробнее</span>
             </div>
-          </NuxtLink>
-        </div>
+          </component>
+        </CmsList>
         <p style="margin-top:28px"><NuxtLink class="btn btn--ghost" to="/services">Все услуги</NuxtLink></p>
       </div>
     </section>

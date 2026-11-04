@@ -25,7 +25,7 @@ A signed-in User's authenticated state: a short-lived access token plus a longer
 A public site page identified by a stable page key (e.g. `home`, `contacts`). Its editable text and media are its Content elements. Not a database record of title/slug/body: the page layout itself is fixed, only its content is editable. The special page key `site` holds content shared by every public page (header, footer, call-to-action banner).
 
 **Content element**:
-One editable piece of a Page, addressed by a dotted path within the Page (e.g. `header.phone_number_one`). Has a type (string, text, html, image), can be switched off (disabled elements are hidden from visitors), and falls back to its default when no value has been saved.
+One editable piece of a Page, addressed by a dotted path within the Page (e.g. `header.phone_number_one`). Has a type (string, text, html, image, icon, link, lines, list), can be switched off (disabled elements are hidden from visitors), and falls back to its default when no value has been saved.
 
 **Content list**:
 A Content element whose value is an ordered list of Items of the same shape. Editors add, delete, reorder and edit Items, but cannot change which fields an Item has. Once saved, the list fully replaces its default.
@@ -35,6 +35,9 @@ One entry of a Content list: a fixed set of named fields (e.g. icon, title, text
 
 **Icon**:
 A Content element type whose value names a pictogram from the site's single icon collection; editors pick it from that collection instead of supplying drawings.
+
+**Link**:
+A Content element type whose value is an address inside the public site (a page, optionally with an anchor). Links to other sites are not editable content. An empty link means the block is not clickable.
 
 **Page content**:
 The saved values of a Page's Content elements. Only values that differ from the defaults are stored.

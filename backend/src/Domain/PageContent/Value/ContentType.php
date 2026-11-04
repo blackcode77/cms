@@ -11,6 +11,8 @@ enum ContentType: string
     case Html = 'html';
     case Image = 'image';
     case Icon = 'icon';
+    case Link = 'link';
+    case Lines = 'lines';
     case List = 'list';
 
     /**
@@ -26,6 +28,8 @@ enum ContentType: string
             self::Html => 50_000,
             self::Image => 255,
             self::Icon => IconName::LENGTH_LIMIT,
+            self::Link => LinkPath::LENGTH_LIMIT,
+            self::Lines => 5_000,
             self::List => 200_000,
         };
     }

@@ -71,6 +71,21 @@ describe('editable content on public pages', () => {
     expect(wrapper.get('.gallery img').attributes()).toMatchObject({ src: '/uploads/a.webp', alt: 'Uploaded' })
   })
 
+  it('home service cards link where saved, and a card without a link is a plain block', async () => {
+    usePageContent().apply('home', 'services.cards', {
+      type: 'list',
+      value: [{ id: 'a', title: 'Linked', link: '/fleet' }, { id: 'b', title: 'Plain' }],
+    })
+
+    const wrapper = await mountSuspended(HomePage)
+    const cards = wrapper.findAll('.grid--4 .card')
+
+    expect(cards[0]!.element.tagName).toBe('A')
+    expect(cards[0]!.attributes('href')).toBe('/fleet')
+    expect(cards[1]!.element.tagName).toBe('DIV')
+    expect(cards[1]!.text()).not.toContain('Подробнее')
+  })
+
   it('contacts hero and the shared header phone follow saved content', async () => {
     const content = usePageContent()
     content.apply('contacts', 'hero.title', { type: 'string', value: 'Edited contacts' })

@@ -47,3 +47,8 @@ export function moveItem<T>(items: T[], index: number, delta: number): T[] {
   copy.splice(target, 0, item)
   return copy
 }
+
+/** Entries of a `lines` value: one per non-empty line, trimmed. */
+export function splitLines(value: string | undefined): string[] {
+  return (value ?? '').split('\n').map(line => line.trim()).filter(Boolean)
+}
