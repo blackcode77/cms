@@ -86,6 +86,19 @@ describe('editable content on public pages', () => {
     expect(cards[1]!.text()).not.toContain('Подробнее')
   })
 
+  it('services geography groups render one list entry per saved line', async () => {
+    usePageContent().apply('services', 'geo.groups', {
+      type: 'list',
+      value: [{ id: 'g', title: 'Порты', items: 'Владивосток\n\n Находка ' }],
+    })
+
+    const wrapper = await mountSuspended(ServicesPage)
+    const group = wrapper.get('#geography')
+
+    expect(group.get('h4').text()).toBe('Порты')
+    expect(group.findAll('.checklist li').map(li => li.text())).toEqual(['Владивосток', 'Находка'])
+  })
+
   it('contacts hero and the shared header phone follow saved content', async () => {
     const content = usePageContent()
     content.apply('contacts', 'hero.title', { type: 'string', value: 'Edited contacts' })
