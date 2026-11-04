@@ -4,8 +4,8 @@ import { PageHero } from '@widgets/page-hero'
 import { CmsText, defineContentSchema, usePageContent } from '@entities/page-content'
 import { offices, officeElements } from '@shared/config'
 import { usePageSeo } from '@shared/seo'
-import { SvgIcon } from '@shared/ui'
-import { companies, facts, history, managers, partners, personIcon, pinIcon } from '../model/content'
+import { AppIcon } from '@shared/ui'
+import { companies, facts, history, managers, partners } from '../model/content'
 
 defineContentSchema('site', officeElements)
 
@@ -71,7 +71,7 @@ usePageSeo({
       </div>
       <div class="org">
         <article v-for="company in companies" :key="company.name" class="card card--plain" :class="{ main: company.main }">
-          <span class="icon" aria-hidden="true"><SvgIcon :inner="company.icon" /></span>
+          <span class="icon" aria-hidden="true"><AppIcon :name="company.icon" /></span>
           <h3>{{ company.name }}</h3>
           <p>{{ company.text }}</p>
           <p><a :href="company.href ?? '#'">{{ company.linkLabel }}</a></p>
@@ -85,7 +85,7 @@ usePageSeo({
       <div class="section-head"><h2>Офисы</h2></div>
       <div class="grid grid--3">
         <article v-for="office in offices" :key="office.city" class="card card--plain">
-          <span class="icon" aria-hidden="true"><SvgIcon :inner="pinIcon" /></span>
+          <span class="icon" aria-hidden="true"><AppIcon name="map-pin" /></span>
           <h3>{{ office.city }}</h3>
           <p>
             <CmsText page="site" :path="`office.${office.id}.address`" /><br>
@@ -102,7 +102,7 @@ usePageSeo({
       <div class="section-head"><h2>Руководство</h2></div>
       <div class="grid grid--4">
         <div v-for="role in managers" :key="role" class="person card card--plain">
-          <div class="ph"><SvgIcon :inner="personIcon" /></div>
+          <div class="ph"><AppIcon name="user" /></div>
           <h4>ФИО</h4>
           <p style="color:var(--grey);margin:0">{{ role }}</p>
         </div>

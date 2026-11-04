@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { CtaBanner } from '@widgets/cta-banner'
-import { CmsImage, CmsList, CmsText, defineContentSchema, useCmsElement } from '@entities/page-content'
+import { CmsImage, CmsList, CmsText, ContentImage, defineContentSchema, useCmsElement } from '@entities/page-content'
 import { imageSizes, officeElements } from '@shared/config'
 import { organizationJsonLd, usePageSeo } from '@shared/seo'
-import { AppIcon, SvgIcon } from '@shared/ui'
-import { partners, projectGallery, serviceCards, stats } from '../model/content'
+import { AppIcon } from '@shared/ui'
+import { serviceCards } from '../model/content'
 import { RouteMap } from '@widgets/route-map'
 
 defineContentSchema('site', officeElements)
@@ -17,9 +17,35 @@ defineContentSchema('home', {
   'hero.lead': { type: 'text', default: 'Море, железная дорога и автотранспорт — в одном окне. Организуем перевозки контейнерных, генеральных и проектных грузов в Россию, из неё и транзитом через Дальний Восток.', label: 'Первый экран: текст' },
   'hero.cta_primary': { type: 'string', default: 'Запросить расчёт', label: 'Первый экран: основная кнопка' },
   'hero.cta_secondary': { type: 'string', default: 'Расписания и тарифы', label: 'Первый экран: вторая кнопка' },
+  'stats.items': {
+    type: 'list',
+    label: 'Цифры: пункты',
+    fields: {
+      icon: { type: 'icon', label: 'Иконка', default: 'circle-check' },
+      value: { type: 'string', label: 'Число' },
+      label: { type: 'string', label: 'Подпись' },
+    },
+    default: [
+      { icon: 'calendar', value: '2014', label: 'год основания' },
+      { icon: 'users', value: '49', label: 'сотрудников' },
+      { icon: 'award', value: '25+', label: 'лет опыта в морской отрасли' },
+      { icon: 'map-pin', value: '3', label: 'офиса: Владивосток, Москва, Находка' },
+      { icon: 'anchor', value: '4', label: 'компании в группе' },
+    ],
+  },
   'about.title': { type: 'string', default: 'Чем мы занимаемся', label: 'О нас: заголовок' },
   'about.text_1': { type: 'text', default: '«Гарант Интермодал» — профессиональный мультимодальный оператор. Мы организуем перевозки морем, по железной дороге и автотранспортом, управляем контейнерными линиями и оказываем агентские услуги в портах Дальнего Востока.', label: 'О нас: первый абзац' },
   'about.text_2': { type: 'text', default: 'Подход модульный: можно заказать перевозку «под ключ» или отдельные звенья цепочки — выбор за вами.', label: 'О нас: второй абзац' },
+  'about.checklist': {
+    type: 'list',
+    label: 'О нас: список',
+    fields: { text: { type: 'string', label: 'Пункт' } },
+    default: [
+      { text: 'Контейнерные, генеральные, насыпные и опасные грузы' },
+      { text: 'Проектные грузы: негабарит и тяжеловесы' },
+      { text: 'Направления: Китай, Корея, Япония, Россия, СНГ, Европа' },
+    ],
+  },
   'about.image': { type: 'image', default: '/img/ship-closeup.jpg', label: 'О нас: картинка' },
   'why.title': { type: 'string', default: 'Почему выбирают Гарант Интермодал', label: 'Преимущества: заголовок' },
   'why.lead': { type: 'string', default: 'Шесть причин, по которым клиенты остаются с нами годами.', label: 'Преимущества: подзаголовок' },
@@ -44,13 +70,43 @@ defineContentSchema('home', {
   'services.lead': { type: 'string', default: 'Основные направления. Полный перечень и подробности — на странице услуг.', label: 'Услуги: подзаголовок' },
   'geo.title': { type: 'string', default: 'География сервисов', label: 'География: заголовок' },
   'geo.text': { type: 'text', default: 'Порты Владивостока, Восточный (терминал ВСК) и Находка (терминал НМРП) — наши основные узлы. Отсюда идут морские каботажные линии на север и Сахалин, а контейнерные поезда — в Москву, Новосибирск и Екатеринбург.', label: 'География: текст' },
+  'geo.checklist': {
+    type: 'list',
+    label: 'География: список',
+    fields: { text: { type: 'string', label: 'Пункт' } },
+    default: [
+      { text: 'Каботаж: Магадан, Корсаков, Петропавловск-Камчатский, Анадырь' },
+      { text: 'Импорт: Китай, Корея, Япония → Россия' },
+      { text: 'Погранпереходы: Наушки, Забайкальск, Достык, Гродеково' },
+    ],
+  },
   'fleet.title': { type: 'string', default: 'Собственный флот', label: 'Флот: заголовок' },
   'fleet.text': { type: 'text', default: 'Два многоцелевых судна типа «Сокол» (2014 г.) и контейнеровоз «Гарант Нагаево» обеспечивают регулярные каботажные линии. Суда эксплуатирует «Восточное судоходное товарищество».', label: 'Флот: текст' },
   'fleet.image': { type: 'image', default: '/img/cabotage.jpg', label: 'Флот: картинка' },
   'projects.title': { type: 'string', default: 'Сложные перевозки — наша специализация', label: 'Проектные перевозки: заголовок' },
   'projects.lead': { type: 'string', default: 'Трубные колена, бульдозеры, рулонная сталь, краны, автомобили: берёмся за грузы, где нужна индивидуальная схема.', label: 'Проектные перевозки: подзаголовок' },
+  'projects.gallery': {
+    type: 'list',
+    label: 'Проектные перевозки: галерея',
+    fields: {
+      image: { type: 'image', label: 'Картинка' },
+      alt: { type: 'string', label: 'Описание картинки' },
+    },
+    default: [
+      { image: '/img/p-pipe.jpg', alt: 'Трубные колена на железнодорожной платформе' },
+      { image: '/img/p-dozer.jpg', alt: 'Бульдозер на платформе' },
+      { image: '/img/p-crane.jpg', alt: 'Погрузка негабаритного оборудования' },
+      { image: '/img/p-carbox.jpg', alt: 'Автомобиль в рамной конструкции для контейнера' },
+    ],
+  },
   'partners.title': { type: 'string', default: 'С кем мы работаем', label: 'Партнёры: заголовок' },
   'partners.lead': { type: 'string', default: 'Клиенты и партнёры, с которыми у нас выстроено сотрудничество.', label: 'Партнёры: подзаголовок' },
+  'partners.items': {
+    type: 'list',
+    label: 'Партнёры: список',
+    fields: { name: { type: 'string', label: 'Название' } },
+    default: ['MSC', 'Transcontainer', 'Dong Young', 'Eurosib', 'SUNSCO', 'Tenpoint', 'ISACO'].map(name => ({ name })),
+  },
 })
 
 const seoTitle = useCmsElement(() => 'home', () => 'seo.title')
@@ -101,13 +157,13 @@ usePageSeo({
 
     <div class="stats">
       <div class="container">
-        <ul>
-          <li v-for="stat in stats" :key="stat.label">
-            <SvgIcon class="stat-ico" :inner="stat.icon" />
-            <b>{{ stat.value }}</b>
-            <span>{{ stat.label }}</span>
+        <CmsList v-slot="{ item }" as="ul" page="home" path="stats.items">
+          <li>
+            <AppIcon v-if="item.icon" class="stat-ico" :name="item.icon" />
+            <b>{{ item.value }}</b>
+            <span>{{ item.label }}</span>
           </li>
-        </ul>
+        </CmsList>
       </div>
     </div>
 
@@ -118,11 +174,9 @@ usePageSeo({
             <div class="section-head"><CmsText as="h2" page="home" path="about.title" /></div>
             <CmsText as="p" page="home" path="about.text_1" />
             <CmsText as="p" page="home" path="about.text_2" />
-            <ul class="checklist">
-              <li>Контейнерные, генеральные, насыпные и опасные грузы</li>
-              <li>Проектные грузы: негабарит и тяжеловесы</li>
-              <li>Направления: Китай, Корея, Япония, Россия, СНГ, Европа</li>
-            </ul>
+            <CmsList v-slot="{ item }" as="ul" class="checklist" page="home" path="about.checklist">
+              <li>{{ item.text }}</li>
+            </CmsList>
             <NuxtLink class="btn btn--ghost" to="/about">О компании</NuxtLink>
           </div>
           <figure>
@@ -207,11 +261,9 @@ usePageSeo({
           <div>
             <div class="section-head"><CmsText id="geo" as="h2" page="home" path="geo.title" /></div>
             <CmsText as="p" page="home" path="geo.text" />
-            <ul class="checklist">
-              <li>Каботаж: Магадан, Корсаков, Петропавловск-Камчатский, Анадырь</li>
-              <li>Импорт: Китай, Корея, Япония → Россия</li>
-              <li>Погранпереходы: Наушки, Забайкальск, Достык, Гродеково</li>
-            </ul>
+            <CmsList v-slot="{ item }" as="ul" class="checklist" page="home" path="geo.checklist">
+              <li>{{ item.text }}</li>
+            </CmsList>
             <NuxtLink class="btn btn--ghost" to="/services#geography">Подробнее о географии</NuxtLink>
           </div>
         </div>
@@ -255,19 +307,18 @@ usePageSeo({
           <CmsText id="pr" as="h2" page="home" path="projects.title" />
           <CmsText as="p" page="home" path="projects.lead" />
         </div>
-        <div class="gallery">
-          <NuxtImg
-            v-for="img in projectGallery"
-            :key="img.src"
-            :src="img.src"
-            :alt="img.alt"
+        <CmsList v-slot="{ item }" class="gallery" page="home" path="projects.gallery">
+          <ContentImage
+            v-if="item.image"
+            :src="item.image"
+            :alt="item.alt"
             width="480"
             height="360"
             :sizes="imageSizes.quarter"
             format="webp"
             loading="lazy"
           />
-        </div>
+        </CmsList>
         <p style="margin-top:28px"><NuxtLink class="btn" to="/project-cargo">Примеры проектных перевозок</NuxtLink></p>
       </div>
     </section>
@@ -278,9 +329,9 @@ usePageSeo({
           <CmsText id="pt" as="h2" page="home" path="partners.title" />
           <CmsText as="p" page="home" path="partners.lead" />
         </div>
-        <ul class="partners">
-          <li v-for="partner in partners" :key="partner">{{ partner }}</li>
-        </ul>
+        <CmsList v-slot="{ item }" as="ul" class="partners" page="home" path="partners.items">
+          <li>{{ item.name }}</li>
+        </CmsList>
       </div>
     </section>
 

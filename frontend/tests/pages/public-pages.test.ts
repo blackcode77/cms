@@ -48,6 +48,29 @@ describe('editable content on public pages', () => {
     expect(wrapper.text()).not.toContain('Кратчайший путь вашего груза')
   })
 
+  it('home lists render their defaults', async () => {
+    const wrapper = await mountSuspended(HomePage)
+
+    expect(wrapper.findAll('.stats li')).toHaveLength(5)
+    expect(wrapper.findAll('article.adv')).toHaveLength(6)
+    expect(wrapper.findAll('ul.checklist')).toHaveLength(2)
+    expect(wrapper.findAll('.gallery img')).toHaveLength(4)
+    expect(wrapper.findAll('ul.partners li').map(li => li.text())).toContain('ISACO')
+  })
+
+  it('home lists follow saved content, and an emptied list disappears', async () => {
+    const content = usePageContent()
+    content.apply('home', 'partners.items', { type: 'list', value: [{ id: 'x', name: 'New Partner' }] })
+    content.apply('home', 'geo.checklist', { type: 'list', value: [] })
+    content.apply('home', 'projects.gallery', { type: 'list', value: [{ id: 'u', image: '/uploads/a.webp', alt: 'Uploaded' }] })
+
+    const wrapper = await mountSuspended(HomePage)
+
+    expect(wrapper.findAll('ul.partners li').map(li => li.text())).toEqual(['New Partner'])
+    expect(wrapper.findAll('ul.checklist')).toHaveLength(1)
+    expect(wrapper.get('.gallery img').attributes()).toMatchObject({ src: '/uploads/a.webp', alt: 'Uploaded' })
+  })
+
   it('contacts hero and the shared header phone follow saved content', async () => {
     const content = usePageContent()
     content.apply('contacts', 'hero.title', { type: 'string', value: 'Edited contacts' })

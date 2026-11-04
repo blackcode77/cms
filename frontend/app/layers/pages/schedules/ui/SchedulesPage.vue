@@ -2,7 +2,7 @@
 import { CtaBanner } from '@widgets/cta-banner'
 import { PageHero } from '@widgets/page-hero'
 import { usePageSeo } from '@shared/seo'
-import { SvgIcon } from '@shared/ui'
+import { AppIcon } from '@shared/ui'
 import { bookingSteps, docFilters, docGroups } from '../model/content'
 import type { DocFilter } from '../model/content'
 
@@ -46,7 +46,7 @@ const activeFilter = ref<DocFilter>('all')
     <section>
       <div class="container">
         <div class="alert" role="status">
-          <span class="icon" aria-hidden="true"><SvgIcon inner="<path d='M6 16V11a6 6 0 0112 0v5l2 2H4zM10 21h4'/>" /></span>
+          <span class="icon" aria-hidden="true"><AppIcon name="bell" /></span>
           <div><b>Уведомление об изменении расписания</b>С 15.11.2026 заход судна HE XING 7 в порт Владивосток переносится на 2 дня. Подробности — в расписании.</div>
         </div>
         <div class="section-head"><h2>Документы для скачивания</h2></div>

@@ -2,7 +2,7 @@
 import { CtaBanner } from '@widgets/cta-banner'
 import { PageHero } from '@widgets/page-hero'
 import { usePageSeo } from '@shared/seo'
-import { SvgIcon } from '@shared/ui'
+import { AppIcon } from '@shared/ui'
 import { cargoAgency, geography, processSteps, relatedLinks, services, shipAgency } from '../model/content'
 import { RouteMap } from '@widgets/route-map'
 
@@ -52,7 +52,7 @@ usePageSeo({
             :to="service.to"
             style="color:inherit;text-decoration:none"
           >
-            <span class="icon" aria-hidden="true"><SvgIcon :inner="service.icon" /></span>
+            <span class="icon" aria-hidden="true"><AppIcon :name="service.icon" /></span>
             <h3>{{ service.title }}</h3>
             <p style="color:#4a4647;font-size:.95rem">{{ service.text }}</p>
             <span class="card__more">Подробнее</span>
@@ -128,7 +128,7 @@ usePageSeo({
             :to="link.to"
             style="color:inherit;text-decoration:none"
           >
-            <span class="icon" aria-hidden="true"><SvgIcon :inner="link.icon" /></span>
+            <span class="icon" aria-hidden="true"><AppIcon :name="link.icon" /></span>
             <h3>{{ link.title }}</h3>
             <p>{{ link.text }}</p>
             <span class="card__more">{{ link.more }}</span>

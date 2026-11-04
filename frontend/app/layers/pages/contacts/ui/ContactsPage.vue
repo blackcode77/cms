@@ -3,8 +3,8 @@ import { PageHero } from '@widgets/page-hero'
 import { CmsText, defineContentSchema, useCmsElement, usePageContent } from '@entities/page-content'
 import { offices, officeElements, telHref } from '@shared/config'
 import { organizationJsonLd, usePageSeo } from '@shared/seo'
-import { SvgIcon } from '@shared/ui'
-import { cargoTypes, pinIcon, requestBenefits } from '../model/content'
+import { AppIcon } from '@shared/ui'
+import { cargoTypes, requestBenefits } from '../model/content'
 
 defineContentSchema('site', officeElements)
 defineContentSchema('contacts', {
@@ -48,7 +48,7 @@ const officeValue = (id: string, field: string) => resolve('site', `office.${id}
     <div class="container">
       <div class="grid grid--3">
         <article v-for="office in offices" :key="office.city" class="card card--plain">
-          <span class="icon" aria-hidden="true"><SvgIcon :inner="pinIcon" /></span>
+          <span class="icon" aria-hidden="true"><AppIcon name="map-pin" /></span>
           <h3>{{ office.city }}</h3>
           <CmsText as="p" page="site" :path="`office.${office.id}.address`" />
           <p>

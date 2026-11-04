@@ -1,4 +1,4 @@
-Status: ready-for-agent
+Status: resolved
 
 # 03: Make the remaining home lists editable
 
@@ -6,6 +6,6 @@ Status: ready-for-agent
 
 **Blocked by:** 02
 
-- [ ] Home looks the same as before with an empty `page_content`
-- [ ] Each list can be edited in Edit mode
-- [ ] Existing home tests updated
+- [x] Home looks the same as before with an empty `page_content`
+- [x] Each list can be edited in Edit mode
+- [x] Existing home tests updated

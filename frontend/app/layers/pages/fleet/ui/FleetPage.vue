@@ -3,7 +3,7 @@ import { CtaBanner } from '@widgets/cta-banner'
 import { PageHero } from '@widgets/page-hero'
 import { imageSizes } from '@shared/config'
 import { usePageSeo } from '@shared/seo'
-import { SvgIcon } from '@shared/ui'
+import { AppIcon } from '@shared/ui'
 import { vessels } from '../model/content'
 
 const description = 'Суда группы Гарант Интермодал: МПП типа «Сокол» и контейнеровоз «Гарант Нагаево», ТТХ, маршруты, слежение.'
@@ -31,7 +31,6 @@ usePageSeo({
   },
 })
 
-const shipIcon = '<path d="M3 17l2 3h14l2-3M5 17l-1-6h16l-1 6M8 11V6h8v5M12 3v3"/>'
 
 const activeVessel = ref(vessels[0]!.id)
 
@@ -141,7 +140,7 @@ function routePath(points: { x: number, y: number }[]) {
         <div class="grid grid--2">
           <article class="card card--plain">
             <span class="icon" aria-hidden="true">
-              <SvgIcon :inner="shipIcon" />
+              <AppIcon name="ship" />
             </span>
             <h3>UNITY LINE</h3>
             <p>На линии работают суда NEWSTRIVER и HE XING 7. Расписания — в разделе «Расписания и тарифы».</p>
