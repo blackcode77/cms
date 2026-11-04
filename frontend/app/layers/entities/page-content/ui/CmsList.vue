@@ -15,7 +15,7 @@ defineSlots<{
 
 const { items, visible, editAttrs, editing } = useCmsList(() => props.page, () => props.path)
 // An empty list placeholder must be a valid child of the wrapper.
-const placeholderTag = computed(() => ['ul', 'ol'].includes(props.as) ? 'li' : 'div')
+const placeholderTag = computed(() => ['ul', 'ol'].includes(props.as) ? 'li' : props.as === 'tbody' ? 'tr' : 'div')
 </script>
 
 <template>
@@ -24,7 +24,8 @@ const placeholderTag = computed(() => ['ul', 'ol'].includes(props.as) ? 'li' : '
       <slot :item="item" :index="index" />
     </template>
     <component :is="placeholderTag" v-if="editing && items.length === 0" class="cms-list-empty" data-testid="cms-list-empty">
-      Список пуст — нажмите, чтобы добавить
+      <td v-if="placeholderTag === 'tr'" colspan="99">Список пуст — нажмите, чтобы добавить</td>
+      <template v-else>Список пуст — нажмите, чтобы добавить</template>
     </component>
   </component>
 </template>

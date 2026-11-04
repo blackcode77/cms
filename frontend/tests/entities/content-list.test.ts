@@ -111,6 +111,21 @@ describe('CmsList', () => {
   })
 })
 
+describe('CmsList placeholder in a table', () => {
+  it('is a row with a cell, so an empty tbody stays valid', async () => {
+    usePageContent().apply('l', 'adv.items', { type: 'list', value: [] })
+    useEditMode().toggle()
+
+    const wrapper = await mountSuspended(CmsList, {
+      props: { page: 'l', path: 'adv.items', as: 'tbody' },
+      slots: { default: () => h('tr') },
+    })
+
+    expect(wrapper.get('[data-testid="cms-list-empty"]').element.tagName).toBe('TR')
+    expect(wrapper.get('[data-testid="cms-list-empty"] td').attributes('colspan')).toBe('99')
+  })
+})
+
 describe('CmsIcon', () => {
   // The SVG body is loaded from the local icon endpoint; real SSR output is covered by the public page check.
   it('renders an inline svg for a standalone icon element, and nothing for an empty one', async () => {
