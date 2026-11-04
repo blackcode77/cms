@@ -8,11 +8,13 @@ use App\Application\PageContent\Exception\ContentValueTooLongException;
 use App\Application\PageContent\Exception\InvalidIconNameException;
 use App\Application\PageContent\Exception\InvalidImageUrlException;
 use App\Application\PageContent\Exception\InvalidLinkException;
+use App\Application\PageContent\Exception\InvalidUrlException;
 use App\Application\PageContent\Exception\TooManyItemsException;
 use App\Application\Shared\HtmlSanitizerInterface;
 use App\Domain\PageContent\Repository\PageContentRepositoryInterface;
 use App\Domain\PageContent\Value\ContentList;
 use App\Domain\PageContent\Value\ContentType;
+use App\Domain\PageContent\Value\ExternalUrl;
 use App\Domain\PageContent\Value\IconName;
 use App\Domain\PageContent\Value\ImageUrl;
 use App\Domain\PageContent\Value\LinkPath;
@@ -32,6 +34,7 @@ final readonly class Handler
      * @throws InvalidImageUrlException
      * @throws InvalidIconNameException
      * @throws InvalidLinkException
+     * @throws InvalidUrlException
      * @throws TooManyItemsException
      */
     public function handle(Command $command): void
@@ -59,6 +62,7 @@ final readonly class Handler
      * @throws InvalidImageUrlException
      * @throws InvalidIconNameException
      * @throws InvalidLinkException
+     * @throws InvalidUrlException
      */
     private function checkValue(ContentType $type, string $value): string
     {
@@ -70,6 +74,7 @@ final readonly class Handler
             ContentType::Image => ImageUrl::isValid($value) ? $value : throw InvalidImageUrlException::create(),
             ContentType::Icon => IconName::isValid($value) ? $value : throw InvalidIconNameException::create(),
             ContentType::Link => LinkPath::isValid($value) ? $value : throw InvalidLinkException::create(),
+            ContentType::Url => ExternalUrl::isValid($value) ? $value : throw InvalidUrlException::create(),
             ContentType::Html => $this->htmlSanitizer->sanitize($value),
             default => $value,
         };
@@ -80,6 +85,7 @@ final readonly class Handler
      * @throws InvalidImageUrlException
      * @throws InvalidIconNameException
      * @throws InvalidLinkException
+     * @throws InvalidUrlException
      * @throws TooManyItemsException
      */
     private function checkList(ContentList $list): ContentList

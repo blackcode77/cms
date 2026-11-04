@@ -58,6 +58,14 @@ const toolbarItems = [
     />
     <UInput v-model="value" placeholder="/services#agent — пусто, если ссылка не нужна" class="w-full" data-testid="link-path" />
   </div>
+  <UInput
+    v-else-if="props.type === 'url'"
+    v-model="value"
+    type="url"
+    placeholder="https://example.com — пусто, если ссылки нет"
+    class="w-full"
+    data-testid="url-input"
+  />
   <div v-else-if="props.type === 'lines'" class="flex flex-col gap-1">
     <UTextarea v-model="value" class="w-full" :rows="4" autoresize data-testid="lines-input" />
     <p class="text-xs text-muted">Каждая строка — отдельный пункт.</p>

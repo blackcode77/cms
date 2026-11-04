@@ -266,6 +266,24 @@ final class PageContentCest
         assertSame(false, isset($home['d']));
     }
 
+    public function urlAcceptsOnlyHttpsAddresses(ApiTester $I): void
+    {
+        $session = $I->haveSessionFor('manager');
+        $send = static fn(string $value) => $I->sendApiRequest(
+            'PATCH',
+            '/api/v1/page-content/about',
+            ['path' => 'company.url', 'type' => 'url', 'value' => $value],
+            $session,
+        );
+
+        foreach (['', 'https://garant-intermodal.com', 'https://sub.example.ru/path?q=1#x'] as $ok) {
+            assertSame(200, $send($ok)->getStatusCode(), $ok);
+        }
+        foreach (['http://example.com', 'javascript:alert(1)', 'https://', 'https://localhost', '//example.com', '/about', 'https://ex ample.com', 'https://example.com/"onmouseover="x'] as $bad) {
+            assertSame(400, $send($bad)->getStatusCode(), $bad);
+        }
+    }
+
     public function listLinkFieldsAreValidated(ApiTester $I): void
     {
         $session = $I->haveSessionFor('manager');

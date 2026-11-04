@@ -6,6 +6,7 @@ import { organizationJsonLd, usePageSeo } from '@shared/seo'
 import { AppIcon } from '@shared/ui'
 import { NuxtLink } from '#components'
 import { RouteMap } from '@widgets/route-map'
+import { PartnersList } from '@widgets/partners-list'
 
 defineContentSchema('site', officeElements)
 defineContentSchema('home', {
@@ -117,12 +118,6 @@ defineContentSchema('home', {
   },
   'partners.title': { type: 'string', default: 'С кем мы работаем', label: 'Партнёры: заголовок' },
   'partners.lead': { type: 'string', default: 'Клиенты и партнёры, с которыми у нас выстроено сотрудничество.', label: 'Партнёры: подзаголовок' },
-  'partners.items': {
-    type: 'list',
-    label: 'Партнёры: список',
-    fields: { name: { type: 'string', label: 'Название' } },
-    default: ['MSC', 'Transcontainer', 'Dong Young', 'Eurosib', 'SUNSCO', 'Tenpoint', 'ISACO'].map(name => ({ name })),
-  },
 })
 
 const seoTitle = useCmsElement(() => 'home', () => 'seo.title')
@@ -345,9 +340,7 @@ usePageSeo({
           <CmsText id="pt" as="h2" page="home" path="partners.title" />
           <CmsText as="p" page="home" path="partners.lead" />
         </div>
-        <CmsList v-slot="{ item }" as="ul" class="partners" page="home" path="partners.items">
-          <li>{{ item.name }}</li>
-        </CmsList>
+        <PartnersList />
       </div>
     </section>
 

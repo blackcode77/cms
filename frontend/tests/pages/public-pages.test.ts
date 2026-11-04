@@ -60,7 +60,7 @@ describe('editable content on public pages', () => {
 
   it('home lists follow saved content, and an emptied list disappears', async () => {
     const content = usePageContent()
-    content.apply('home', 'partners.items', { type: 'list', value: [{ id: 'x', name: 'New Partner' }] })
+    content.apply('site', 'partners.items', { type: 'list', value: [{ id: 'x', name: 'New Partner' }] })
     content.apply('home', 'geo.checklist', { type: 'list', value: [] })
     content.apply('home', 'projects.gallery', { type: 'list', value: [{ id: 'u', image: '/uploads/a.webp', alt: 'Uploaded' }] })
 
@@ -114,6 +114,34 @@ describe('editable content on public pages', () => {
 
     expect((await mountSuspended(FleetPage)).find('table.spec').text()).toContain('5000 т')
     expect((await mountSuspended(DangerousGoodsPage)).findAll('tbody tr')).toHaveLength(1)
+  })
+
+  it('about: the first company is highlighted, only companies with a website get a link, photos replace the icon', async () => {
+    const content = usePageContent()
+    content.apply('about', 'group.companies', {
+      type: 'list',
+      value: [
+        { id: 'a', name: 'Head', url: 'https://example.com', url_label: 'example.com →' },
+        { id: 'b', name: 'Other' },
+      ],
+    })
+    content.apply('about', 'management.people', { type: 'list', value: [{ id: 'p', name: 'Иванов', role: 'CEO', photo: '/uploads/p.webp' }] })
+
+    const wrapper = await mountSuspended(AboutPage)
+    const companies = wrapper.findAll('.org article')
+
+    expect(companies[0]!.classes()).toContain('main')
+    expect(companies[1]!.classes()).not.toContain('main')
+    expect(companies[0]!.get('a').attributes()).toMatchObject({ href: 'https://example.com', target: '_blank', rel: 'noopener' })
+    expect(companies[1]!.find('a').exists()).toBe(false)
+    expect(wrapper.get('.person .ph img').attributes()).toMatchObject({ src: '/uploads/p.webp', alt: 'Иванов' })
+  })
+
+  it('partners are one shared list on home and about', async () => {
+    usePageContent().apply('site', 'partners.items', { type: 'list', value: [{ id: 'x', name: 'Shared' }] })
+
+    expect((await mountSuspended(HomePage)).findAll('ul.partners li').map(li => li.text())).toEqual(['Shared'])
+    expect((await mountSuspended(AboutPage)).findAll('ul.partners li').map(li => li.text())).toEqual(['Shared'])
   })
 
   it('contacts hero and the shared header phone follow saved content', async () => {

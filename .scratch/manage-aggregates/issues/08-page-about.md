@@ -1,4 +1,4 @@
-Status: ready-for-agent
+Status: resolved
 
 # 08: Make `/about` editable (page key `about`)
 
@@ -8,6 +8,11 @@ Lists: Companies (icon, name, text, link, link label), managers, history (year, 
 
 **Blocked by:** 05
 
-- [ ] Page renders identically with empty `page_content`
-- [ ] Every text block and list editable in Edit mode
-- [ ] Constants moved out of `model/content.ts`; public page tests updated
+- [x] Page renders identically with empty `page_content`
+- [x] Every text block and list editable in Edit mode
+- [x] Constants moved out of `model/content.ts`; public page tests updated
+
+## Notes
+
+- Decisions Q24–Q26: new type `url` (https only, backend `ExternalUrl`), company card links open in a new tab with `rel="noopener"`, empty url = no link line; the first company is the highlighted head company; managers are Items (photo optional, name, role).
+- Partners: one list `site:partners.items` rendered by `@widgets/partners-list` on home and about.

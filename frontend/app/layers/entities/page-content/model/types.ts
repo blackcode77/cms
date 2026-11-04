@@ -1,5 +1,5 @@
 /** Types a single value can have: a standalone Content element or a field of an Item. */
-export type FieldType = 'string' | 'text' | 'html' | 'image' | 'icon' | 'link' | 'lines'
+export type FieldType = 'string' | 'text' | 'html' | 'image' | 'icon' | 'link' | 'url' | 'lines'
 export type ContentType = FieldType | 'list'
 
 /** One Item of a Content list: a stable `id` plus string values of its fields (absent field = empty). */
