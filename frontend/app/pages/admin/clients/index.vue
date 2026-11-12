@@ -5,5 +5,5 @@ definePageMeta({ layout: 'admin', permission: 'view_clients' })
 </script>
 
 <template>
-  <AdminClientsPage />
+    <AdminClientsPage />
 </template>

@@ -6,5 +6,5 @@ definePageMeta({ cmsPage: 'about' })
 </script>
 
 <template>
-  <AboutPage />
+    <AboutPage />
 </template>

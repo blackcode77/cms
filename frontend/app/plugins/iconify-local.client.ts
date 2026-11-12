@@ -8,11 +8,11 @@ import { addAPIProvider } from '@iconify/vue'
  * Iconify CDN and stays empty where the CDN is unreachable.
  */
 export default defineNuxtPlugin({
-  name: 'iconify-local',
-  dependsOn: ['@nuxt/icon'],
-  setup() {
-    const baseURL = useRuntimeConfig().app.baseURL.replace(/\/$/, '')
-    const endpoint = useAppConfig().icon.localApiEndpoint ?? '/_nuxt_icon'
-    addAPIProvider('', { resources: [baseURL + endpoint] })
-  },
+    name: 'iconify-local',
+    dependsOn: ['@nuxt/icon'],
+    setup() {
+        const baseURL = useRuntimeConfig().app.baseURL.replace(/\/$/, '')
+        const endpoint = useAppConfig().icon.localApiEndpoint ?? '/_nuxt_icon'
+        addAPIProvider('', { resources: [baseURL + endpoint] })
+    },
 })

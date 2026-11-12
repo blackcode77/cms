@@ -6,5 +6,5 @@ definePageMeta({ cmsPage: 'contacts' })
 </script>
 
 <template>
-  <ContactsPage />
+    <ContactsPage />
 </template>

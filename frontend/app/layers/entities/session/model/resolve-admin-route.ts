@@ -6,7 +6,7 @@ export const ADMIN_HOME_PATH = '/admin'
 export const ADMIN_CHANGE_PASSWORD_PATH = '/admin/change-password'
 
 function isAdminPath(path: string): boolean {
-  return path === '/admin' || path.startsWith('/admin/')
+    return path === '/admin' || path.startsWith('/admin/')
 }
 
 /**
@@ -18,18 +18,25 @@ function isAdminPath(path: string): boolean {
  * `permission` is the route's `definePageMeta({ permission })`: when set, a signed-in User
  * lacking it is sent to the admin home (the menu hiding the item is not enough).
  */
-export async function resolveAdminRoute(path: string, permission?: Permission): Promise<string | undefined> {
-  if (!isAdminPath(path)) return undefined
+export async function resolveAdminRoute(
+    path: string,
+    permission?: Permission,
+): Promise<string | undefined> {
+    if (!isAdminPath(path)) return undefined
 
-  const current = useCurrentUser()
-  const session = await current.load()
+    const current = useCurrentUser()
+    const session = await current.load()
 
-  if (path === ADMIN_LOGIN_PATH) {
-    if (!session) return undefined
-    return current.mustChangePassword.value ? ADMIN_CHANGE_PASSWORD_PATH : ADMIN_HOME_PATH
-  }
-  if (!session) return ADMIN_LOGIN_PATH
-  if (current.mustChangePassword.value && path !== ADMIN_CHANGE_PASSWORD_PATH) return ADMIN_CHANGE_PASSWORD_PATH
-  if (permission && !current.can(permission) && path !== ADMIN_HOME_PATH) return ADMIN_HOME_PATH
-  return undefined
+    if (path === ADMIN_LOGIN_PATH) {
+        if (!session) return undefined
+        return current.mustChangePassword.value
+            ? ADMIN_CHANGE_PASSWORD_PATH
+            : ADMIN_HOME_PATH
+    }
+    if (!session) return ADMIN_LOGIN_PATH
+    if (current.mustChangePassword.value && path !== ADMIN_CHANGE_PASSWORD_PATH)
+        return ADMIN_CHANGE_PASSWORD_PATH
+    if (permission && !current.can(permission) && path !== ADMIN_HOME_PATH)
+        return ADMIN_HOME_PATH
+    return undefined
 }

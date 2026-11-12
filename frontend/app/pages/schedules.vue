@@ -6,5 +6,5 @@ definePageMeta({ cmsPage: 'schedules' })
 </script>
 
 <template>
-  <SchedulesPage />
+    <SchedulesPage />
 </template>

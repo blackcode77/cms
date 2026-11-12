@@ -7,12 +7,16 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-app}
     # Host access for DB clients, bound to localhost only. Override the host port with POSTGRES_HOST_PORT if 5432 is taken.
     ports:
-      - "127.0.0.1:${POSTGRES_HOST_PORT:-5432}:5432"
+      - '127.0.0.1:${POSTGRES_HOST_PORT:-5432}:5432'
     volumes:
       - pgdata:/var/lib/postgresql
       - ./docker/postgres/init:/docker-entrypoint-initdb.d:ro
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-app} -d ${POSTGRES_DB:-app}"]
+      test:
+        [
+          'CMD-SHELL',
+          'pg_isready -U ${POSTGRES_USER:-app} -d ${POSTGRES_DB:-app}',
+        ]
       interval: 3s
       timeout: 3s
       retries: 20
@@ -51,14 +55,14 @@ services:
   mailpit:
     image: axllent/mailpit:latest
     ports:
-      - "${MAILPIT_PORT:-8025}:8025"
+      - '${MAILPIT_PORT:-8025}:8025'
 
   node:
     build:
       context: .
       dockerfile: docker/node/Dockerfile
       target: dev
-    user: "${UID:-1000}:${GID:-1000}"
+    user: '${UID:-1000}:${GID:-1000}'
     working_dir: /app
     environment:
       HOME: /tmp
@@ -71,7 +75,7 @@ services:
   nginx:
     image: nginx:stable-alpine
     ports:
-      - "${HTTP_PORT:-80}:80"
+      - '${HTTP_PORT:-80}:80'
     volumes:
       - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
       - ./backend/public:/app/public:ro

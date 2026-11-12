@@ -1,9 +1,9 @@
 <template>
-  <UApp>
-    <slot />
-  </UApp>
+    <UApp>
+        <slot />
+    </UApp>
 </template>
 
 <style>
-@import "~/assets/css/main.css";
+@import '~/assets/css/main.css';
 </style>

@@ -7,5 +7,5 @@ definePageMeta({ cmsPage: 'service-multimodal' })
 </script>
 
 <template>
-  <ServiceDetailPage />
+    <ServiceDetailPage />
 </template>

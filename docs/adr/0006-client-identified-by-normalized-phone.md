@@ -5,7 +5,7 @@
 ## Considered options
 
 - A new Client per Order: trivial, but the Clients section fills with duplicates and a Client's history is split.
-- Match by phone *or* email, merging automatically: emails are optional and often mistyped; wrong merges are hard to undo.
+- Match by phone _or_ email, merging automatically: emails are optional and often mistyped; wrong merges are hard to undo.
 
 ## Consequences
 

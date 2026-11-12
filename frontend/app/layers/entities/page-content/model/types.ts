@@ -1,5 +1,16 @@
 /** Types a single value can have: a standalone Content element or a field of an Item. */
-export type FieldType = 'string' | 'text' | 'html' | 'image' | 'icon' | 'link' | 'url' | 'lines' | 'file' | 'color' | 'stops'
+export type FieldType =
+    | 'string'
+    | 'text'
+    | 'html'
+    | 'image'
+    | 'icon'
+    | 'link'
+    | 'url'
+    | 'lines'
+    | 'file'
+    | 'color'
+    | 'stops'
 export type ContentType = FieldType | 'list'
 
 /** One Item of a Content list: a stable `id` plus string values of its fields (absent field = empty). */
@@ -7,35 +18,35 @@ export type ListItem = { id: string } & Record<string, string>
 
 /** Declaration of one Item field. `default` pre-fills Items an editor adds. */
 export interface FieldDef {
-  type: FieldType
-  label?: string
-  default?: string
-  /** Not shown in the editor panel; filled automatically (see `sizeField`). */
-  hidden?: boolean
-  /** For a `file` field: the Item field that receives the uploaded file's size, e.g. «210 КБ». */
-  sizeField?: string
-  /** For a `stops` field: path of the page's image element drawn under the Stops in the editor. */
-  background?: string
-  /** Filled when the list is resolved: the current URL of `background`. */
-  backgroundUrl?: string
+    type: FieldType
+    label?: string
+    default?: string
+    /** Not shown in the editor panel; filled automatically (see `sizeField`). */
+    hidden?: boolean
+    /** For a `file` field: the Item field that receives the uploaded file's size, e.g. «210 КБ». */
+    sizeField?: string
+    /** For a `stops` field: path of the page's image element drawn under the Stops in the editor. */
+    background?: string
+    /** Filled when the list is resolved: the current URL of `background`. */
+    backgroundUrl?: string
 }
 
 /** Declaration of one Content element in code: its type and the default shown until an editor saves a value. */
 export interface ValueElementDef {
-  type: FieldType
-  default: string
-  /** Shown in the editor panel; falls back to the path. */
-  label?: string
+    type: FieldType
+    default: string
+    /** Shown in the editor panel; falls back to the path. */
+    label?: string
 }
 
 /** Declaration of a Content list: its Item fields, Item count limits and default Items (without ids). */
 export interface ListElementDef {
-  type: 'list'
-  fields: Record<string, FieldDef>
-  default: Array<Record<string, string>>
-  label?: string
-  min?: number
-  max?: number
+    type: 'list'
+    fields: Record<string, FieldDef>
+    default: Array<Record<string, string>>
+    label?: string
+    min?: number
+    max?: number
 }
 
 export type ElementDef = ValueElementDef | ListElementDef
@@ -44,38 +55,43 @@ export type ContentSchema = Record<string, ElementDef>
 
 /** What the backend stores for a path (`GET /page-content`); every field is optional. */
 export interface SavedElement {
-  type?: ContentType
-  value?: string | ListItem[]
-  enabled?: boolean
+    type?: ContentType
+    value?: string | ListItem[]
+    enabled?: boolean
 }
 
 export type SavedPages = Record<string, Record<string, SavedElement>>
 
 /** A single-value Content element with the saved value (or the default) applied. */
 export interface ResolvedValue {
-  type: FieldType
-  value: string
-  default: string
-  label: string
-  enabled: boolean
+    type: FieldType
+    value: string
+    default: string
+    label: string
+    enabled: boolean
 }
 
 /** A Content list with the saved Items (or the default ones) applied. */
 export interface ResolvedList {
-  type: 'list'
-  value: ListItem[]
-  default: ListItem[]
-  label: string
-  enabled: boolean
-  fields: Record<string, FieldDef>
-  min: number
-  max: number
+    type: 'list'
+    value: ListItem[]
+    default: ListItem[]
+    label: string
+    enabled: boolean
+    fields: Record<string, FieldDef>
+    min: number
+    max: number
 }
 
 export type ResolvedElement = ResolvedValue | ResolvedList
 
 /** A change sent to `PATCH /page-content/{page}`; a list carries its field types (ADR 0005). */
 export type ElementPatch =
-  | { type: FieldType, value: string, enabled?: boolean }
-  | { type: 'list', value: ListItem[], fields: Record<string, FieldType>, enabled?: boolean }
-  | { enabled: boolean, type?: never, value?: never }
+    | { type: FieldType; value: string; enabled?: boolean }
+    | {
+          type: 'list'
+          value: ListItem[]
+          fields: Record<string, FieldType>
+          enabled?: boolean
+      }
+    | { enabled: boolean; type?: never; value?: never }

@@ -7,5 +7,8 @@ const route = useRoute()
 </script>
 
 <template>
-  <AdminClientPage :id="String(route.params.id)" :key="String(route.params.id)" />
+    <AdminClientPage
+        :id="String(route.params.id)"
+        :key="String(route.params.id)"
+    />
 </template>

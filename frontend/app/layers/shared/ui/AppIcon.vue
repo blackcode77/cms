@@ -11,5 +11,5 @@ const iconName = computed(() => `i-lucide-${props.name}`)
 </script>
 
 <template>
-  <Icon :name="iconName" aria-hidden="true" />
+    <Icon :name="iconName" aria-hidden="true" />
 </template>

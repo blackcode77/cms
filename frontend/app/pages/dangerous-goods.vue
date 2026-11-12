@@ -6,5 +6,5 @@ definePageMeta({ cmsPage: 'dangerous-goods' })
 </script>
 
 <template>
-  <DangerousGoodsPage />
+    <DangerousGoodsPage />
 </template>

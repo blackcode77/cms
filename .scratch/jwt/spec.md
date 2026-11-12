@@ -11,6 +11,7 @@ The admin area (`/admin/**`) is open to everyone, and write endpoints such as `P
 The backend issues JWT-based Sessions (short-lived access token + revocable refresh token in httpOnly cookies). `/admin/login` is the only public admin page; every other `/admin/**` route requires a Session and the matching Permission. An admin manages Users (create, edit, delete, reset password) and Roles (create, rename, delete, tick Permissions from a fixed catalog) through the admin UI, all via backend API. New Users receive their login and a generated password by email and must change it on first sign-in. The Initial admin is seeded from backend environment variables. Anonymous site visitors have the implicit Visiter Role. Terms follow `GLOSSARY.md`; decisions follow ADR 0002 (tokens in httpOnly cookies, permissions not in the JWT) and ADR 0003 (one Role per User).
 
 Delivery is split into three vertical slices, each mergeable on its own:
+
 1. Auth core (User/Role/Permission model, seeding, login/refresh/logout/me, route protection, login form, guarded `/admin/**`).
 2. Users section (CRUD, email, reset password, change own password).
 3. Roles section (CRUD, Permission checkboxes).
@@ -76,9 +77,9 @@ Delivery is split into three vertical slices, each mergeable on its own:
 - **Passwords**: argon2id; generated passwords are 16 characters.
 - **Brute force**: 5 failed attempts per email+IP lock sign-in for 15 minutes; failure message identical for unknown email, wrong password, and lockout-safe where appropriate.
 - **API** (mounted under `/api/v1`, envelope via `ResponseFactory`, business errors as `#[UserException]` 400):
-  - Auth: login, refresh, logout, `GET /auth/me` (User, Role, Permissions, must-change-password), `POST /auth/change-password`.
-  - Users: list (read model), create, update, delete, reset/resend password (generates new password and emails it). Create returns `mail_sent`.
-  - Roles: list (read model), create, update (name + Permissions), delete; plus the Permission catalog for the checkbox UI.
+    - Auth: login, refresh, logout, `GET /auth/me` (User, Role, Permissions, must-change-password), `POST /auth/change-password`.
+    - Users: list (read model), create, update, delete, reset/resend password (generates new password and emails it). Create returns `mail_sent`.
+    - Roles: list (read model), create, update (name + Permissions), delete; plus the Permission catalog for the checkbox UI.
 - **Middleware**: `Authenticate` (cookie → access token → User, with transparent handling of expired access via refresh endpoint on the client) and `RequirePermission(permission)`. Apply `edit_page` to `POST /pages`, `view_*`/`manage_*` to Users/Roles endpoints. 401 for unauthenticated, 403 for missing Permission. `GET /health` and `GET /pages` stay public. Permissions are loaded from the DB per request.
 - **Mail**: `MailerInterface` in Application; infrastructure implementation on `symfony/mailer` with SMTP settings from `.env`; Mailpit service added to the dev compose stack. Sending is synchronous, no queue; failure does not roll back User creation.
 - **Frontend** (FSD, Nuxt UI admin dashboard per ADR 0001, no Nuxt UI/Tailwind in public layout): a session entity exposing `useCurrentUser()` with `can(permission)`, loaded from `/auth/me` (SSR-safe, forwards the cookie via `useApi()`); public `/admin/login`; route middleware guarding the rest of `/admin/**` (redirect to login, forced password change when flagged, Permission checks per route); admin layout menu filtered by Permissions; Users and Roles pages built from features/entities slices. Page files stay thin, importing from `@pages/<slice>`.

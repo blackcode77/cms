@@ -1,4 +1,4 @@
 export interface HealthStatus {
-  app: string
-  database: string
+    app: string
+    database: string
 }

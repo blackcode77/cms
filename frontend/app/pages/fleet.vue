@@ -6,5 +6,5 @@ definePageMeta({ cmsPage: 'fleet' })
 </script>
 
 <template>
-  <FleetPage />
+    <FleetPage />
 </template>

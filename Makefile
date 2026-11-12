@@ -17,6 +17,8 @@ DC  := docker compose
 PHP := $(DC) run --rm -u $(UID):$(GID) php
 PHP_TEST := $(DC) run --rm -u $(UID):$(GID) -e APP_ENV=test php
 NODE := $(DC) run --rm --no-deps node
+# Prettier runs from the repo root (it formats backend/, .claude/, docs/ too), so it cannot use the node service, which mounts only frontend/.
+PRETTIER := docker run --rm -u $(UID):$(GID) -v $(CURDIR):/repo -w /repo node:24-alpine frontend/node_modules/.bin/prettier
 
 help: ## Show this help
 	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-16s\033[0m %s\n", $$1, $$2}'
@@ -85,13 +87,17 @@ test-one: ## Run one test: make test-one f=tests/Api/HealthCest.php[:method]
 test-front: ## Run frontend tests (Vitest)
 	$(NODE) npm run test
 
-lint: ## psalm + php-cs-fixer (check) + eslint + steiger
+lint: ## psalm + php-cs-fixer (check) + eslint + steiger + prettier (check)
 	$(PHP) composer psalm
 	$(PHP) composer cs-check
 	$(NODE) npm run lint
+	$(PRETTIER) --check .
 
 cs-fix: ## Fix PHP code style
 	$(PHP) composer cs-fix
+
+format: ## Format all files with Prettier (config: .prettierrc)
+	$(PRETTIER) --write .
 
 # Production images are built here, not on the server (it has ~1 GB RAM: `nuxt build` runs out of memory there).
 # Names must match `image:` in compose.prod.yaml.

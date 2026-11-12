@@ -6,5 +6,5 @@ definePageMeta({ layout: 'admin-embed', permission: 'edit_page' })
 </script>
 
 <template>
-  <AdminCmsEditorPage />
+    <AdminCmsEditorPage />
 </template>

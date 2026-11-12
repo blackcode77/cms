@@ -22,6 +22,16 @@ Frontend single test: `docker compose run --rm --no-deps node npx vitest run tes
 
 Entry point is `http://cms.localhost` (nginx, port `HTTP_PORT`): `/api/*` → php-fpm, everything else → Nuxt dev server.
 
+## Formatting
+
+All files are formatted with Prettier. Config: `.prettierrc` (repo root); excluded files: `.prettierignore`.
+
+- Run `make format` to format the whole repo. `make lint` runs `prettier --check` and fails on unformatted files. Don't hand-format; let Prettier do it.
+- Markup (HTML, Vue templates): 4-space indent, LF line endings. Prettier puts each element on its own line when it doesn't fit in 80 columns.
+- JS/TS/Vue: no semicolons, single quotes (the existing code style). CSS keeps double quotes.
+- PHP is not formatted by Prettier; use `make cs-fix`.
+- Prettier runs in a one-off container from the repo root (`node` service mounts only `frontend/`), using `frontend/node_modules/.bin/prettier`.
+
 ## Backend architecture (`backend/`)
 
 Layered DDD modelled on `yiisoft/demo-blog`. Dependencies point inward: Presentation → Application → Domain; Infrastructure implements Domain interfaces.

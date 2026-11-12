@@ -8,58 +8,66 @@ let refreshed = false
 let refreshWorks = true
 
 registerEndpoint('/api/v1/users', () => {
-  usersCalls++
-  if (!refreshed) throw createError({ statusCode: 401 })
-  return { status: 'success', data: ['ok'] }
+    usersCalls++
+    if (!refreshed) throw createError({ statusCode: 401 })
+    return { status: 'success', data: ['ok'] }
 })
 registerEndpoint('/api/v1/auth/refresh', {
-  method: 'POST',
-  handler: async () => {
-    refreshCalls++
-    await new Promise(resolve => setTimeout(resolve, 20))
-    if (!refreshWorks) throw createError({ statusCode: 401 })
-    refreshed = true
-    return { status: 'success', data: null }
-  },
+    method: 'POST',
+    handler: async () => {
+        refreshCalls++
+        await new Promise((resolve) => setTimeout(resolve, 20))
+        if (!refreshWorks) throw createError({ statusCode: 401 })
+        refreshed = true
+        return { status: 'success', data: null }
+    },
 })
 registerEndpoint('/api/v1/auth/me', () => {
-  throw createError({ statusCode: 401 })
+    throw createError({ statusCode: 401 })
 })
 
 describe('useApi 401 recovery', () => {
-  beforeEach(() => {
-    refreshCalls = 0
-    usersCalls = 0
-    refreshed = false
-    refreshWorks = true
-  })
+    beforeEach(() => {
+        refreshCalls = 0
+        usersCalls = 0
+        refreshed = false
+        refreshWorks = true
+    })
 
-  it('refreshes once and retries the original request', async () => {
-    const result = await useApi()<{ data: string[] }>('/v1/users')
+    it('refreshes once and retries the original request', async () => {
+        const result = await useApi()<{ data: string[] }>('/v1/users')
 
-    expect(result.data).toEqual(['ok'])
-    expect(refreshCalls).toBe(1)
-    expect(usersCalls).toBe(2)
-  })
+        expect(result.data).toEqual(['ok'])
+        expect(refreshCalls).toBe(1)
+        expect(usersCalls).toBe(2)
+    })
 
-  it('shares a single refresh between concurrent callers', async () => {
-    const api = useApi()
-    const results = await Promise.all([api('/v1/users'), api('/v1/users'), api('/v1/users')])
+    it('shares a single refresh between concurrent callers', async () => {
+        const api = useApi()
+        const results = await Promise.all([
+            api('/v1/users'),
+            api('/v1/users'),
+            api('/v1/users'),
+        ])
 
-    expect(results).toHaveLength(3)
-    expect(refreshCalls).toBe(1)
-  })
+        expect(results).toHaveLength(3)
+        expect(refreshCalls).toBe(1)
+    })
 
-  it('gives up when the refresh fails: the original error is thrown and nothing is retried', async () => {
-    refreshWorks = false
+    it('gives up when the refresh fails: the original error is thrown and nothing is retried', async () => {
+        refreshWorks = false
 
-    await expect(useApi()('/v1/users')).rejects.toMatchObject({ statusCode: 401 })
-    expect(usersCalls).toBe(1)
-    expect(useRoute().path).toBe('/admin/login')
-  })
+        await expect(useApi()('/v1/users')).rejects.toMatchObject({
+            statusCode: 401,
+        })
+        expect(usersCalls).toBe(1)
+        expect(useRoute().path).toBe('/admin/login')
+    })
 
-  it('does not try to refresh for auth endpoints', async () => {
-    await expect(useApi()('/v1/auth/me')).rejects.toMatchObject({ statusCode: 401 })
-    expect(refreshCalls).toBe(0)
-  })
+    it('does not try to refresh for auth endpoints', async () => {
+        await expect(useApi()('/v1/auth/me')).rejects.toMatchObject({
+            statusCode: 401,
+        })
+        expect(refreshCalls).toBe(0)
+    })
 })

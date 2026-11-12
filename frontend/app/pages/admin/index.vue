@@ -5,5 +5,5 @@ definePageMeta({ layout: 'admin' })
 </script>
 
 <template>
-  <AdminDashboardPage />
+    <AdminDashboardPage />
 </template>

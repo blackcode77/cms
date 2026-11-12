@@ -5,5 +5,5 @@ definePageMeta({ layout: 'admin', permission: 'view_users' })
 </script>
 
 <template>
-  <AdminUsersPage />
+    <AdminUsersPage />
 </template>

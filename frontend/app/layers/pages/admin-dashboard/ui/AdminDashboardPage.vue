@@ -3,12 +3,12 @@ import { HealthStatusCard } from '@widgets/health-status'
 </script>
 
 <template>
-  <UDashboardPanel id="dashboard">
-    <template #header>
-      <UDashboardNavbar title="Главная" />
-    </template>
-    <template #body>
-      <HealthStatusCard />
-    </template>
-  </UDashboardPanel>
+    <UDashboardPanel id="dashboard">
+        <template #header>
+            <UDashboardNavbar title="Главная" />
+        </template>
+        <template #body>
+            <HealthStatusCard />
+        </template>
+    </UDashboardPanel>
 </template>

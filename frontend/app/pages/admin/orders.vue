@@ -5,5 +5,5 @@ definePageMeta({ layout: 'admin', permission: 'view_orders' })
 </script>
 
 <template>
-  <AdminOrdersPage />
+    <AdminOrdersPage />
 </template>

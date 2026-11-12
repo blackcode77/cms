@@ -5,6 +5,7 @@ Status: resolved
 Terms per `GLOSSARY.md` (**Document**). Decisions Q27–Q34.
 
 **What to build:**
+
 - Backend `POST /api/v1/uploads/file` (`edit_page`): PDF, XLSX, XLS, DOCX, DOC detected by content (PDF magic, OOXML zip with the matching `[Content_Types].xml` part, OLE2 for XLS/DOC); anything else (zip, exe, html, svg, …) rejected. Max 20 MB (raise nginx `client_max_body_size` and PHP limits; images stay 5 MB). Stored as `/uploads/files/<uuid>/<name>.<ext>`, name transliterated and reduced to `[a-z0-9-]`. Returns `{url, size}`.
 - New Content value type `file` (path under `/uploads/files/`, empty = no file), validated by the backend like `image`.
 - nginx (dev + prod): `/uploads/files/` sent with `Content-Disposition: attachment` and `nosniff`.

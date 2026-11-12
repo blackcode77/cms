@@ -6,5 +6,9 @@ defineProps<{ status: OrderStatus }>()
 </script>
 
 <template>
-  <UBadge :color="orderStatuses[status].color" variant="subtle" :label="orderStatuses[status].label" />
+    <UBadge
+        :color="orderStatuses[status].color"
+        variant="subtle"
+        :label="orderStatuses[status].label"
+    />
 </template>

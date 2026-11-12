@@ -5,5 +5,5 @@ definePageMeta({ layout: 'admin-guest' })
 </script>
 
 <template>
-  <AdminLoginPage />
+    <AdminLoginPage />
 </template>
